@@ -1,0 +1,9 @@
+site_name: flare
+nav:
+  - Home: index.md
+  - Quick Start: quickstart.md
+  - Widgets: widgets.md
+  - Attributes: attributes.md
+  - Events: events.md
+  - HTML parser: html.md
+theme: readthedocs
