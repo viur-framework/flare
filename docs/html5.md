@@ -78,9 +78,18 @@ class Link(html5.A):
         self.sinkEvent("onClick")
 
     def onClick(self, event):
-        logging.info(f"The link to {self["href"]} has been clicked")
+        logging.info(f"The link to {self['href']} has been clicked")
 
-html5.Body.appendChild(
-    Link("https://www.viur.dev", "Hello World")
+html5.Body().appendChild(
+    # Create a link with text
+    Link("https://www.viur.dev", "ViUR Framework"),
+
+    "<br>",
+
+    # Create link with logo
+    Link("https://www.python.org", """
+        <img src="https://www.python.org/static/community_logos/python-powered-h-50x65.png"
+            title="Python Programming Language">
+    """)
 )
 ```
