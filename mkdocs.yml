@@ -3,4 +3,6 @@ theme: readthedocs
 
 nav:
   - Home: index.md
+  - Setup: setup.md
+  - Configuration: config.md
   - html5: html5.md

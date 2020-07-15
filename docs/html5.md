@@ -93,3 +93,6 @@ html5.Body().appendChild(
     """)
 )
 ```
+
+In this example, we just made our first custom component: The `Link`-class can be arbitrarily used.
+
