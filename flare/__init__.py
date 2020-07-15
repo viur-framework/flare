@@ -11,3 +11,5 @@ from . import network
 from . import observable
 from . import popup
 from . import utils
+
+from .config import conf

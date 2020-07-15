@@ -1,6 +1,5 @@
 from . import html5
-
-svgpool = {} # fixme: I am temporary!
+from .config import conf
 
 
 @html5.tag
@@ -22,7 +21,7 @@ class Icon(html5.Div):
 		if not embedsvg:
 			return
 
-		svg = svgpool.get(embedsvg)
+		svg = conf["icons.pool"].get(embedsvg)
 		self.embedsvg = embedsvg
 
 		if not svg:

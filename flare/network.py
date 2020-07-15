@@ -237,7 +237,7 @@ class NetworkService(object):
 		if module:
 			href = "%s/%s/%s" % (NetworkService.prefix, module, path)
 		else:
-			href = "%s" % path
+			href = path
 
 		if not href.startswith("/"):
 			href = "/" + href
