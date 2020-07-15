@@ -1,5 +1,7 @@
 from . import html5
 
+svgpool = {} # fixme: I am temporary!
+
 
 @html5.tag
 class Icon(html5.Div):

@@ -1,4 +1,5 @@
 from . import html5
+from .icon import Icon
 
 
 @html5.tag

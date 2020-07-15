@@ -1,23 +1,29 @@
 class init {
 
-	constructor(modules, invocation){
+	constructor(config) {
 		window.languagePluginLoader.then(() => {
-			// If you require for pre-loaded Python packages, enable the promise below.
-			//window.pyodide.runPythonAsync("import setuptools, micropip").then(()=>{
-				this.fetchSources(modules).then(() => {
-					for( let module of Object.keys(modules) )
+			let kickoff = config.kickoff || "";
+
+			// Run prelude first
+			window.pyodide.runPythonAsync(config.prelude || "").then(() => {
+
+				// Then fetch sources and import modules
+				this.fetchSources(config.fetch || {}).then(() => {
+					for(let module of Object.keys(config.fetch || {}))
 					{
-						if( modules[module].optional === true ) {
-							invocation = `try:\n\timport ${module}\nexcept:\n\tpass\n` + invocation
-						} else {
-							invocation = `import ${module}\n` + invocation
+						if(config.fetch[module].optional === true)  {
+							kickoff = `try:\n\timport ${module}\nexcept:\n\tpass\n` + kickoff
+						}
+						else {
+							kickoff = `import ${module}\n` + kickoff
 						}
 					}
 
-					window.pyodide.runPythonAsync(invocation).then(
+					// Then, run kickoff code
+					window.pyodide.runPythonAsync(kickoff).then(
 						() => this.initializingComplete());
 				});
-			//});
+			});
 		});
 	}
 
