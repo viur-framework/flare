@@ -22,7 +22,7 @@ _lngMap = {}
 
 def buildTranslations(pathToFolder):
 	import importlib
-	translations = importlib.import_module(pathToFolder,"translations")
+	translations = importlib.import_module(pathToFolder+".translations")
 
 	# Populate the lng table
 	for key in dir( translations ):
