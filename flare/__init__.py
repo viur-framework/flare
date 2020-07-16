@@ -4,7 +4,7 @@ from . import cache
 from . import event
 from . import handler
 from . import i18n
-from . import icon
+from . import icons
 from . import ignite
 from . import input
 from . import network

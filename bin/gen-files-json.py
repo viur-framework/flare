@@ -17,5 +17,5 @@ for root, dirnames, filenames in walkObj:
 			print(f)
 
 with open("files.json", "w") as f:
-	json.dump(files, f, indent=2)
+	json.dump(sorted(files), f, indent=2)
 

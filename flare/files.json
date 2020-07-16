@@ -1,20 +1,20 @@
 [
   "__init__.py",
+  "button.py",
   "cache.py",
+  "config.py",
   "event.py",
   "handler.py",
+  "html5/__init__.py",
+  "html5/core.py",
+  "html5/svg.py",
   "i18n.py",
+  "icons.py",
   "ignite.py",
   "input.py",
   "network.py",
   "observable.py",
   "popup.py",
   "priorityqueue.py",
-  "utils.py",
-  "button.py",
-  "icon.py",
-  "config.py",
-  "html5/__init__.py",
-  "html5/core.py",
-  "html5/svg.py"
+  "utils.py"
 ]

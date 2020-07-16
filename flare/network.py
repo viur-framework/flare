@@ -105,7 +105,8 @@ def NiceError(req, code, params="(no parameters provided)"):
 		       "und starten Sie das Programm danach erneut!",
 	}.get(str(code), "")
 
-	html5.ext.Alert(
+	from . import popup
+	popup.Alert(
 		"<strong>%s</strong>%s\n\n<em>%s/%s/%s</em>" % (reason, hint, req.module, req.url, params),
 		title="Fehler %d" % code
 	)
