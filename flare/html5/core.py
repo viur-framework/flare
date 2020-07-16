@@ -2783,7 +2783,7 @@ def parseHTML(html, debug=False):
 					html.pop(0)
 					continue
 
-				if att in __tags[tag][1] or att in ["[name]", "style", "disabled", "hidden"] or att.startswith("data-"):
+				if att in __tags[ tag ][ 1 ] or att in [ "[name]", "style", "disabled", "hidden" ] or att.startswith( "data-" ) or att.startswith( ":" ):
 					scanWhite(html)
 					if html[0] == "=":
 						html.pop(0)
@@ -2928,6 +2928,13 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 
 						# print(tag, "style", att.strip(), val.strip())
 						wdg["style"][att.strip()] = val.strip()
+
+				elif att.startswith( ":" ):
+					attrName = att[ 1: ]
+					attrVal = val
+
+					refObj = getattr( bindTo, attrVal )
+					setattr( wdg, attrName, refObj )
 
 				elif att.startswith("data-"):
 					wdg["data"][att[5:]] = val
