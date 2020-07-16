@@ -1,5 +1,5 @@
 from . import html5
-from .icons import Icon
+from .icons import getIconHTML
 
 
 @html5.tag
@@ -40,18 +40,20 @@ class Button(html5.Button):
 				self.callback()
 
 	def update(self):
-		self.removeAllChildren()
+		html = ""
 
 		if self.icon:
-			self.appendChild(self.icon)
+			html += getIconHTML(self.icon)
 
-		self.appendChild(self.text)
+		html += self.text
+
+		self.element.innerHTML = html
 
 	def _setIcon(self, icon):
 		if not icon:
 			self.icon = None
 		else:
-			self.icon = Icon(icon=icon)
+			self.icon = icon
 
 		self.update()
 

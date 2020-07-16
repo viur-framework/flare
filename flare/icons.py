@@ -37,6 +37,17 @@ def fetchIconsFromJSON(url, then=None):
 		failureHandler=_fetchIconsFailure
 	)
 
+def getIconHTML(icon):
+	"""
+	Retrieve SVG/HTML-code for icon, either from conf["icons.pool"] or a generated <i>-Tag
+	"""
+	svg = conf["icons.pool"].get(icon)
+
+	if not svg:
+		return f"""<i class="i">{icon[0]}</i>"""
+
+	return svg
+
 
 @html5.tag
 class Icon(html5.Div):
@@ -63,13 +74,8 @@ class Icon(html5.Div):
 		if not embedsvg:
 			return
 
-		svg = conf["icons.pool"].get(embedsvg)
 		self.embedsvg = embedsvg
-
-		if not svg:
-			self.appendChild("""<i class="i">{{letter}}</i>""", letter=embedsvg[0])
-		else:
-			self.appendChild(svg)
+		self.appendChild(getIconHTML(embedsvg))
 
 	def _getEmbedsvg(self):
 		return self.embedsvg
