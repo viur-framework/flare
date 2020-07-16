@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 from . import html5
 
-# disabled for now
-'''
-from . import translations
-
 _currentLanguage = None
 
 if html5.jseval:
@@ -24,10 +20,15 @@ print("Configured for language: %s" % _currentLanguage)
 _runtimeTranslations = {}
 _lngMap = {}
 
-#Populate the lng table
-for key in dir( translations ):
-	if key.startswith("lng"):
-		_lngMap[ key[3:].lower() ] = { k.lower(): v for k,v in getattr( translations, key ).items() }
+def buildTranslations(pathToFolder):
+	import importlib
+	translations = importlib.import_module(pathToFolder,"translations")
+
+	# Populate the lng table
+	for key in dir( translations ):
+		if key.startswith( "lng" ):
+			_lngMap[ key[ 3: ].lower() ] = { k.lower(): v for k, v in getattr( translations, key ).items() }
+
 
 
 def translate( key, **kwargs ):
@@ -83,4 +84,3 @@ def getLanguage():
 	"""
 	global _currentLanguage
 	return _currentLanguage
-'''
