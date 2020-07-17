@@ -277,8 +277,6 @@ class Widget(object):
 		self._isAttached = False
 		self._parent = None
 
-		self._lastDisplayState = None
-
 		if args:
 			self.appendChild(*args, **kwargs)
 
