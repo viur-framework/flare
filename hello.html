@@ -18,11 +18,10 @@
 				(event) => {
 					window.init = new init({
 						// Prelude to be executed before fetching local modules
-						/*
-						prelude: `
-import setuptools, micropip
-`,
-						*/
+						// language=Python
+						//prelude: `
+//import setuptools, micropip
+//`,
 
 						// Fetch location for locally available Python modules
 						fetch: {
@@ -32,6 +31,7 @@ import setuptools, micropip
 						},
 
 						// Python code to be finally executed
+						// language=Python
 						kickoff: `
 from flare import *
 html5.Body().appendChild('<a href="https://www.viur.dev">Hello World</a>')

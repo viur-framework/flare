@@ -4,6 +4,7 @@ from .button import Button
 
 class Popup(html5.Div):
 	def __init__(self, title=None, id=None, className=None, icon=None, enableShortcuts=True, closeable=True, *args, **kwargs):
+		# language=HTML
 		super().__init__("""
 			<div class="box" [name]="popupBox">
 				<div class="box-head" [name]="popupHead">
@@ -93,6 +94,7 @@ class InputDialog(Popup):
 		self.abortHandler = abortHandler
 
 		self.fromHTML(
+			# language=HTML
 			"""
 			<div class="input-group">
 				<label class="label">

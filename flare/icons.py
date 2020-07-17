@@ -44,6 +44,7 @@ def getIconHTML(icon):
 	svg = conf["icons.pool"].get(icon)
 
 	if not svg:
+		# language=HTML
 		return f"""<i class="i">{icon[0]}</i>"""
 
 	return svg
