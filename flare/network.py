@@ -391,7 +391,7 @@ class NetworkService(object):
 		self.status = "failed"
 		self.result = text
 
-		logging.error("onError", self.kickoffs, self.retryMax, int(code), self.retryCodes)
+		logging.error("onError: %r, %r, %r, %r", self.kickoffs, self.retryMax, code, self.retryCodes)
 
 		if self.kickoffs < self.retryMax and int(code) in self.retryCodes:
 			logError = None  # html5.window.top.logError
@@ -399,7 +399,7 @@ class NetworkService(object):
 				logError("NetworkService.onError code:%s module:%s url:%s params:%s" % (
 					code, self.module, self.url, self.params))
 
-			logging.error("error %d, kickoff %d, will retry now", int(code), self.kickoffs)
+			logging.error("error %d, kickoff %d, will retry now", code, self.kickoffs)
 			DeferredCall(self.kickoff, _delay=self.retryDelay)
 			return
 
