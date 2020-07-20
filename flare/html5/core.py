@@ -277,8 +277,6 @@ class Widget(object):
 		self._isAttached = False
 		self._parent = None
 
-		self._lastDisplayState = None
-
 		if args:
 			self.appendChild(*args, **kwargs)
 
@@ -318,35 +316,20 @@ class Widget(object):
 			self.element.removeEventListener(event, eventFn)
 
 	def disable(self):
+		"""
+		Disables an element, in case it is not already disabled.
+
+		On disabled elements, events are not triggered anymore.
+		"""
 		if not self["disabled"]:
 			self["disabled"] = True
 
 	def enable(self):
+		"""
+		Enables an element, in case it is not already enabled.
+		"""
 		if self["disabled"]:
 			self["disabled"] = False
-
-	def _getDisabled(self):
-		return bool(self._disabledState)
-
-	def _setDisabled(self, disable):
-		for child in self._children:
-			child._setDisabled(disable)
-
-		if disable:
-			self._disabledState += 1
-			self.addClass("is-disabled")
-
-			if isinstance(self, _attrDisabled):
-				self.element.disabled = True
-
-		elif self._disabledState:
-			self._disabledState -= 1
-
-			if not self._disabledState:
-				self.removeClass("is-disabled")
-
-			if isinstance(self, _attrDisabled):
-				self.element.disabled = False
 
 	def _getTargetfuncName(self, key, type):
 		assert type in ["get", "set"]
@@ -468,6 +451,19 @@ class Widget(object):
 			self.element.setAttribute("hidden", "")
 		else:
 			self.element.removeAttribute("hidden")
+
+	def _getDisabled(self):
+		return bool(self._disabledState)
+
+	def _setDisabled(self, disable):
+		for child in self._children:
+			child._setDisabled(disable)
+
+		if self._disabledState == 0:
+			if isinstance(self, _attrDisabled):
+				self.element.disabled = not disable
+
+		self._disabledState += 1 if disable else -1
 
 	def _getDropzone(self):
 		"""
@@ -621,27 +617,23 @@ class Widget(object):
 		Hide element, if shown.
 		:return:
 		"""
-		state = self["style"].get("display", "")
-
-		if state != "none":
-			self._lastDisplayState = state
-			self["style"]["display"] = "none"
+		if not self["hidden"]:
+			self["hidden"] = True
 
 	def show(self):
 		"""
 		Show element, if hidden.
 		:return:
 		"""
-		if self._lastDisplayState is not None:
-			self["style"]["display"] = self._lastDisplayState
-			self._lastDisplayState = None
+		if self["hidden"]:
+			self["hidden"] = False
 
 	def isHidden(self):
 		"""
 		Checks if a widget is hidden.
 		:return: True if hidden, False otherwise.
 		"""
-		return self["style"].get("display", "") == "none"
+		return self["hidden"]
 
 	def isVisible(self):
 		"""
