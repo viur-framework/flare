@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+import logging
+
 import os, sys, json, string, random
 from . import html5
 
@@ -305,7 +308,7 @@ class NetworkService(object):
 			:type secure: bool
 
 		"""
-		print("NS REQUEST", module, url, params)
+		logging.debug("NS REQUEST %r, %r, %r", module, url, params)
 
 		return NetworkService(module, url, params,
 		                      successHandler, failureHandler, finishedHandler,
@@ -329,8 +332,7 @@ class NetworkService(object):
 				contentType = "application/x-www-form-urlencoded"
 				multipart = params
 			else:
-				print(params)
-				print(type(params))
+				logging.debug("doFetch: %r", params)
 				multipart = params
 
 			HTTPRequest().asyncPost(url, multipart, self, content_type=contentType)
@@ -389,7 +391,7 @@ class NetworkService(object):
 		self.status = "failed"
 		self.result = text
 
-		print("onError", self.kickoffs, self.retryMax, int(code), self.retryCodes)
+		logging.error("onError: %r, %r, %r, %r", self.kickoffs, self.retryMax, code, self.retryCodes)
 
 		if self.kickoffs < self.retryMax and int(code) in self.retryCodes:
 			logError = None  # html5.window.top.logError
@@ -397,7 +399,7 @@ class NetworkService(object):
 				logError("NetworkService.onError code:%s module:%s url:%s params:%s" % (
 					code, self.module, self.url, self.params))
 
-			print("error %d, kickoff %d, will retry now" % (int(code), self.kickoffs))
+			logging.error("error %d, kickoff %d, will retry now", code, self.kickoffs)
 			DeferredCall(self.kickoff, _delay=self.retryDelay)
 			return
 

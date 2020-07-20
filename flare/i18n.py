@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from . import html5
 
 _currentLanguage = None
@@ -15,7 +17,7 @@ if not _currentLanguage:
 if len(_currentLanguage) > 2:
 	_currentLanguage = _currentLanguage[:2]
 
-print("Configured for language: %s" % _currentLanguage)
+logging.debug("Configured for language: %s", _currentLanguage)
 
 _runtimeTranslations = {}
 _lngMap = {}
