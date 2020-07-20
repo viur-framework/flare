@@ -1,3 +1,5 @@
+import logging, string
+
 ########################################################################################################################
 # DOM-access functions and variables
 ########################################################################################################################
@@ -2775,25 +2777,24 @@ def parseHTML(html, debug=False):
 					html.pop(0)
 					continue
 
-				if att in __tags[ tag ][ 1 ] or att in [ "[name]", "style", "disabled", "hidden" ] or att.startswith( "data-" ) or att.startswith( ":" ):
+				scanWhite(html)
+				if html[0] == "=":
+					html.pop(0)
 					scanWhite(html)
-					if html[0] == "=":
+
+					if html[0] in "\"'":
+						ch = html.pop(0)
+
+						val = ""
+						while html and html[0] != ch:
+							val += html.pop(0)
+
 						html.pop(0)
-						scanWhite(html)
 
-						if html[0] in "\"'":
-							ch = html.pop(0)
-
-							val = ""
-							while html and html[0] != ch:
-								val += html.pop(0)
-
-							html.pop(0)
-
-					if att not in elem[1]:
-						elem[1][att] = val
-					else:
-						elem[1][att] += " " + val
+				if att not in elem[1]:
+					elem[1][att] = val
+				else:
+					elem[1][att] += " " + val
 
 				continue
 
@@ -2875,28 +2876,28 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 			for att, val in atts.items():
 				val = replaceVars(val)
 
+				# The [name] attribute binds the current widget to bindTo under the provided name!
 				if att == "[name]":
 					# Allow disable binding!
 					if not bindTo:
+						logging.warning("html5: Unable to evaluate %r due unset bindTo", att)
 						continue
 
 					if getattr(bindTo, val, None):
-						print("Cannot assign name '{}' because it already exists in {}".format(val, bindTo))
+						logging.warning("html5: Cannot assign name %r because it already exists in %r", val, bindTo)
 
-					elif not (any([val.startswith(x) for x in
-								   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" + "_"])
-							  and all(
-								[x in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" + "0123456789" + "_"
-								 for x in val[1:]])):
-						print("Cannot assign name '{}' because it contains invalid characters".format(val))
+					elif not (any([val.startswith(x) for x in string.ascii_letters + "_"])
+							  and all([x in string.ascii_letters + string.digits + "_" for x in val[1:]])):
+						logging.warning("html5: Cannot assign name %r because it contains invalid characters", val)
 
 					else:
 						setattr(bindTo, val, wdg)
 						wdg.onBind(bindTo, val)
 
-					if debug:
-						print("name '{}' assigned to {}".format(val, bindTo))
+					if debug: #fixme: remove debug flag!
+						logging.debug("html5: %r assigned to %r", val, bindTo)
 
+				# Class is handled via Widget.addClass()
 				elif att == "class":
 					# print(tag, att, val.split())
 					wdg.addClass(*val.split())
@@ -2911,6 +2912,7 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 					if val == "hidden":
 						wdg.hide()
 
+				# style-attributes must be split into its separate parts to be mapped into the dict.
 				elif att == "style":
 					for dfn in val.split(";"):
 						if ":" not in dfn:
@@ -2921,18 +2923,33 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 						# print(tag, "style", att.strip(), val.strip())
 						wdg["style"][att.strip()] = val.strip()
 
-				elif att.startswith( ":" ):
-					attrName = att[ 1: ]
-					attrVal = val
-
-					refObj = getattr( bindTo, attrVal )
-					setattr( wdg, attrName, refObj )
-
+				# data attributes are mapped into a related dict.
 				elif att.startswith("data-"):
 					wdg["data"][att[5:]] = val
 
+				# transfer attributes from the binder into current widget
+				elif att.startswith(":"):
+					if bindTo:
+						try:
+							setattr(wdg, att[1:], getattr(bindTo, val))
+						except Exception as e:
+							logging.exception(e)
+					else:
+						logging.error("html5: bindTo is unset, can't use %r here", att)
+
+				# Otherwise, either store widget attribute or save value on widget.
 				else:
-					wdg[att] = parseInt(val, val)
+					try:
+						wdg[att] = parseInt(val, val)
+
+					except ValueError:
+						if att in dir(wdg):
+							logging.error("html5: Attribute %r already defined for %r", att, wdg)
+						else:
+							setattr(wdg, att, val)
+
+					except Exception as e:
+						logging.exception(e)
 
 			interpret(wdg, children)
 
