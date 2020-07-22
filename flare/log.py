@@ -4,8 +4,10 @@ Generalized Python logging for Pyodide.
 
 
 import os, sys, threading, time, logging
+from functools import partial
 from typing import Any
 from js import console
+
 
 # fixme: This is a little strange, global objects only work inside lists or dicts (Pyodide-related)
 loggers = []
@@ -23,18 +25,19 @@ class FlareLogRecord(logging.LogRecord):
 	the source line where the logging call was made, and any exception
 	information to be logged.
 
-	NOTE: This is mostly the same as the original LogRecord but do not use
-	a single dict as keyword args because pyodites' Proxy objects cannot be used
-	with isinstance(proxy, collections.abc.Mapping).
+	NOTE: This is mostly the same as the original LogRecord. Differences:
+
+	* Do not use a single dict as keyword args because pyodites' Proxy objects cannot be used
+	with isinstance(proxy, collections.abc.Mapping). This will be discussed upstream.
+	* User-supplied arguments to logging messages will not be replaced in message, but will be forwarded
+	to js console via separate arguments.
 	"""
 
 	def __init__(self, name, level, pathname, lineno,
-	             msg, args, exc_info, func=None, sinfo=None, **kwargs):
+	             msg, args, exc_info, func=None, sinfo=None, mergeArgs=False, **kwargs):
 		"""
 		Initialize a logging record with interesting information.
 		"""
-		#super().__init__()
-
 		ct = time.time()
 		self.name = name
 		self.msg = msg
@@ -43,7 +46,6 @@ class FlareLogRecord(logging.LogRecord):
 		# argument, so that you can do something like
 		#  logging.debug("a %(a)d b %(b)s", {'a':1, 'b':2})
 		# Suggested by Stefan Behnel.
-		#
 		# Note that without the test for args[0], we get a problem because
 		# during formatting, we test to see if the arg is present using
 		# 'if self.args:'. If the event being logged is e.g. 'Value is %d'
@@ -52,7 +54,6 @@ class FlareLogRecord(logging.LogRecord):
 		# 'Value is %d' instead of 'Value is 0'.
 		# For the use case of passing a dictionary, this should not be a
 		# problem.
-		#
 		# Issue #21172: a request was made to relax the isinstance check
 		# to hasattr(args[0], '__getitem__'). However, the docs on string
 		# formatting still seem to suggest a mapping object is required.
@@ -76,6 +77,7 @@ class FlareLogRecord(logging.LogRecord):
 		self.created = ct
 		self.msecs = (ct - int(ct)) * 1000
 		self.relativeCreated = (self.created - logging._startTime) * 1000
+		self.mergeArgs = mergeArgs
 		if logging.logThreads:
 			self.thread = threading.get_ident()
 			self.threadName = threading.current_thread().name
@@ -101,10 +103,19 @@ class FlareLogRecord(logging.LogRecord):
 		else:
 			self.process = None
 
+	def getMessage(self) -> str:
+		"""
+		Optionally merge args into message driven by mergeArgs flag in ctor, otherwise this will happen later in js console as objects
+		:return:
+		"""
+		if self.mergeArgs:
+			return super().getMessage()
+		return self.msg
+
 
 class JSConsoleHandler(logging.StreamHandler):
-	"""
-	Brings our awesome log messages onto the js console
+	"""Brings our awesome log messages onto the js console
+
 	"""
 
 	def emit(self, record: logging.LogRecord) -> None:
@@ -126,17 +137,17 @@ class JSConsoleHandler(logging.StreamHandler):
 		elif record.levelno == logging.CRITICAL:
 			console.error(msg, *record.args)
 		else:
-			console.log("Don't know which level", record.msg, *record.args)
+			console.log("dont know which level", record.msg, *record.args)
 
 
-def prepareLogger(level: str = None) -> None:
-	"""
-	Calls this before first usage of logging or getLogger()
-
-	A good place would be on top level of the app to be logged.
+def prepareLogger(level: str, mergeArgs: bool = False) -> None:
+	"""Call this before first usage of logging or getLogger()
 
 	:param level Log level as str as of all, info, debug, warning, error or critical
+	:param mergeArgs: If True we're merging args into resulting message resulting in
+	possible duplicated output or get the 'raw' message output if False.
 	"""
+
 	if loggers:
 		return
 
@@ -155,26 +166,19 @@ def prepareLogger(level: str = None) -> None:
 	else:
 		level = logging.DEBUG
 
-
-	logging.setLogRecordFactory(FlareLogRecord)
+	logging.setLogRecordFactory(partial(FlareLogRecord, mergeArgs=mergeArgs))
 	logger = logging.getLogger()
 	logger.setLevel(level)
-
-	if level == logging.NOTSET:
-		# Enable fully fledged drill-down debug in JS console
-		# This results in double lines currently.
-		ch = JSConsoleHandler()
-		ch.setLevel(level)
-		formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(pathname)s:%(lineno)d - %(message)s')
-		ch.setFormatter(formatter)
-		logger.addHandler(ch)
-
+	ch = JSConsoleHandler()
+	ch.setLevel(level)
+	formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(pathname)s:%(lineno)d - %(message)s')
+	ch.setFormatter(formatter)
+	logger.addHandler(ch)
 	loggers.append(logger)
 
 
 def getLogger(name: str) -> Any:
-	"""
-	Creates a child logger of our 'root' logger with a name.
+	"""Creates a child logger of our 'root' logger with a name.
 
 	Usually it's the __name__ attribute of the module you want to use a logger for.
 
