@@ -35,7 +35,8 @@ Summarized:
 - Attributes are accessable via attribute indexing, like `widget["attribute"]`. There are some special attributes like `style` or `data` that are providing a dict-like access, so `widget["style"]["border"] = "1px solid red"` is used.
 - Stacking is performed with `widget.appendChild()`. There's also `widget.prependChild()`, `widget.insertChild()` and `widget.removeChild()` for further insertion or removal operations.
 
-## The build-in HTML5 parser
+
+## Parsing widgets from HTML-code
 
 Above result can also be achieved much faster, when the build-in HTML5 parser is used. 
 
@@ -96,3 +97,60 @@ html5.Body().appendChild(
 
 In this example, we just made our first custom component: The `Link`-class can be arbitrarily used.
 
+## Widget fundamentals
+
+Following sections describe the most widely used functions of the `html5.Widget`-class which are inherited by any widget or huger component in flare.
+
+### Constructor
+
+All Widgets in html5 share the same `__init__`-function, having the following signature:
+
+```python
+def Widget.__init__(self, *args, appendTo=None, style=None, **kwargs)
+```
+
+- `*args` are any positional arguments that are passed to `self.appendChild()`. These can be either other widgets or strings containing HTML-code. Non-container widgets like `html5.Br()` or `html5.Hr()` don't allow anything passed to this parameter, and throw an Exception.
+- `appendTo` can be set to another html5.Widget where the constructed widget automatically will be appended to. It substitutes an additional `appendChild()`-call to insert the constructed Widget to the parent.
+- `style` allows to specify CSS-classes which are added to the constructed widget using
+- `**kwargs` specifies any other parameters that are passed to `appendChild()`, like variables.  
+
+### appendChild(), prependChild(), insertChild(), fromHTML()
+
+todo
+
+### addClass(), removeClass(), toggleClass()
+
+todo
+
+### enable(), disable()
+
+todo
+
+### hide(), show()
+
+todo
+
+### Event handling
+
+todo
+
+
+## HTML parser reference
+
+todo
+
+### Widget configuration
+
+todo
+
+### html5.parseHTML()
+
+todo
+
+### html5.fromHTML()
+
+todo
+
+### @html5.tag
+
+todo
