@@ -1,3 +1,8 @@
+"""
+Pre-defined dialog widgets for user interaction.
+"""
+
+
 from . import html5, utils
 from .button import Button
 
@@ -81,12 +86,12 @@ class Popup(html5.Div):
 		self.popupOverlay = None
 
 
-class InputDialog(Popup):
+class Prompt(Popup):
 	def __init__(self, text, value="", successHandler=None, abortHandler=None,
 				 	successLbl="OK", abortLbl="Cancel", placeholder="", *args, **kwargs):
 
 		super().__init__(*args, **kwargs)
-		self.addClass("popup--inputdialog")
+		self.addClass("popup--prompt")
 
 		self.sinkEvent("onKeyDown", "onKeyUp")
 
@@ -119,7 +124,6 @@ class InputDialog(Popup):
 			self.okayBtn.disable()
 
 		self.popupFoot.appendChild(self.okayBtn)
-
 		self.inputElem.focus()
 
 	def onKeyDown(self, event):
@@ -200,12 +204,12 @@ class Alert(Popup):
 			self.onOkBtnClick()
 
 
-class YesNoDialog(Popup):
+class Confirm(Popup):
 	def __init__(self, question, title=None, yesCallback=None, noCallback=None,
 	                yesLabel="Yes", noLabel="No", icon="?",
 	                    closeable=False, *args, **kwargs):
 		super().__init__(title, closeable=closeable, icon=icon, *args, **kwargs)
-		self.addClass("popup--yesnodialog")
+		self.addClass("popup--confirm")
 
 		self.yesCallback = yesCallback
 		self.noCallback = noCallback

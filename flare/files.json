@@ -12,6 +12,7 @@
   "icons.py",
   "ignite.py",
   "input.py",
+  "log.py",
   "network.py",
   "observable.py",
   "popup.py",

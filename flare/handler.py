@@ -1,3 +1,8 @@
+"""
+Flare base handlers for ViUR prototypes.
+"""
+
+
 from .network import NetworkService
 from .event import EventDispatcher
 

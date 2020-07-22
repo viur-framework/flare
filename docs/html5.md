@@ -33,9 +33,10 @@ Summarized:
 
 - `html5.Xyz()` creates an instance of the desired widget (the notation is that the first letter is always uppercase, rest is hold lowercase, therefore `html5.Textarea()` for a textarea is used)
 - Attributes are accessable via attribute indexing, like `widget["attribute"]`. There are some special attributes like `style` or `data` that are providing a dict-like access, so `widget["style"]["border"] = "1px solid red"` is used.
-- Stacking is performed with `widget.appendChild()`. There's also `widget.prependChild()`, `widget.insertChild()` and `widget.removeChild()` for further insertion or removal operations.
+- Stacking is performed with `widget.appendChild()`. There's also `widget.prependChild()`, `widget.insertBefore()` and `widget.removeChild()` for further insertion or removal operations.
 
-## The build-in HTML5 parser
+
+## Parsing widgets from HTML-code
 
 Above result can also be achieved much faster, when the build-in HTML5 parser is used. 
 
@@ -96,3 +97,120 @@ html5.Body().appendChild(
 
 In this example, we just made our first custom component: The `Link`-class can be arbitrarily used.
 
+## Widget fundamentals
+
+Following sections describe the most widely used functions of the `html5.Widget`-class which are inherited by any widget or huger component in flare.
+
+### Constructor
+
+All Widgets in html5 share the same `__init__`-function, having the following signature:
+
+```python
+def Widget.__init__(self, *args, appendTo=None, style=None, **kwargs)
+```
+
+- `*args` are any positional arguments that are passed to `self.appendChild()`. These can be either other widgets or strings containing HTML-code. Non-container widgets like `html5.Br()` or `html5.Hr()` don't allow anything passed to this parameter, and throw an Exception.
+- `appendTo` can be set to another html5.Widget where the constructed widget automatically will be appended to. It substitutes an additional `appendChild()`-call to insert the constructed Widget to the parent.
+- `style` allows to specify CSS-classes which are added to the constructed widget using
+- `**kwargs` specifies any other parameters that are passed to `appendChild()`, like variables.  
+
+### appendChild(), prependChild(), insertBefore(), fromHTML(), removeChild()
+These methods manipulate the DOM and it's html elements
+
+#### appendChild()
+Appends a new child to the parent element:
+```
+self.appendChild("""<ul class='navlist'></ul>""")
+self.nav.appendChild("""<li>Navigation Point 1</li>""")
+```
+If replace=True is passed as an argument next to the html code, this method will discard all children of the parent element
+and replace them.
+
+#### prependChild()
+Prepends a new child to the parent element
+```
+self.appendChild("""<ul class='navlist'></ul>""")
+navpoint2 = self.nav.appendChild("""<li>Navigation Point 2</li>""")
+navpoint2.prependChild(("""<li>Navigation Point 1</li>"""))
+```
+If replace=True is passed as an argument next to the html code, this method will discard all children of the parent element
+and replace them.
+
+#### insertBefore()
+Inserts a new child element before the target child element
+```
+self.appendChild("""<ul class='navlist'></ul>""")
+navpoint = self.nav.appendChild("""<li>Navigation Point 1</li>""")
+navpoint3 = self.nav.appendChild(("""<li>Navigation Point 3</li>"""))
+navpoint2 = self.nav.insertBefore(("""<li>Navigation Point 2</li>"""), navpoint3)
+```
+If the child element that the new element is supposed to be inserted before does not exist, the new element is appended to the parent instead.
+
+#### fromHTML()
+Instantiates a widget from an html string that we can access in our python code.
+
+#### removeChild()
+Removes the child from the parent element
+
+#### removeAllChildren()
+Removes all child elements from the parent element
+
+### addClass(), removeClass(), toggleClass(), hasClass()
+These methods are helpful for adding classes dynamically.
+
+#### addClass()
+Adds a class to the html5 element and checks to prevent adding the same class.
+```
+nav = self.appendChild("""<ul></ul>""")
+nav.addClass('navlist')
+```
+
+#### removeClass()
+Checks if the object has that class and removes it
+```
+nav = self.appendChild("""<ul class='big-red-warning-border-color'></ul>""")
+nav.removeClass('big-red-warning-border-color')
+```
+
+#### toggleClass()
+Toggles a class on and off, depending on wether it has already been added or not.
+If the element already has the class, it is removed. If the element does not have the class already, it is added to it.
+
+#### hasClass()
+Checks if the element has a given class or not. Returns True if class name is found and False otherwise.
+```
+nav = self.appendChild("""<ul class='big-red-warning-border-color'></ul>""")
+if nav.hasClass('big-red-warning-border-color'):
+    print("Help! There is a big red border around this element! Remove the class so we can feel safe again")
+```
+
+### enable(), disable()
+These methods will enable or disable an element in the DOM. Useful for forms and similar UI applications.
+
+### hide(), show()
+Will hide or show and element on demand. This is done by adding the hidden attribute to the element or removing it accordingly.
+
+### Event handling
+
+todo
+
+
+## HTML parser reference
+
+todo
+
+### Widget configuration
+
+todo
+
+### html5.parseHTML()
+
+todo
+
+### html5.fromHTML()
+
+todo
+
+### @html5.tag
+
+todo

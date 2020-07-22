@@ -1,5 +1,5 @@
 # flare
-Web-App development framework for Python
+Flare is an application development framework for writing software frontends in pure Python.
 
 ## About
 *flare* is an app development framework for Python-based web-apps running on top of [Pyodide](https://github.com/iodide-project/pyodide) in the browser.

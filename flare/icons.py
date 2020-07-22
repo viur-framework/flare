@@ -1,3 +1,8 @@
+"""
+Generic icon handling, especially of embedded SVG images served from a pool of icons.
+"""
+
+
 import logging
 
 from . import html5

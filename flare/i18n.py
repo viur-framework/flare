@@ -1,7 +1,9 @@
-# -*- coding: utf-8 -*-
+"""
+Internationalization tools to easily implement multi-language applications.
+"""
 import logging
-
 from . import html5
+
 
 _currentLanguage = None
 

@@ -1,4 +1,14 @@
+"""
+HTML5 Widget abstraction library
+
+- Provides a Widget-abstraction for each HTML-element
+- Routing of attribute getter/setter and Jquery-style helpers
+- Fully-integrated HTML-parser for quick Widget prototyping
+"""
+
+
 import logging, string
+
 
 ########################################################################################################################
 # DOM-access functions and variables
