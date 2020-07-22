@@ -1,18 +1,16 @@
-# -*- coding: utf-8 -*-
-import os
-import sys
-import threading
-import time
+"""
+Generalized Python logging for Pyodide.
+"""
+
+
+import os, sys, threading, time, logging
 from functools import partial
 from typing import Any
-import logging
 from js import console
 
-__author__ = 'Stefan Kögl <sk@mausbrand.de>'
 
-
-# strange, global objects only work inside lists or dicts
-loggers = list()
+# fixme: This is a little strange, global objects only work inside lists or dicts (Pyodide-related)
+loggers = []
 
 
 class FlareLogRecord(logging.LogRecord):
