@@ -308,7 +308,7 @@ class NetworkService(object):
 			:type secure: bool
 
 		"""
-		logging.debug("NS REQUEST %r, %r, %r", module, url, params)
+		logging.debug("NetworkService.request module=%r, url=%r, params=%r", module, url, params)
 
 		return NetworkService(module, url, params,
 		                      successHandler, failureHandler, finishedHandler,
@@ -332,7 +332,6 @@ class NetworkService(object):
 				contentType = "application/x-www-form-urlencoded"
 				multipart = params
 			else:
-				logging.debug("doFetch: %r", params)
 				multipart = params
 
 			HTTPRequest().asyncPost(url, multipart, self, content_type=contentType)
@@ -391,9 +390,13 @@ class NetworkService(object):
 		self.status = "failed"
 		self.result = text
 
-		logging.error("onError: %r, %r, %r, %r", self.kickoffs, self.retryMax, code, self.retryCodes)
+		logging.debug(
+			"NetworkService.onError kickoffs=%r, retryMax=%r, code=%r, retryCodes=%r",
+		    self.kickoffs, self.retryMax, code, self.retryCodes
+		)
 
 		if self.kickoffs < self.retryMax and int(code) in self.retryCodes:
+			# The following can be used to pass errors to a bugtracker service like Stackdriver or Bugsnag
 			logError = None  # html5.window.top.logError
 			if logError and self.kickoffs == self.retryMax - 1:
 				logError("NetworkService.onError code:%s module:%s url:%s params:%s" % (
