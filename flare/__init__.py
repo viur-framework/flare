@@ -1,3 +1,8 @@
+"""
+Flare is an application development framework
+for writing software frontends in pure Python.
+"""
+
 import logging
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())

@@ -1,3 +1,8 @@
+"""
+Pre-defined dialog widgets for user interaction.
+"""
+
+
 from . import html5, utils
 from .button import Button
 

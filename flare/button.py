@@ -1,3 +1,7 @@
+"""
+Flare-styled button Widgets.
+"""
+
 from . import html5
 from .icons import getIconHTML
 

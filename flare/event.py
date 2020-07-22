@@ -1,3 +1,8 @@
+"""
+Event dispatcher for non-browser Events which occur on Widget state changes.
+"""
+
+
 class EventDispatcher(object):
 	"""
 		Base class for event notifier.

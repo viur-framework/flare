@@ -1,4 +1,7 @@
-# -*- coding: utf-8 -*-
+"""
+Wrapper to handle ViUR-related Ajax requests.
+"""
+
 
 import logging
 

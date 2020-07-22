@@ -1,4 +1,8 @@
-# -*- coding: utf-8 -*-
+"""
+Generalized Python logging for Pyodide.
+"""
+
+
 import os, sys, threading, time, logging
 from typing import Any
 from js import console

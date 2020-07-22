@@ -1,3 +1,10 @@
+"""
+The cache module is set on top of the network module and caches any entries read.
+
+When the same entry (identified by module and key) is requested, it first is returned
+from the cache, when already there.
+"""
+
 from .network import NetworkService, DeferredCall, NiceError
 
 

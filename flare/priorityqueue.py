@@ -1,3 +1,11 @@
+"""
+Select object generators by priority.
+
+This is used when implementing pluggable features,
+which can optionally be registered for specific use-cases.
+"""
+
+
 class PriorityQueue(object):
 	def __init__(self):
 		super(PriorityQueue, self).__init__()

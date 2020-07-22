@@ -1,3 +1,8 @@
+"""
+Input widget with additional event handling.
+"""
+
+
 from . import html5
 
 
