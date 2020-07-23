@@ -432,3 +432,66 @@ class NetworkService(object):
 		self.finishedHandler = []
 		self.failureHandler = []
 		self.params = None
+
+
+def getUrlHashAsString():
+	urlHash = html5.window.location.hash
+	if not urlHash:
+		return None, None
+
+	if "?" in urlHash:
+		hashStr = urlHash[ 1:urlHash.find( "?" ) ]
+		paramsStr = urlHash[ urlHash.find( "?" ) + 1: ]
+	else:
+		hashStr = urlHash[ 1: ]
+		paramsStr = ""
+
+	return hashStr, paramsStr
+
+
+def getUrlHashAsObject():
+	hashStr, paramsStr = getUrlHashAsString()
+	if hashStr:
+		hash = [ x for x in hashStr.split( "/" ) if x ]
+	else:
+		hash = []
+	param = { }
+
+	if paramsStr:
+		for pair in paramsStr.split( "&" ):
+			if not "=" in pair:
+				continue
+
+			key = pair[ :pair.find( "=" ) ]
+			value = pair[ pair.find( "=" ) + 1: ]
+
+			if not (key and value):
+				continue
+
+			if key in param.keys():
+				if not isinstance( param[ key ], list ):
+					param[ key ] = [ paramsStr[ key ] ]
+
+				param[ key ].append( value )
+			else:
+				param[ key ] = value
+
+	return hash, param
+
+
+def setUrlHash( hash, param=None ):
+	hashStr = "/".join( hash )
+
+	if not param:
+		hash = html5.window.top.location.hash
+		if "?" in hash:
+			paramsStr = hash.split( "?", 1 )[ 1 ]
+		else:
+			paramsStr = ""
+	else:
+		paramsStr = "&".join( [ "%s=%s" % (k, v) for k, v in param.items() ] )
+
+	if paramsStr:
+		paramsStr = "?"+paramsStr
+
+	html5.window.top.location.hash = hashStr + paramsStr
