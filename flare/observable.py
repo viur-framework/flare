@@ -27,3 +27,30 @@ class ObservableValue(object):
 			event = value
 
 		self.valueChanged.fire(event)
+
+class StateHandler:
+
+	def __init__(self,widget):
+		self.widget = widget
+		self.internalStates = { }
+
+	def updateState( self, key, value ):
+
+		if key in self.internalStates:
+			self.internalStates[ key ].setValue( value )
+
+		else: # key does not exist
+			self.internalStates.update( { key: ObservableValue( key ) } )  # create observable
+			self.internalStates[ key ].valueChanged.register( self.widget )  # register eventhandler
+			self.internalStates[ key ].setValue( value ) #update value
+
+	def getState( self,key,empty=None ):
+		if key in self.internalStates:
+			return self.internalStates[key].value
+		return empty
+
+	def register( self, key, widget ):
+		self.internalStates[ key ].valueChanged.register( widget )
+
+	def unregister( self, key, widget ):
+		self.internalStates[ key ].valueChanged.unregister( widget )
