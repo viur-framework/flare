@@ -332,7 +332,7 @@ class FileEditWidget(RelationalEditWidget):
 						<p [name]="uploadResult" style="display: none;"></p>
 					</div>
 				</div>
-			""".format(embedsvg.get("icons-upload-file"))
+            """.format( getIconHTML("icons-upload-file") )
 		)
 
 		if not self.hasFileApi:
