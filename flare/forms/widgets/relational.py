@@ -6,6 +6,8 @@ from flare import html5
 from flare.forms.formtags import viurForm
 
 class InternalEdit(html5.Div):
+	style = ["flr-internal-edit"]
+
 	def __init__( self, skelStructure, values = None, errorInformation = None, readOnly = False,
 				  context = None, defaultCat = "", module = None, boneparams = None ):
 		super().__init__()
