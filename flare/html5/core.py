@@ -471,11 +471,17 @@ class Widget(object):
 		for child in self._children:
 			child._setDisabled(disable)
 
-		if self._disabledState == 0:
-			if isinstance(self, _attrDisabled):
-				self.element.disabled = not disable
+		if disable:
+			self._disabledState += 1
 
-		self._disabledState += 1 if disable else -1
+			if isinstance(self, _attrDisabled) and self._disabledState == 1:
+				self.element.disabled = True
+
+		elif self._disabledState > 0:
+			if isinstance(self, _attrDisabled) and self._disabledState == 1:
+				self.element.disabled = False
+
+			self._disabledState -= 1
 
 	def _getDropzone(self):
 		"""
