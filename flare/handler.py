@@ -8,22 +8,19 @@ from .event import EventDispatcher
 
 
 class requestHandler():
-	def __init__(self, module, action, params={}, eventName="listUpdated"):
+	def __init__(self, module, action, params=(), eventName="listUpdated", secure=False):
 		self.module = module
 		self.action = action
 		self.params = params
 		self.eventName = eventName
-		self.cursor = None
-		self.complete = False
-		self.skellist = []
-		self.structure = {}
-
+		self.secure = secure
 		setattr(self, self.eventName, EventDispatcher(self.eventName))
 
 	def requestData(self, *args, **kwargs):
 		NetworkService.request(self.module, self.action, self.params,
 		                       successHandler=self.requestSuccess,
-		                       failureHandler=self.requestFailed)
+		                       failureHandler=self.requestFailed,
+							   secure=self.secure)
 
 	def requestSuccess(self, req):
 		resp = NetworkService.decode(req)
@@ -33,11 +30,19 @@ class requestHandler():
 	def requestFailed(self, req, *args, **kwargs):
 		print("REQUEST Failed")
 		print(req)
-# resp = NetworkService.decode(req)
-# print(resp)
+		# resp = NetworkService.decode(req)
+		# print(resp)
 
 
 class ListHandler(requestHandler):
+	def __init__(self, module, action, params=(), eventName="listUpdated", secure=False):
+		self.cursor = None
+		self.complete = False
+		self.skellist = []
+		self.structure = {}
+		super().__init__(module, action, params, eventName, secure)
+
+
 	def reload(self):
 		self.skellist = []
 		self.requestData()
