@@ -16,6 +16,7 @@ class TextEditWidget( BaseEditWidget ):
 				widget.disable()
 		else:
 			widget = Textarea()
+			widget.addClass("textarea")
 			widget[ "readonly" ] = bool( self.bone.boneStructure.get( "readonly" ) )
 
 		self.sinkEvent( "onKeyUp" )
