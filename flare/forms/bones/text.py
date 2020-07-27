@@ -11,6 +11,7 @@ class TextEditWidget( BaseEditWidget ):
 		if self.bone.boneStructure[ "validHtml" ]:
 			widget = HtmlEditor()
 			widget.boneName = self.bone.boneName  # fixme WTF?
+			widget.addClass("textarea")
 
 			if bool( self.bone.boneStructure.get( "readonly" ) ):
 				widget.disable()
