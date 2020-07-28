@@ -2,7 +2,6 @@ from flare import html5
 from flare.button import Button
 from flare.observable import ObservableValue, StateHandler
 
-
 class ButtonBar( html5.Div ):
 
 	def __init__( self ):
@@ -17,11 +16,13 @@ class ButtonBar( html5.Div ):
 
 	def addButton( self, name, btnStr ):
 		self.appendChild( btnStr )
-		btn = getattr( self, name )
-		btn.name = name
-		btn.callback = self.buttonClicked
-		self.state.register( "activeButton", btn )
-		return btn
+		if name in dir(self):
+			btn = getattr( self, name )
+			btn.name = name
+			btn.callback = self.buttonClicked
+			self.state.register( "activeButton", btn )
+			return btn
+		return None
 
 	def buttonClicked( self, widget ):
 		self.state.updateState( "activeButton", widget )
