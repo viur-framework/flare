@@ -9,6 +9,13 @@ HTML5 Widget abstraction library
 
 import logging, string
 
+try:
+	from ..config import conf
+	sEval = conf["safeEvalInstance"]
+except:
+	# if a toplevel conf in missing
+	from .safeeval import SafeEval
+	sEval = SafeEval()
 
 ########################################################################################################################
 # DOM-access functions and variables
@@ -2889,6 +2896,7 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 			tag = item[0]
 			atts = item[1]
 			children = item[2]
+			appendItem = True
 
 			# Special handling for tables: A "thead" and "tbody" are already part of table!
 			if tag in ["thead", "tbody"] and isinstance(parent, Table):
@@ -2962,6 +2970,22 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 					else:
 						logging.error("html5: bindTo is unset, can't use %r here", att)
 
+				# use a safeval string to decide if the current item should be added
+				elif att == "v-if":
+					if bindTo:
+						try:
+							# update whitelist
+							sEval.allowedCallables = conf["saveEvalAllowedCallables"]
+							showWdg = sEval.execute( sEval.compile(val), {} )
+							if not showWdg:
+								appendItem = False
+								break
+						except Exception as e:
+							logging.exception(e)
+
+					else:
+						logging.error("html5: bindTo is unset, can't use %r here", att)
+
 				# Otherwise, either store widget attribute or save value on widget.
 				else:
 					try:
@@ -2975,6 +2999,9 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 
 					except Exception as e:
 						logging.exception(e)
+
+			if not appendItem:
+				continue
 
 			interpret(wdg, children)
 

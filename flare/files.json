@@ -30,6 +30,7 @@
   "handler.py",
   "html5/__init__.py",
   "html5/core.py",
+  "html5/safeeval.py",
   "html5/svg.py",
   "i18n.py",
   "icons.py",
