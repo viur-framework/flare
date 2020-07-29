@@ -1,6 +1,4 @@
-from flare.log import getLogger
-
-logger = getLogger(__name__)
+import logging
 
 from flare import html5
 from flare.forms.formtags import viurForm
@@ -29,7 +27,7 @@ class InternalEdit(html5.Div):
 				res[ key ] = boneField.bonewidget.serialize()
 
 			except Exception as e:
-				logger.exception(e)
+				logging.exception(e)
 				pass
 				#if validityCheck:
 				#return None

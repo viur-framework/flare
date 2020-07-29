@@ -39,3 +39,30 @@ class ButtonBarButton( Button ):
 			self.addClass( "btn--primary" )
 		else:
 			self.removeClass( "btn--primary" )
+
+
+@html5.tag
+class ButtonBarSearch(html5.Div):
+
+	def __init__(self):
+		super().__init__()
+
+		self.addClass(["input-group"])
+		# language=HTML
+		self.appendChild('''
+			<input [name]="widget" type="text" class="input input--small">
+			<button class="btn btn--small" :callback="applyFilter">filtern</button>
+		''')
+
+		self.state = StateHandler(self)
+		self.state.updateState("applyfilter", None)
+
+	def applyFilter(self, widget):
+		currentValue = self.widget["value"]
+		self.state.updateState("applyfilter", currentValue)
+
+	def onApplyfilterChanged(self, event):
+		pass
+
+	def onActiveButtonChanged(self, event):
+		pass

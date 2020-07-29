@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-
-from ...log import getLogger
-
-logger = getLogger(__name__)
+import logging
 
 from time import time
 
@@ -404,7 +401,7 @@ class TreeWidget(html5.Div):
 		self.selectionAllow = allow or TreeItemWidget
 		self.selectionMulti = multi
 
-		logger.debug("TREEEE")
+		logging.debug("TREEEE")
 
 	@staticmethod
 	def canHandle(moduleName, moduleInfo):

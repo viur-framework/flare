@@ -1,6 +1,4 @@
-from ...log import getLogger
-
-logger = getLogger(__name__)
+import logging
 
 from js import Event as JSevent, encodeURI as JSencodeURI#, summernoteEditor
 from flare import html5
@@ -28,12 +26,10 @@ class TextInsertImageAction(Button):
 		conf["mainWindow"].stackWidget(currentSelector)
 
 	def onSelectionActivated(self, selectWdg, selection):
-		logger.debug("onSelectionActivated")
+		logging.debug("onSelectionActivated")
 
 		if not selection:
 			return
-
-		prlogger.debugint(selection)
 
 		for item in selection:
 
@@ -41,7 +37,7 @@ class TextInsertImageAction(Button):
 				dataUrl = "/file/download/%s/%s" % (item.data["dlkey"], JSencodeURI(item.data["name"]))
 
 				self.summernote.summernote("editor.insertImage", dataUrl, item.data["name"].replace("\"", ""))
-				logger.debug("insert img %r", dataUrl)
+				logging.debug("insert img %r", dataUrl)
 			else:
 				dataUrl = "/file/download/%s/%s" % (item.data["dlkey"], JSencodeURI(item.data["name"]))
 
@@ -50,7 +46,7 @@ class TextInsertImageAction(Button):
 					text = item.data["name"].replace("\"", "")
 
 				self.summernote.summernote("editor.createLink",{"url":dataUrl, "text": text, "isNewWindow": True})
-				logger.debug("insert link %r<%r> ", text, dataUrl)
+				logging.debug("insert link %r<%r> ", text, dataUrl)
 
 	@staticmethod
 	def isSuitableFor(modul, handler, actionName):
@@ -83,7 +79,7 @@ class HtmlEditor(html5.Textarea):
 				html5.ext.Alert("Unable to connect summernote, please contact technical support...")
 				return
 
-			logger.debug("Summernote initialization failed, retry will start in 1sec")
+			logging.debug("Summernote initialization failed, retry will start in 1sec")
 			DeferredCall(self._attachSummernote, retry=retry + 1, _delay=1000)
 			return
 

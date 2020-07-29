@@ -1,7 +1,4 @@
-from flare.log import getLogger
-
-logger = getLogger(__name__)
-
+import logging
 from flare import html5
 from flare.forms import boneSelector, InvalidBoneValueException
 from flare.network import NetworkService
@@ -59,7 +56,7 @@ class viurForm(html5.Form):
 			return 0
 
 		if key in self.bones:
-			logger.debug("Double field definition in {}!, only first field will be used", self)
+			logging.debug("Double field definition in {}!, only first field will be used", self)
 			return 0
 
 		self.bones.update({key:widget})
@@ -94,7 +91,7 @@ class viurForm(html5.Form):
 
 	def actionSuccess( self, req ):
 		resp = NetworkService.decode(req)
-		logger.debug("actionSuccess: %r", resp)
+		logging.debug("actionSuccess: %r", resp)
 		'''
 		severity cases:
 			NotSet = 0
@@ -161,7 +158,7 @@ class viurForm(html5.Form):
 											   error=error["errorMessage"])
 
 	def actionFailed( self, req, *args, **kwargs ):
-		logger.debug("FAILED: %r", req)
+		logging.debug("FAILED: %r", req)
 
 
 @html5.tag
@@ -182,16 +179,16 @@ class boneField(html5.Div):
 
 		if not self.formloaded:
 			if "boneName" not in dir(self):
-				logger.debug("Please add boneName attribute to {}", self)
+				logging.debug("Please add boneName attribute to {}", self)
 
 			if "form" not in dir(self) or not self.form:
-				logger.debug("Please add :form attribute with a named form widget to {}.", self)
+				logging.debug("Please add :form attribute with a named form widget to {}.", self)
 
 			if "skel" not in dir(self.form) or "structure" not in dir(self.form):
-				logger.debug( "Missing :skel and :structure databinding on referenced form", self.form)
+				logging.debug( "Missing :skel and :structure databinding on referenced form", self.form)
 
 			if "moduleName" not in dir(self.form):
-				logger.debug( "Missing moduleName attribute on referenced form", self.form)
+				logging.debug( "Missing moduleName attribute on referenced form", self.form)
 
 			#self.form existiert und form hat skel und structure
 			if  isinstance(self.form.structure, list):
@@ -207,7 +204,7 @@ class boneField(html5.Div):
 				boneFactory = boneSelector.select( self.moduleName, self.boneName, self.structure, **formparam )( self.moduleName, self.boneName, self.structure )
 				self.bonewidget = boneFactory.editWidget()
 			except Exception as e:
-				logger.exception(e)
+				logging.exception(e)
 				self.bonewidget = html5.Div("Bone not Found %s"%self.boneName)
 				self.appendChild( self.bonewidget )
 				return 0
@@ -299,7 +296,7 @@ class sendForm(Button):
 
 	def onAttach(self):
 		if "form" not in dir(self) or not self.form:
-			logger.debug("Please add :form attribute with a named form widget to {}.", self)
+			logging.debug("Please add :form attribute with a named form widget to {}.", self)
 			self.element.innerHTML = "ERROR"
 			self.disable()
 

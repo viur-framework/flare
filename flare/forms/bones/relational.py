@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-from flare.log import getLogger
-
-logger = getLogger(__name__)
+import logging
 
 from js import console
 
@@ -256,7 +254,7 @@ class RelationalBone(BaseBone):
 		self.destStructure = self.boneStructure["relskel"]
 		self.dataStructure = self.boneStructure["using"]
 
-		logger.debug("RelationalBone: %r, %r", self.destModule, self.destInfo)
+		logging.debug("RelationalBone: %r, %r", self.destModule, self.destInfo)
 
 	@staticmethod
 	def checkFor(moduleName, boneName, skelStructure, *args, **kwargs):
