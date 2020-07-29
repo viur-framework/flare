@@ -21,8 +21,9 @@ class viurForm(html5.Form):
 
 		if structure:
 			self.structure = {k: v for k, v in structure}
-		self.formSuccess = EventDispatcher( "formSuccess" )
-		self.formSuccess.register(self)
+
+		self.formSuccessEvent = EventDispatcher( "formSuccess" )
+		self.formSuccessEvent.register(self)
 
 		self.addClass("form")
 
@@ -103,10 +104,12 @@ class viurForm(html5.Form):
 			Invalid = 3			 <-- relevant
 		'''
 		if "action" in resp and resp["action"].endswith("Success"):
-			self.formSuccess.fire(self)
+			# form approved: Let's store the new skeleton values and fire the success event
+			self.skel = resp["values"]
+			self.formSuccessEvent.fire(self)
 
 		else:
-			pass #form rejected
+			#form rejected
 			self.errors = resp["errors"]
 
 			for error in self.errors:
