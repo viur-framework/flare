@@ -114,7 +114,7 @@ class viurForm(html5.Form):
 			for error in self.errors:
 				if error[ "fieldPath" ] in self.bones:
 					boneField = self.bones[ error[ "fieldPath" ] ]  # todo dependency errors
-					if (error["severity"]%2 == 0 and self.bones[boneField]["requried"]) or\
+					if (error["severity"]%2 == 0 and boneField["required"]) or\
 						(error["severity"]%2 == 1): #invalid
 
 						boneField.setInvalid()

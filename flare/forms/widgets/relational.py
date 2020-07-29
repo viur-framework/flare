@@ -44,3 +44,6 @@ class InternalEdit(html5.Div):
 				res[ key ] = str( e )
 
 		return res
+
+	def doSave( self, closeOnSuccess=False, *args, **kwargs ):
+		return self.serializeForPost(True)
