@@ -3,6 +3,7 @@ from flare import html5
 from flare.forms import boneSelector, InvalidBoneValueException
 from flare.network import NetworkService
 from flare.button import Button
+from flare.event import EventDispatcher
 
 @html5.tag
 class viurForm(html5.Form):
@@ -20,6 +21,8 @@ class viurForm(html5.Form):
 
 		if structure:
 			self.structure = {k: v for k, v in structure}
+		self.formSuccess = EventDispatcher( "formSuccess" )
+		self.formSuccess.register(self)
 
 		self.addClass("form")
 
@@ -100,12 +103,7 @@ class viurForm(html5.Form):
 			Invalid = 3			 <-- relevant
 		'''
 		if "action" in resp and resp["action"].endswith("Success"):
-			pass#form was accepted
-
-			self.createFormSuccessMessage()
-
-			#todo event für weitere aktionen werfern
-
+			self.formSuccess.fire(self)
 
 		else:
 			pass #form rejected
@@ -159,6 +157,11 @@ class viurForm(html5.Form):
 
 	def actionFailed( self, req, *args, **kwargs ):
 		logging.debug("FAILED: %r", req)
+
+
+	def onFormSuccess( self,event ):
+		self.createFormSuccessMessage()
+
 
 
 @html5.tag
