@@ -310,14 +310,14 @@ class Widget(object):
 				continue
 
 			eventFn = getattr(self, event_attrName, None)
-			assert eventFn and callable(eventFn), "{} must provide a {} method".format(str(self), event_attrName)
+			assert eventFn and callable(eventFn), f"{self} must provide a {event_attrName}-function"
 
 			self._catchedEvents[event_attrName] = eventFn
 
 			if event.startswith("on"):
 				event = event[2:]
 
-			self.element.addEventListener(event, eventFn)
+			self.addEventListener(event, eventFn)
 
 	def unsinkEvent(self, *args):
 		for event_attrName in args:
@@ -332,7 +332,25 @@ class Widget(object):
 			if event.startswith("on"):
 				event = event[2:]
 
-			self.element.removeEventListener(event, eventFn)
+			self.removeEventListener(event, eventFn)
+
+	def addEventListener(self, event, callback):
+		"""
+		Adds an event listener callback to an event on a Widget.
+		:param event: The event string, e.g. "click" or "mouseover"
+		:param callback: The callback function to be called on the given event.
+		"""
+		self.element.addEventListener(event, callback)
+
+	def removeEventListener(self, event, callback):
+		"""
+		Removes an event listener callback from a Widget. The event listener must be previously added by
+		Widget.addEventListener().
+
+		:param event: The event string, e.g. "click" or "mouseover"
+		:param callback: The callback function to be removed
+		"""
+		self.element.removeEventListener(event, callback)
 
 	def disable(self):
 		"""
@@ -754,7 +772,7 @@ class Widget(object):
 		toAppend = self.__collectChildren(*args, **kwargs)
 
 		for child in toAppend:
-			if isinstance(child,template):
+			if isinstance(child, template):
 				return self.appendChild(child._children)
 
 			if child._parent:
@@ -2967,6 +2985,20 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 							setattr(wdg, att[1:], getattr(bindTo, val))
 						except Exception as e:
 							logging.exception(e)
+
+					else:
+						logging.error("html5: bindTo is unset, can't use %r here", att)
+
+				# add event listener on current widget to callbacks on the binder
+				elif att.startswith("@"):
+					if bindTo:
+						try:
+							callback = getattr(bindTo, val)
+							assert callable(callback), f"{callback} is not callable"
+							wdg.addEventListener(att[1:], callback)
+						except Exception as e:
+							logging.exception(e)
+
 					else:
 						logging.error("html5: bindTo is unset, can't use %r here", att)
 

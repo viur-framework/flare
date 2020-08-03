@@ -39,6 +39,7 @@
   "log.py",
   "network.py",
   "observable.py",
+  "popout.py",
   "popup.py",
   "priorityqueue.py",
   "utils.py",

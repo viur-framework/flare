@@ -61,6 +61,13 @@ class Button(html5.Button):
 
 		self.update()
 
+	def _getIcon(self):
+		return self.icon
+
 	def _setText(self, text):
 		self.text = text or ""
 		self.update()
+
+	def _getText(self):
+		return self.text
+

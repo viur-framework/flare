@@ -18,6 +18,7 @@ from . import ignite
 from . import input
 from . import network
 from . import observable
+from . import popout
 from . import popup
 from . import utils
 
