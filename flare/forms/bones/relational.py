@@ -33,8 +33,8 @@ class RelationalEditWidget(BaseEditWidget):
 		return self.fromHTML(
 			"""
 				<flr-input [name]="destWidget" class="input-group-item" readonly>
-				<button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="check"></button>
-				<button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="cross"></button>
+				<button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="icon-check"></button>
+				<button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="icon-cross"></button>
 			"""
 		)
 
@@ -202,7 +202,7 @@ class RelationalMultiEditWidget(BaseMultiEditWidget):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.addBtn["text"] = "Select"
-		self.addBtn["icon"] = "check"
+		self.addBtn["icon"] = "icon-check"
 		self.addBtn.removeClass("btn--add")
 		self.addBtn.addClass("btn--select")
 
@@ -318,8 +318,8 @@ class FileEditWidget(RelationalEditWidget):
 				<div class="flr-bone-widgets">
 					<div class="flr-widgets-item input-group">
 						<flr-input [name]="destWidget" readonly>
-						<button [name]="selectBtn" class="btn--select input-group-item--last" text="Select" icon="icons-select"></button>
-						<button hidden [name]="deleteBtn" class="btn--delete" text="Delete" icon="icons-delete"></button>
+						<button [name]="selectBtn" class="btn--select input-group-item--last" text="Select" icon="icon-select"></button>
+						<button hidden [name]="deleteBtn" class="btn--delete" text="Delete" icon="icon-delete"></button>
 					</div>
 					<div class="flr-widgets-item">
 						<div [name]="dropArea" class="supports-upload">
@@ -330,7 +330,7 @@ class FileEditWidget(RelationalEditWidget):
 						<p [name]="uploadResult" style="display: none;"></p>
 					</div>
 				</div>
-            """.format( getIconHTML("icons-upload-file") )
+            """.format( getIconHTML("icon-upload-file") )
 		)
 
 		if not self.hasFileApi:
