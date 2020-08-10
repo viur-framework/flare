@@ -254,7 +254,7 @@ class RelationalBone(BaseBone):
 		self.destStructure = self.boneStructure["relskel"]
 		self.dataStructure = self.boneStructure["using"]
 
-		logging.debug("RelationalBone: %r, %r", self.destModule, self.destInfo)
+		#logging.debug("RelationalBone: %r, %r", self.destModule, self.destInfo)
 
 	@staticmethod
 	def checkFor(moduleName, boneName, skelStructure, *args, **kwargs):

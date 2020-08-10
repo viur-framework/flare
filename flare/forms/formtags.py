@@ -5,6 +5,7 @@ from flare.network import NetworkService
 from flare.button import Button
 from flare.event import EventDispatcher
 
+
 @html5.tag
 class viurForm(html5.Form):
 
@@ -26,6 +27,10 @@ class viurForm(html5.Form):
 		self.formSuccessEvent.register(self)
 
 		self.addClass("form")
+		self.sinkEvent("onChange")
+
+	def onChange(self, event):
+		self.applyVisiblity()
 
 	def _setModulename( self, val ):
 		self.moduleName = val
@@ -65,10 +70,41 @@ class viurForm(html5.Form):
 
 		self.bones.update({key:widget})
 
+	def applyVisiblity( self ):
+		for key, boneField in self.bones.items():
+			codestr = getattr(boneField,"visibleif",None)
+			if not codestr:
+				continue
+
+			from flare.config import conf
+
+			seInst = conf["safeEvalInstance"]
+			seResult = seInst.execute( seInst.compile(codestr), self.collectCurrentFormValues() )
+
+			widget = boneField.bonewidget
+			if not seResult:
+				boneField.hide()
+			else:
+				boneField.show()
+
+
+
+
+
 	def submitForm( self ):
+		res = self.collectCurrentFormValues()
+
+		NetworkService.request( self.moduleName, self.actionName, res,
+								secure = True, #always with fresh skey
+								successHandler = self.actionSuccess,
+								failureHandler = self.actionFailed )
+
+		return res
+
+	def collectCurrentFormValues( self ):
 		res = { }
-		if "key" in self.skel and self.skel["key"]:
-			res["key"] = self.skel["key"]
+		if "key" in self.skel and self.skel[ "key" ]:
+			res[ "key" ] = self.skel[ "key" ]
 
 		for key, boneField in self.bones.items():
 			widget = boneField.bonewidget
@@ -83,14 +119,8 @@ class viurForm(html5.Form):
 
 			except InvalidBoneValueException:
 				pass
-				#if validityCheck:
-				#	return None
-
-		NetworkService.request( self.moduleName, self.actionName, res,
-								secure = True, #always with fresh skey
-								successHandler = self.actionSuccess,
-								failureHandler = self.actionFailed )
-
+		# if validityCheck:
+		#	return None
 		return res
 
 	def actionSuccess( self, req ):
@@ -235,6 +265,7 @@ class boneField(html5.Div):
 								 type = bonestructure.get("type"),
 								 boneName = self.boneName)
 
+			self.sinkEvent("onChange")
 			self.appendChild(self.bonewidget)
 
 			if self.defaultvalue:
@@ -243,6 +274,11 @@ class boneField(html5.Div):
 
 			self.unserialize(self.skel)
 			self.formloaded = True
+
+	def onChange( self,event,*args,**kwargs ):
+		print(event)
+		print(args)
+		print(kwargs)
 
 	def unserialize(self, data = None):
 		for key, bone in self.form.bones.items():

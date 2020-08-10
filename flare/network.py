@@ -311,7 +311,7 @@ class NetworkService(object):
 			:type secure: bool
 
 		"""
-		logging.debug("NetworkService.request module=%r, url=%r, params=%r", module, url, params)
+		#logging.debug("NetworkService.request module=%r, url=%r, params=%r", module, url, params)
 
 		return NetworkService(module, url, params,
 		                      successHandler, failureHandler, finishedHandler,
@@ -483,7 +483,7 @@ def setUrlHash( hash, param=None ):
 	hashStr = "/".join( hash )
 
 	if not param:
-		hash = html5.window.top.location.hash
+		hash = html5.window.location.hash
 		if "?" in hash:
 			paramsStr = hash.split( "?", 1 )[ 1 ]
 		else:
@@ -494,4 +494,4 @@ def setUrlHash( hash, param=None ):
 	if paramsStr:
 		paramsStr = "?"+paramsStr
 
-	html5.window.top.location.hash = hashStr + paramsStr
+	html5.window.location.hash = hashStr + paramsStr
