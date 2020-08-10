@@ -44,40 +44,22 @@ class HTTPRequest(object):
 		Wrapper around XMLHttpRequest
 	"""
 
-	def __init__(self, *args, **kwargs):
-		super(HTTPRequest, self).__init__(*args, **kwargs)
-		self.req = html5.jseval("new XMLHttpRequest()")
-		self.req.onreadystatechange = self.onReadyStateChange
-		self.cb = None
+	def __init__(self, method, url, callbackSuccess=None, callbackFailure=None, payload=None, content_type=None):
+		super(HTTPRequest, self).__init__()
+
+		method = method.upper()
+		assert method in ["GET", "POST"]
+
+		self.method = method
+		self.callbackSuccess = callbackSuccess
+		self.callbackFailure = callbackFailure
 		self.hasBeenSent = False
-
-	def asyncGet(self, url, cb):
-		"""
-			Performs a GET operation on a remote server
-			:param url: The url to fetch. Either absolute or relative to the server
-			:type url: str
-			:param cb: Target object to call "onCompletion" on success
-			:type cb: object
-		"""
-		self.cb = cb
-		self.type = "GET"
-		self.payload = None
-		self.content_type = None
-		self.req.open("GET", url, True)
-
-	def asyncPost(self, url, payload, cb, content_type=None):
-		"""
-			Performs a POST operation on a remote server
-			:param url: The url to fetch. Either absolute or relative to the server
-			:type url: str
-			:param cb: Target object to call "onCompletion" on success
-			:type cb: object
-		"""
-		self.cb = cb
-		self.type = "POST"
 		self.payload = payload
 		self.content_type = content_type
-		self.req.open("POST", url, True)
+
+		self.req = html5.jseval("new XMLHttpRequest()")
+		self.req.onreadystatechange = self.onReadyStateChange
+		self.req.open(method, url, True)
 
 	def onReadyStateChange(self, *args, **kwargs):
 		"""
@@ -86,16 +68,20 @@ class HTTPRequest(object):
 		if self.req.readyState == 1 and not self.hasBeenSent:
 			self.hasBeenSent = True  # Internet Explorer calls this function twice!
 
-			if self.type == "POST" and self.content_type is not None:
-				self.req.setRequestHeader('Content-Type', self.content_type)
+			if self.method == "POST" and self.content_type is not None:
+				self.req.setRequestHeader("Content-Type", self.content_type)
 
 			self.req.send(self.payload)
 
 		if self.req.readyState == 4:
-			if self.req.status >= 200 and self.req.status < 300:
-				self.cb.onCompletion(self.req.responseText)
+			if 200 <= self.req.status < 300:
+				if self.callbackSuccess:
+					self.callbackSuccess(self.req.responseText)
+				# todo: report to log?
 			else:
-				self.cb.onError(self.req.responseText, self.req.status)
+				if self.callbackFailure:
+					self.callbackFailure(self.req.responseText, self.req.status)
+				# todo: report to log?
 
 
 def NiceError(req, code, params="(no parameters provided)"):
@@ -337,7 +323,7 @@ class NetworkService(object):
 			else:
 				multipart = params
 
-			HTTPRequest().asyncPost(url, multipart, self, content_type=contentType)
+			HTTPRequest("POST", url, self.onCompletion, self.onError, payload=multipart, content_type=contentType)
 
 		else:
 			if skey:
@@ -346,7 +332,7 @@ class NetworkService(object):
 				else:
 					url += "?skey=%s" % skey
 
-			HTTPRequest().asyncGet(url, self)
+			HTTPRequest("GET", url, self.onCompletion, self.onError)
 
 	def onCompletion(self, text):
 		"""

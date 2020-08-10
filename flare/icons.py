@@ -7,7 +7,7 @@ import logging
 
 from . import html5
 from .config import conf
-from .network import NetworkService
+from .network import NetworkService, HTTPRequest
 
 
 def fetchIconsFromJSON(url, then=None):
@@ -42,17 +42,40 @@ def fetchIconsFromJSON(url, then=None):
 		failureHandler=_fetchIconsFailure
 	)
 
-def getIconHTML(icon):
+def addIconToPool(name, icon):
 	"""
-	Retrieve SVG/HTML-code for icon, either from conf["icons.pool"] or a generated <i>-Tag
+	Adds an icon under an name to the icon pool.
+	icon can be None to mark an icon as "not found".
 	"""
-	svg = conf["icons.pool"].get(icon)
+	conf["icons.pool"][name] = icon
+	return name
+
+def getIconHTML(icon, callback):
+	"""
+	Retrieve SVG/HTML-code for icon.
+
+	It either loads the icon into the SVG pool or returns a placeholder.
+
+	The function requires for a callback URL that is called to render the returned Icon.
+	WARNING: The callback can be called twice, once for a pre-load and then after fetching.
+	"""
+
+	if icon in conf["icons.pool"]:
+		svg = conf["icons.pool"].get(icon)
+	else:
+		HTTPRequest(
+			"GET", f"{conf['icons.lookup']}/{icon}.svg",
+			lambda svg: getIconHTML(addIconToPool(icon, svg), callback),
+			lambda *args, **kwargs: addIconToPool(icon, None)
+		)
+
+		svg = None
 
 	if not svg:
 		# language=HTML
-		return f"""<i class="i">{icon[0]}</i>"""
+		svg = f"""<i class="i">{icon[0]}</i>"""
 
-	return svg
+	callback(svg)
 
 
 @html5.tag
@@ -81,7 +104,8 @@ class Icon(html5.Div):
 			return
 
 		self.embedsvg = embedsvg
-		self.appendChild(getIconHTML(embedsvg))
+
+		getIconHTML(embedsvg, lambda *args, **kwargs: self.appendChild(*args, **kwargs, replace=True))
 
 	def _getEmbedsvg(self):
 		return self.embedsvg

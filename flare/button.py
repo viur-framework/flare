@@ -44,14 +44,13 @@ class Button(html5.Button):
 				self.callback()
 
 	def update(self):
-		html = ""
-
 		if self.icon:
-			html += getIconHTML(self.icon)
+			getIconHTML(self.icon, self.__render)
+		else:
+			self.__render()
 
-		html += self.text
-
-		self.element.innerHTML = html
+	def __render(self, icon=None):
+		self.element.innerHTML = (icon or "") + self.text
 
 	def _setIcon(self, icon):
 		if not icon:

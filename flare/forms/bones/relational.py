@@ -306,6 +306,7 @@ class FileEditWidget(RelationalEditWidget):
 		self.previewImg = FilePreviewImage()
 		self.appendChild(self.previewImg)
 
+		# language=JS
 		self.hasFileApi = html5.jseval("""var isAdvancedUpload = function() {
             var div = document.createElement('div');
             return (('draggable' in div) || ('ondragstart' in div && 'ondrop' in div)) && 'FormData' in window && 'FileReader' in window;
@@ -323,15 +324,21 @@ class FileEditWidget(RelationalEditWidget):
 					</div>
 					<div class="flr-widgets-item">
 						<div [name]="dropArea" class="supports-upload">
-						{0}
+							(icon-placeholder)
 							<label for="inplace-upload" class="flr-inplace-upload-label"><strong>Datei auswählen</strong><span [name]="dropText"> oder hierhin ziehen</span>.</label>
 							<input id="inplace-upload" class="flr-inplace-upload" type="file" [name]="files" files selected"/>
 						</div>
 						<p [name]="uploadResult" style="display: none;"></p>
 					</div>
 				</div>
-            """.format( getIconHTML("icon-upload-file") )
+            """
 		)
+
+		def replaceIconInDropArea(icon):
+			self.dropArea.removeChild(self.dropArea.children(0))
+			self.dropArea.prependChild(icon)
+
+		getIconHTML("icon-upload-file", replaceIconInDropArea)
 
 		if not self.hasFileApi:
 			self.dropText.hide()
