@@ -8,8 +8,21 @@ from flare.event import EventDispatcher
 
 @html5.tag
 class viurForm(html5.Form):
+	"""
+	Handles an input form for a VIUR skeleton.
+	"""
 
-	def __init__(self,formName = None, moduleName = None, actionName="add", skel=None, structure=None, ignore=(),hide=()):
+	def __init__(
+			self,
+			formName=None,
+			moduleName=None,
+			actionName="add",
+			skel=None,
+			structure=None,
+			visible=(),
+			ignore=(),
+			hide=()
+	):
 		super().__init__()
 		self.formName = formName
 		self.moduleName = moduleName
@@ -17,6 +30,7 @@ class viurForm(html5.Form):
 		self.bones = {}
 		self.skel = skel
 		self.errors = []
+		self.visible = visible
 		self.ignore = ignore
 		self.hide = hide
 
@@ -45,6 +59,9 @@ class viurForm(html5.Form):
 		for key, bone in self.structure.items():
 			if key in self.ignore:
 				continue
+			elif self.visible and key not in self.visible:
+				continue
+
 			bonefield = boneField(key,self)
 			self.appendChild( bonefield )
 
@@ -55,6 +72,8 @@ class viurForm(html5.Form):
 		for key, bone in self.structure.items():
 			if key in self.ignore:
 				continue
+			elif self.visible and key not in self.visible:
+				continue
 
 			bonefield = boneField(key,self)
 			bonefield.onAttach() #we need a better solution
@@ -62,6 +81,8 @@ class viurForm(html5.Form):
 
 	def registerField( self,key,widget ):
 		if key in self.ignore:
+			return 0
+		elif self.visible and key not in self.visible:
 			return 0
 
 		if key in self.bones:
