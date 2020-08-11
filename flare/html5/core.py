@@ -7,7 +7,7 @@ HTML5 Widget abstraction library
 """
 
 
-import logging, string
+import logging, string, inspect
 
 try:
 	from ..config import conf
@@ -266,6 +266,13 @@ class _WidgetStyleWrapper(dict):
 
 # Widget ---------------------------------------------------------------------------------------------------------------
 
+def _wrapEventCallback(callback):
+	"""
+	This is used to wrap event callbacks that accept no parameters!
+	"""
+	return lambda _: callback()
+
+
 class Widget(object):
 	_tagName = None # Defines the tag-name that is used for DOM-Element construction
 	_leafTag = False    # Defines whether ths Widget may contain other Widgets (default) or is a leaf
@@ -340,6 +347,9 @@ class Widget(object):
 		:param event: The event string, e.g. "click" or "mouseover"
 		:param callback: The callback function to be called on the given event.
 		"""
+		if len(inspect.signature(callback).parameters) == 0:
+			callback = _wrapEventCallback(callback)
+
 		self.element.addEventListener(event, callback)
 
 	def removeEventListener(self, event, callback):
@@ -2995,9 +3005,12 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 						try:
 							callback = getattr(bindTo, val)
 							assert callable(callback), f"{callback} is not callable"
-							wdg.addEventListener(att[1:], callback)
+
 						except Exception as e:
 							logging.exception(e)
+							continue
+
+						wdg.addEventListener(att[1:], callback)
 
 					else:
 						logging.error("html5: bindTo is unset, can't use %r here", att)
