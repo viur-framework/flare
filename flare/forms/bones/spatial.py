@@ -1,16 +1,19 @@
 from flare.forms import boneSelector
 from .base import BaseBone, BaseEditWidget
+from flare import html5
 
 
 class SpatialEditWidget( BaseEditWidget ):
 
 	def _createWidget( self ):
-		return self.fromHTML(
+		tpl = html5.template()
+		tpl.appendChild( self.fromHTML(
 			"""
 			<flr-input [name]="latitude" type="number" placeholder="latitude">
 			<flr-input [name]="longitude" type="number" placeholer="longitute">
 			"""
-		)
+		))
+		return tpl
 
 	def unserialize( self, value = None ):
 		self.latitude[ "value" ], self.longitude[ "value" ] = value or (0, 0)

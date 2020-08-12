@@ -30,13 +30,16 @@ class RelationalEditWidget(BaseEditWidget):
 	style = ["flr-value", "flr-value--relational"]
 
 	def _createWidget(self):
-		return self.fromHTML(
+		tpl = html5.template()
+		widgetList = self.fromHTML(
 			"""
 				<flr-input [name]="destWidget" class="input-group-item" readonly>
 				<button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="icon-check"></button>
 				<button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="icon-cross"></button>
-			"""
-		)
+			""")
+		tpl.appendChild(widgetList,bindTo=self)
+		return tpl
+
 
 	def _updateWidget(self):
 		if self.bone.readonly:
