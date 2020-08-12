@@ -3,7 +3,7 @@ Generic icon handling, especially of embedded SVG images served from a pool of i
 """
 
 
-import logging
+import logging, string
 
 from . import html5
 from .config import conf
@@ -97,3 +97,59 @@ class Icon(html5.Div):
 
 	def _getIcon(self):
 		return self.icon
+
+@html5.tag
+class Noci(html5.I):
+	"""
+	Next-generation icon component:
+	Represents either an image, or an icon or a placeholder text using an <i>-tag.
+	"""
+	_leafTag = True
+	style = ["i"]
+
+	def __init__(self):
+		super().__init__()
+		self.fallback = None
+		self.value = None
+
+	def _setFallback(self, fallback):
+		self.fallback = fallback
+		self["value"] = self["value"]
+
+	def _getFallback(self):
+		return self.fallback
+
+	def _setValue(self, value):
+		self.removeAllChildren()
+		self.element.innerHTML = ""
+
+		self.value = value
+
+		# Accept empty value
+		if not value:
+			if self.fallback:
+				self["value"] = self.fallback
+
+			return
+
+		# Accept a fileBone entry
+		elif isinstance(value, dict):
+			self.appendChild(
+				html5.Img(value.get("dest", {}).get("downloadUrl") or self.fallback)
+			)
+		elif isinstance(value, str):
+			icon = conf["icons.pool"].get(value)
+
+			if icon:
+				self.element.innerHTML = icon
+			else:
+				value = value.replace("-", " ") # replace dashes by spaces
+				value = value.translate({ord(c): None for c in string.punctuation})  # remove all punctuations
+
+				self.appendChild("".join([tag[0] for tag in value.split(maxsplit=2)]))
+
+		else:
+			raise ValueError("Either provide fileBone-dict or string")
+
+	def _getValue(self):
+		return self.value
