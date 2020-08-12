@@ -311,7 +311,7 @@ class NetworkService(object):
 			:type secure: bool
 
 		"""
-		#logging.debug("NetworkService.request module=%r, url=%r, params=%r", module, url, params)
+		logging.info("NetworkService.request module=%r, url=%r, params=%r", module, url, params)
 
 		return NetworkService(module, url, params,
 		                      successHandler, failureHandler, finishedHandler,

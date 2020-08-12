@@ -146,7 +146,7 @@ class Noci(html5.I):
 				value = value.replace("-", " ") # replace dashes by spaces
 				value = value.translate({ord(c): None for c in string.punctuation})  # remove all punctuations
 
-				self.appendChild("".join([tag[0] for tag in value.split(maxsplit=2)]))
+				self.appendChild("".join([tag[0] for tag in value.split(maxsplit=1)])) # Only allow first two words
 
 		else:
 			raise ValueError("Either provide fileBone-dict or string")
