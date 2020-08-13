@@ -306,20 +306,22 @@ class FileEditWidget(RelationalEditWidget):
 	style = ["flr-value", "flr-value--file"]
 
 	def _createWidget(self):
+		tpl = html5.template()
 		self.previewImg = FilePreviewImage()
 		self.appendChild(self.previewImg)
 
-		self.hasFileApi = html5.jseval("""var isAdvancedUpload = function() {
-            var div = document.createElement('div');
-            return (('draggable' in div) || ('ondragstart' in div && 'ondrop' in div)) && 'FormData' in window && 'FileReader' in window;
-			}();
-		""")
+		def FileApiTest():
+			testDiv = html5.Div()
+			divparamslist = dir(testDiv.element)
+			return ('draggable' in divparamslist or ('ondragstart' in divparamslist and 'ondrop' in divparamslist)) and 'FormData' in dir(html5.window) and 'FileReader' in dir(html5.window)
+
+		self.hasFileApi =FileApiTest()
 
 		# language=html
-		self.fromHTML(
+		tpl.appendChild(self.fromHTML(
 			"""
 				<div class="flr-bone-widgets">
-					<div class="flr-widgets-item input-group">
+					<div class="flr-widgets-item input-group" [name]='filerow'>
 						<flr-input [name]="destWidget" readonly>
 						<button [name]="selectBtn" class="btn--select input-group-item--last" text="Select" icon="icon-select"></button>
 						<button hidden [name]="deleteBtn" class="btn--delete" text="Delete" icon="icon-delete"></button>
@@ -334,7 +336,9 @@ class FileEditWidget(RelationalEditWidget):
 					</div>
 				</div>
             """.format( getIconHTML("icon-upload-file") )
-		)
+		))
+
+		self.filerow.hide()
 
 		if not self.hasFileApi:
 			self.dropText.hide()
@@ -342,6 +346,20 @@ class FileEditWidget(RelationalEditWidget):
 			for event in ["onDragEnter", "onDragOver", "onDragLeave", "onDrop"]:
 				setattr(self.dropArea, event, getattr(self, event))
 				self.dropArea.sinkEvent(event)
+				
+		self.sinkEvent("onChange")
+		return tpl
+
+	def onChange( self, event ):
+		if event.target.files:
+			file = event.target.files[0]
+			self.startUpload(file)
+
+	def startUpload( self, file ):
+		uploader = Uploader( file, None, showResultMessage = False )
+		self.appendChild( uploader )
+		uploader.uploadSuccess.register( self )
+		uploader.uploadFailed.register( self )
 
 	def onDragEnter(self, event):
 		console.log("onDragEnter", event)
@@ -364,27 +382,28 @@ class FileEditWidget(RelationalEditWidget):
 		event.preventDefault()
 		files = event.dataTransfer.files
 		if files.length:  # only pick first file!!!
-			currentFile = files.item(0)
-			uploader = Uploader(currentFile, None, showResultMessage=False)
-			self.appendChild(uploader)
-			uploader.uploadSuccess.register(self)
-			uploader.uploadFailed.register(self)
+			currentFile = files.item( 0 )
+			self.startUpload(currentFile)
 
 	def onUploadSuccess(self, uploader, entry):
-		console.log("onUploadSuccess", uploader, entry)
 		self.destKey = entry["key"]
 		self.value = {"dest": entry, "rel": None}
 		self.previewImg.setFile(entry)
 		self.updateString()
 		self._updateWidget()
 		self.removeChild(uploader)
-		self.uploadResult.element.innerHTML = "Upload erfolgreich"
-		self.uploadResult["style"]["display"] = "block"
+		self.uploadResult.hide()
+		self.filerow.show()
+		#self.uploadResult.element.innerHTML = "Upload erfolgreich"
+		#self.uploadResult["style"]["display"] = "block"
+		if not self.bone.multiple:
+			self.dropArea.hide()
 
-	def onFailed(self, uploader, errorCode):
+
+	def onUploadFailed(self, uploader, errorCode):
 		self.removeChild(uploader)
 		self.uploadResult.element.innerHTML = "Upload abgebrochen mit Fehlercode {0}".format(errorCode)
-		self.uploadResult["style"]["display"] = "block"
+		self.uploadResult.show()
 
 	def unserialize(self, value=None):
 		super().unserialize(value)
@@ -392,6 +411,13 @@ class FileEditWidget(RelationalEditWidget):
 		if self.value:
 			self.previewImg.setFile(self.value["dest"])
 
+	def onDeleteBtnClick(self):
+		self.unserialize()
+		self.dropArea.show() #show drop Area
+		self.uploadResult.hide() #hide Status
+		self.files["value"]='' # reset input
+		self.previewImg.setFile(None) #reset Preview
+		self.filerow.hide()
 
 class FileViewWidget(RelationalViewWidget):
 

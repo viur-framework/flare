@@ -107,6 +107,7 @@ class FilePreviewImage(html5.Div):
 	def setFile(self, file):
 		if self.previewIcon:
 			self.removeChild(self.previewIcon)
+			self.previewIcon = None
 
 		if not file:
 			self.addClass("is-hidden")
