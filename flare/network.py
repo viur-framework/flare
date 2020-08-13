@@ -44,40 +44,22 @@ class HTTPRequest(object):
 		Wrapper around XMLHttpRequest
 	"""
 
-	def __init__(self, *args, **kwargs):
-		super(HTTPRequest, self).__init__(*args, **kwargs)
-		self.req = html5.jseval("new XMLHttpRequest()")
-		self.req.onreadystatechange = self.onReadyStateChange
-		self.cb = None
+	def __init__(self, method, url, callbackSuccess=None, callbackFailure=None, payload=None, content_type=None):
+		super(HTTPRequest, self).__init__()
+
+		method = method.upper()
+		assert method in ["GET", "POST"]
+
+		self.method = method
+		self.callbackSuccess = callbackSuccess
+		self.callbackFailure = callbackFailure
 		self.hasBeenSent = False
-
-	def asyncGet(self, url, cb):
-		"""
-			Performs a GET operation on a remote server
-			:param url: The url to fetch. Either absolute or relative to the server
-			:type url: str
-			:param cb: Target object to call "onCompletion" on success
-			:type cb: object
-		"""
-		self.cb = cb
-		self.type = "GET"
-		self.payload = None
-		self.content_type = None
-		self.req.open("GET", url, True)
-
-	def asyncPost(self, url, payload, cb, content_type=None):
-		"""
-			Performs a POST operation on a remote server
-			:param url: The url to fetch. Either absolute or relative to the server
-			:type url: str
-			:param cb: Target object to call "onCompletion" on success
-			:type cb: object
-		"""
-		self.cb = cb
-		self.type = "POST"
 		self.payload = payload
 		self.content_type = content_type
-		self.req.open("POST", url, True)
+
+		self.req = html5.jseval("new XMLHttpRequest()")
+		self.req.onreadystatechange = self.onReadyStateChange
+		self.req.open(method, url, True)
 
 	def onReadyStateChange(self, *args, **kwargs):
 		"""
@@ -86,16 +68,20 @@ class HTTPRequest(object):
 		if self.req.readyState == 1 and not self.hasBeenSent:
 			self.hasBeenSent = True  # Internet Explorer calls this function twice!
 
-			if self.type == "POST" and self.content_type is not None:
-				self.req.setRequestHeader('Content-Type', self.content_type)
+			if self.method == "POST" and self.content_type is not None:
+				self.req.setRequestHeader("Content-Type", self.content_type)
 
 			self.req.send(self.payload)
 
 		if self.req.readyState == 4:
-			if self.req.status >= 200 and self.req.status < 300:
-				self.cb.onCompletion(self.req.responseText)
+			if 200 <= self.req.status < 300:
+				if self.callbackSuccess:
+					self.callbackSuccess(self.req.responseText)
+				# todo: report to log?
 			else:
-				self.cb.onError(self.req.responseText, self.req.status)
+				if self.callbackFailure:
+					self.callbackFailure(self.req.responseText, self.req.status)
+				# todo: report to log?
 
 
 def NiceError(req, code, params="(no parameters provided)"):
@@ -174,46 +160,58 @@ class NetworkService(object):
 
 	@staticmethod
 	def genReqStr(params):
-		"""
-			Creates a MIME (multipart/mixed) payload for post requests transmitting
-			the values given in params.
-			:param params: Dictionary of key->values to encode
-			:type params: dict
-			:returns: (string payload, string boundary )
-		"""
 		boundary_str = "---" + ''.join(
 			[random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(13)])
 		boundary = boundary_str
-		res = 'Content-Type: multipart/mixed; boundary="' + boundary + '"\r\nMIME-Version: 1.0\r\n'
-		res += '\r\n--' + boundary
-		for (key, value) in list(params.items()):
+
+		res = f"Content-Type: multipart/mixed; boundary=\"{boundary}\"\r\nMIME-Version: 1.0\r\n"
+		res += "\r\n--" + boundary
+
+		def expand(key, value):
+			ret = ""
+
 			if all([x in dir(value) for x in ["name", "read"]]):  # File
-				try:
-					(type, encoding) = mimetypes.guess_type(value.name.decode(sys.getfilesystemencoding()),
-					                                        strict=False)
-					type = type or "application/octet-stream"
-				except:
-					type = "application/octet-stream"
-				res += '\r\nContent-Type: ' + type + '\r\nMIME-Version: 1.0\r\nContent-Disposition: form-data; name="' + key + '"; filename="' + os.path.basename(
-					value.name).decode(sys.getfilesystemencoding()) + '"\r\n\r\n'
-				res += str(value.read())
-				res += '\r\n--' + boundary
+				type = "application/octet-stream"
+				filename = os.path.basename(value.name).decode(sys.getfilesystemencoding())
+
+				ret += \
+					f"\r\nContent-Type: {type}" \
+					f"\r\nMIME-Version: 1.0" \
+					f"\r\nContent-Disposition: form-data; name=\"{key}\"; filename=\"{filename}\"\r\n\r\n"
+				ret += str(value.read())
+				ret += '\r\n--' + boundary
+
 			elif isinstance(value, list):
-				for val in value:
-					res += '\r\nContent-Type: application/octet-stream\r\nMIME-Version: 1.0\r\nContent-Disposition: form-data; name="' + key + '"\r\n\r\n'
-					res += str(val)
-					res += '\r\n--' + boundary
+				if any([isinstance(entry, dict) for entry in value]):
+					for idx, entry in enumerate(value):
+						ret += expand(key + "." + str(idx), entry)
+				else:
+					for entry in value:
+						ret += expand(key, entry)
+
 			elif isinstance(value, dict):
-				for k, v in value.items():
-					res += '\r\nContent-Type: application/octet-stream\r\nMIME-Version: 1.0\r\nContent-Disposition: form-data; name="' + key + b"." + k + '"\r\n\r\n'
-					res += str(v)
-					res += '\r\n--' + boundary
+				for key_, entry in value.items():
+					ret += expand(((key + ".") if key else "") + key_, entry)
+
 			else:
-				res += '\r\nContent-Type: application/octet-stream\r\nMIME-Version: 1.0\r\nContent-Disposition: form-data; name="' + key + '"\r\n\r\n'
-				res += str(value)
-				res += '\r\n--' + boundary
-		res += '--\r\n'
-		return (res, boundary)
+				ret += \
+					"\r\nContent-Type: application/octet-stream" \
+					"\r\nMIME-Version: 1.0" \
+					f"\r\nContent-Disposition: form-data; name=\"{key}\"\r\n\r\n"
+				ret += str(value) if value is not None else ""
+				ret += '\r\n--' + boundary
+
+			return ret
+
+		for key, value in params.items():
+			res += expand(key, value)
+
+		res += "--\r\n"
+
+		# fixme: DEBUG!
+		#print(res)
+
+		return res, boundary
 
 	@staticmethod
 	def decode(req):
@@ -264,6 +262,11 @@ class NetworkService(object):
 		self.waitingForSkey = False
 		self.module = module
 		self.url = url
+
+		if params and not isinstance(params, dict):
+			self.url += "/%s" % params
+			params = {}
+
 		self.params = params
 
 		self.successHandler = [successHandler] if successHandler else []
@@ -311,7 +314,7 @@ class NetworkService(object):
 			:type secure: bool
 
 		"""
-		logging.info("NetworkService.request module=%r, url=%r, params=%r", module, url, params)
+		#logging.debug("NetworkService.request module=%r, url=%r, params=%r", module, url, params)
 
 		return NetworkService(module, url, params,
 		                      successHandler, failureHandler, finishedHandler,
@@ -337,7 +340,7 @@ class NetworkService(object):
 			else:
 				multipart = params
 
-			HTTPRequest().asyncPost(url, multipart, self, content_type=contentType)
+			HTTPRequest("POST", url, self.onCompletion, self.onError, payload=multipart, content_type=contentType)
 
 		else:
 			if skey:
@@ -346,7 +349,7 @@ class NetworkService(object):
 				else:
 					url += "?skey=%s" % skey
 
-			HTTPRequest().asyncGet(url, self)
+			HTTPRequest("GET", url, self.onCompletion, self.onError)
 
 	def onCompletion(self, text):
 		"""
