@@ -315,7 +315,7 @@ class FileEditWidget(RelationalEditWidget):
 			divparamslist = dir(testDiv.element)
 			return ('draggable' in divparamslist or ('ondragstart' in divparamslist and 'ondrop' in divparamslist)) and 'FormData' in dir(html5.window) and 'FileReader' in dir(html5.window)
 
-		self.hasFileApi =FileApiTest()
+		self.hasFileApi = FileApiTest()
 
 		# language=html
 		tpl.appendChild(self.fromHTML(
@@ -410,6 +410,10 @@ class FileEditWidget(RelationalEditWidget):
 
 		if self.value:
 			self.previewImg.setFile(self.value["dest"])
+
+			self.dropArea.hide()
+			self.filerow.show()
+
 
 	def onDeleteBtnClick(self):
 		self.unserialize()
