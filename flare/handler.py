@@ -5,6 +5,7 @@ Flare base handlers for ViUR prototypes.
 
 from .network import NetworkService
 from .event import EventDispatcher
+from .observable import StateHandler
 
 
 class requestHandler():
@@ -15,23 +16,31 @@ class requestHandler():
 		self.eventName = eventName
 		self.secure = secure
 		setattr(self, self.eventName, EventDispatcher(self.eventName))
+		self.state = StateHandler(self)
+		self.state.updateState("listStatus", 'init')
 
 	def requestData(self, *args, **kwargs):
+		self.state.updateState( "listStatus", 'loading' )
 		NetworkService.request(self.module, self.action, self.params,
 		                       successHandler=self.requestSuccess,
 		                       failureHandler=self.requestFailed,
 							   secure=self.secure)
 
 	def requestSuccess(self, req):
+		self.state.updateState( "listStatus", 'success' )
 		resp = NetworkService.decode(req)
 		self.resp = resp
 		getattr(self, self.eventName).fire(self.resp)
 
 	def requestFailed(self, req, *args, **kwargs):
+		self.state.updateState( "listStatus", 'failed' )
 		print("REQUEST Failed")
 		print(req)
 		# resp = NetworkService.decode(req)
 		# print(resp)
+
+	def onListStatusChanged( self,event ):
+		pass
 
 
 class ListHandler(requestHandler):
@@ -60,6 +69,7 @@ class ListHandler(requestHandler):
 			self.requestData()
 
 	def requestSuccess(self, req):
+		self.state.updateState( "listStatus", 'success' )
 		resp = NetworkService.decode(req)
 		self.resp = resp
 
