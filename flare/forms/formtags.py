@@ -21,7 +21,8 @@ class viurForm(html5.Form):
 			structure=None,
 			visible=(),
 			ignore=(),
-			hide=()
+			hide=(),
+			defaultValues = ()
 	):
 		super().__init__()
 		self.formName = formName
@@ -33,6 +34,7 @@ class viurForm(html5.Form):
 		self.visible = visible
 		self.ignore = ignore
 		self.hide = hide
+		self.defaultValues = defaultValues
 
 		if structure:
 			self.structure = {k: v for k, v in structure}
@@ -62,7 +64,10 @@ class viurForm(html5.Form):
 			elif self.visible and key not in self.visible:
 				continue
 
-			bonefield = boneField(key,self)
+			boneValue = None
+			if key in self.defaultValues:
+				boneValue = self.defaultValues[key]
+			bonefield = boneField(key,self,boneValue)
 			self.appendChild( bonefield )
 
 		submitbtn = sendForm(text = "speichern",form = self)
@@ -92,6 +97,8 @@ class viurForm(html5.Form):
 		self.bones.update({key:widget})
 
 	def applyVisiblity( self ):
+		#only PoC!
+		#WIP
 		for key, boneField in self.bones.items():
 			codestr = getattr(boneField,"visibleif",None)
 			if not codestr:
@@ -221,14 +228,14 @@ class viurForm(html5.Form):
 @html5.tag
 class boneField(html5.Div):
 
-	def __init__(self, boneName=None, form=None):
+	def __init__(self, boneName=None, form=None, defaultvalue=None):
 		super().__init__()
 		self.boneName = boneName
 		self.form = form
 		self.label = True
 		self.hidden = False
 		self.placeholder = False
-		self.defaultvalue = None
+		self.defaultvalue = defaultvalue
 
 		self.formloaded = False
 
@@ -297,9 +304,10 @@ class boneField(html5.Div):
 			self.formloaded = True
 
 	def onChange( self,event,*args,**kwargs ):
-		print(event)
-		print(args)
-		print(kwargs)
+		pass
+		#print(event)
+		#print(args)
+		#print(kwargs)
 
 	def unserialize(self, data = None):
 		for key, bone in self.form.bones.items():
