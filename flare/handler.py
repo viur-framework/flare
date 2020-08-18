@@ -16,6 +16,7 @@ class requestHandler():
 		self.eventName = eventName
 		self.secure = secure
 		setattr(self, self.eventName, EventDispatcher(self.eventName))
+		self.requestFailed = EventDispatcher("requestFailed")
 		self.state = StateHandler(self)
 		self.state.updateState("listStatus", 'init')
 
@@ -23,7 +24,7 @@ class requestHandler():
 		self.state.updateState( "listStatus", 'loading' )
 		NetworkService.request(self.module, self.action, self.params,
 		                       successHandler=self.requestSuccess,
-		                       failureHandler=self.requestFailed,
+		                       failureHandler=self._requestFailed,
 							   secure=self.secure)
 
 	def requestSuccess(self, req):
@@ -32,12 +33,13 @@ class requestHandler():
 		self.resp = resp
 		getattr(self, self.eventName).fire(self.resp)
 
-	def requestFailed(self, req, *args, **kwargs):
+	def _requestFailed(self, req, *args, **kwargs):
 		self.state.updateState( "listStatus", 'failed' )
 		print("REQUEST Failed")
 		print(req)
 		# resp = NetworkService.decode(req)
 		# print(resp)
+		self.requestFailed.fire( req )
 
 	def onListStatusChanged( self,event ):
 		pass
