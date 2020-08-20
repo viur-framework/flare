@@ -2945,7 +2945,7 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 						continue
 
 					if getattr(bindTo, val, None):
-						logging.warning("html5: Cannot assign name %r because it already exists in %r", val, bindTo)
+						pass#logging.warning("html5: Cannot assign name %r because it already exists in %r", val, bindTo)
 
 					elif not (any([val.startswith(x) for x in string.ascii_letters + "_"])
 							  and all([x in string.ascii_letters + string.digits + "_" for x in val[1:]])):

@@ -31,6 +31,12 @@ class requestHandler():
 		self.state.updateState( "listStatus", 'success' )
 		resp = NetworkService.decode(req)
 		self.resp = resp
+
+		if self.action == "view":
+			resp["values"] = self.buildSelectDescr(resp["values"], resp["structure"])
+
+
+
 		getattr(self, self.eventName).fire(self.resp)
 
 	def _requestFailed(self, req, *args, **kwargs):
@@ -44,6 +50,31 @@ class requestHandler():
 	def onListStatusChanged( self,event ):
 		pass
 
+	def getDescrFromValue(self, definition, val ):
+		return dict(definition[ "values" ])[ val ]
+
+	def buildSelectDescr(self, skel, structure ):
+		for bone, definition in dict(structure).items():
+			if definition[ "type" ].startswith("relational.") and definition["using"]:
+				if isinstance( skel[ bone ], list ):
+					skel[ bone ] = [{"dest":relskel["dest"], "rel":self.buildSelectDescr( relskel["rel"], definition[ "using" ] )} for relskel in skel[ bone ]]
+				else:
+					skel[ bone ]["rel"] = self.buildSelectDescr(skel[ bone ]["rel"],definition["using"])
+
+			if definition[ "type" ] != "select":
+				continue
+			try:
+				if isinstance( skel[ bone ], str ):
+					descr = self.getDescrFromValue( definition, skel[ bone ] )
+				elif isinstance( skel[ bone ], list ):
+					descr = [ self.getDescrFromValue( definition, val ) for val in skel[ bone ] ]
+				else:
+					descr = None
+
+				skel[ bone + "_descr" ] = descr
+			except:
+				skel[ bone + "_descr" ] = None
+		return skel
 
 class ListHandler(requestHandler):
 	def __init__(self, module, action, params=(), eventName="listUpdated", secure=False):
@@ -82,6 +113,10 @@ class ListHandler(requestHandler):
 
 		if not self.structure and "structure" in resp:
 			self.structure = resp["structure"]
-		self.skellist += resp["skellist"]
+		#self.skellist += resp["skellist"]
+
+		for skel in resp["skellist"]:
+			skel = self.buildSelectDescr(skel,self.structure)
+			self.skellist.append(skel)
 
 		getattr(self, self.eventName).fire(self.skellist)
