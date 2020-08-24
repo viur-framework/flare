@@ -10,7 +10,7 @@ class StringEditWidget( BaseEditWidget ):
 		tpl = html5.template()
 		tpl.appendChild( """
 			<flr-input class="input-group-item" [name]="widget">
-			<div class="label input-group-item input-group-item--last" [name]="length">0</div>
+			<div class="label input-group-item input-group-item--last" [name]="length" hidden>0</div> <!-- fixme: add later ... -->
 			<div class="label" [name]="maxlength" hidden>0</div> <!-- fixme: add later ... -->
 		""",bindTo=self )
 
