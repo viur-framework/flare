@@ -42,6 +42,8 @@
   "popout.py",
   "popup.py",
   "priorityqueue.py",
+  "timestamp.py",
+  "user.py",
   "utils.py",
   "widgets/__init__.py",
   "widgets/buttonbar.py"
