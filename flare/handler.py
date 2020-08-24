@@ -106,15 +106,14 @@ class ListHandler(requestHandler):
 		resp = NetworkService.decode(req)
 		self.resp = resp
 
-		if "cursor" in resp:
-			if self.cursor == resp["cursor"]:
-				self.complete = True
+		if "cursor" in resp and not resp["cursor"]:
+			self.complete = True
 			self.cursor = resp["cursor"]
 
 		if not self.structure and "structure" in resp:
 			self.structure = resp["structure"]
 		#self.skellist += resp["skellist"]
-
+		self.skellist = []
 		for skel in resp["skellist"]:
 			skel = self.buildSelectDescr(skel,self.structure)
 			self.skellist.append(skel)
