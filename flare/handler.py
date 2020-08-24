@@ -59,7 +59,10 @@ class requestHandler():
 				if isinstance( skel[ bone ], list ):
 					skel[ bone ] = [{"dest":relskel["dest"], "rel":self.buildSelectDescr( relskel["rel"], definition[ "using" ] )} for relskel in skel[ bone ]]
 				else:
-					skel[ bone ]["rel"] = self.buildSelectDescr(skel[ bone ]["rel"],definition["using"])
+					try:
+						skel[ bone ]["rel"] = self.buildSelectDescr(skel[ bone ]["rel"],definition["using"])
+					except:
+						pass
 
 			if definition[ "type" ] != "select":
 				continue
