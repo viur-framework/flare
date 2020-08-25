@@ -50,7 +50,7 @@ class Avatar(Noci):
 				super()._setValue( self.fallback )
 			# if no fallback und no first- and lastname available use hardcoded icon
 			else:
-				super()._setValue("icons-user")
+				super()._setValue("icon-user")
 
 	def _onUserAvailable(self, res):
 		self["value"] = res["user"]
