@@ -54,6 +54,8 @@ def getIconHTML(icon, classList=None):
 	return """<img src="/static/svgs/%s.svg" class="js-svg %s" style="visibility:hidden">""" % (icon, classList)
 
 
+
+
 def svgReplacer(e):
 	targetElem = e.target  # Element that just loaded
 	def nsServiceSuccess(ns):  # We've fetched the svg from the server
@@ -63,6 +65,7 @@ def svgReplacer(e):
 			svgElem = tmp.querySelector("svg")
 			for cls in [x for x in targetElem.classList if x != "js-svg"]:
 				svgElem.classList.add(cls)
+			svgElem.style.pointerEvents = "none"
 			targetElem.parentElement.insertBefore(svgElem, targetElem)
 			targetElem.parentElement.removeChild(targetElem)
 	if targetElem.classList.contains("js-svg"):  # Start replacing only if we encountered an image with js-svg
@@ -154,15 +157,9 @@ class Noci(html5.I):
 				html5.Img(value.get("dest", {}).get("downloadUrl") or self.fallback)
 			)
 		elif isinstance(value, str):
-			self.appendChild(getIconHTML(value))
-			return
-
-			#this fallback is not possible anymore?
-
-			icon = conf["icons.pool"].get(value)
-
-			if icon:
-				self.element.innerHTML = icon
+			#we need a better detection
+			if value.startswith("icon-") or value.startswith("logo-"):
+				self.appendChild(getIconHTML(value))
 			else:
 				value = value.replace("-", " ") # replace dashes by spaces
 				value = value.translate({ord(c): None for c in string.punctuation})  # remove all punctuations
