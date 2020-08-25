@@ -15,7 +15,9 @@ def fetchIconsFromJSON(url, then=None):
 	Utility function that is used to fetch icons from an URL using NetworkRequest,
 	and adding these icons to the icon pool.
 	"""
-
+	if then:
+		then()
+	return
 	def _fetchIconsSuccess(req):
 		try:
 			icons = NetworkService.decode(req)
@@ -42,18 +44,30 @@ def fetchIconsFromJSON(url, then=None):
 		failureHandler=_fetchIconsFailure
 	)
 
-def getIconHTML(icon):
+def getIconHTML(icon, classList=None):
 	"""
 	Retrieve SVG/HTML-code for icon, either from conf["icons.pool"] or a generated <i>-Tag
 	"""
-	svg = conf["icons.pool"].get(icon)
+	classList = " ".join(classList) if classList else ""
+	return """<img src="/static/svgs/%s.svg" class="js-svg %s">""" % (icon.replace("icon-", ""), classList)
 
-	if not svg:
-		# language=HTML
-		return f"""<i class="i">{icon[0]}</i>"""
 
-	return svg
+def svgReplacer(e):
+	targetElem = e.target  # Element that just loaded
+	def nsServiceSuccess(ns):  # We've fetched the svg from the server
+		if targetElem.parentElement:  # Ignore if it disappeared from the DOM
+			tmp = html5.domCreateElement("div")
+			tmp.innerHTML = ns.result
+			svgElem = tmp.querySelector("svg")
+			for cls in [x for x in targetElem.classList if x != "js-svg"]:
+				svgElem.classList.add(cls)
+			targetElem.parentElement.insertBefore(svgElem, targetElem)
+			targetElem.parentElement.removeChild(targetElem)
+	if targetElem.classList.contains("js-svg"):  # Start replacing only if we encountered an image with js-svg
+		NetworkService.request(None, e.target.src, successHandler=nsServiceSuccess)
 
+
+html5.document.addEventListener("load", svgReplacer, True)
 
 @html5.tag
 class Icon(html5.Div):
