@@ -124,7 +124,6 @@ class Noci(html5.I):
 	Represents either an image, or an icon or a placeholder text using an <i>-tag.
 	"""
 	_leafTag = True
-	style = ["i"]
 
 	def __init__(self):
 		super().__init__()
@@ -132,6 +131,19 @@ class Noci(html5.I):
 		self.value = None
 		self.badge = None
 		self._badge = None
+		self.baseclass = None
+
+		self["baseclass"] = "i"
+
+	def _setBaseclass(self, baseclass):
+		if self.baseclass:
+			self.removeClass(self.baseclass)
+
+		self.baseclass = baseclass
+		self.addClass(self.baseclass)
+
+	def _getBaseclass(self):
+		return self.baseclass
 
 	def _setFallback(self, fallback):
 		self.fallback = fallback
