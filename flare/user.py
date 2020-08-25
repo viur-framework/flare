@@ -16,13 +16,16 @@ class Avatar(Noci):
 	def __init__(self):
 		super().__init__()
 		self.user = None
+		self.fallbackClass = None
 		self.addClass("INDICATE")
 
 	def _setValue(self, value):
+		print(value)
 		if isinstance(value, dict) and "key" in value:
 			if "image" not in value:
 				value = value["key"]
 
+		#request missing data
 		if isinstance(value, str):
 			conf["cache"].request({
 					"module": "user",
@@ -31,21 +34,31 @@ class Avatar(Noci):
 				},
 				finishHandler=self._onUserAvailable
 			)
-		elif isinstance(value, dict) and all([k in value for k in ["key", "firstname", "lastname", "image"]]):
+		#try to set Image
+		elif isinstance(value, dict) and all([k in value for k in ["key", "image"]]) and value["image"]:
 			self.user = value
-
-			if value["image"]:
-				super()._setValue(value["image"])
-			else:
-				super()._setValue(" ".join([value["firstname"], value["lastname"]]))
-
+			if self.fallbackClass:
+				self.removeClass( self.fallbackClass )
+			super()._setValue(value["image"])
 		else:
-			super()._setValue("icons-user")
+			#if not fallback use initials
+			if not self.fallback and isinstance(value, dict) and all([k in value for k in ["key", "firstname", "lastname"]]):
+				super()._setValue( " ".join( [ value[ "firstname" ], value[ "lastname" ] ] ) )
+			#if a fallback is set use this instead
+			elif self.fallback:
+				if self.fallbackClass:
+					self.addClass(self.fallbackClass)
+				super()._setValue( self.fallback )
+			# if no fallback und no first- and lastname available use hardcoded icon
+			else:
+				super()._setValue("icons-user")
 
 	def _onUserAvailable(self, res):
 		self["value"] = res["user"]
 
-
+	def _setFallbackclass( self, value ):
+		self.fallbackClass = value
+	
 @html5.tag
 class Username(html5.Div):
 	"""
