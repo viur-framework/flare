@@ -3,7 +3,7 @@ Generic icon handling, especially of embedded SVG images served from a pool of i
 """
 
 
-import logging, string
+import logging, string, os
 
 from . import html5
 from .config import conf
@@ -130,6 +130,8 @@ class Noci(html5.I):
 		super().__init__()
 		self.fallback = None
 		self.value = None
+		self.badge = None
+		self._badge = None
 
 	def _setFallback(self, fallback):
 		self.fallback = fallback
@@ -137,6 +139,15 @@ class Noci(html5.I):
 
 	def _getFallback(self):
 		return self.fallback
+
+	def _setBadge(self, badge):
+		self.badge = badge
+		self._badge = html5.fromHTML("""<span class="badge"></span>""")[0]
+		self._badge.appendChild(self.badge, replace=True)
+		self["value"] = self["value"]
+
+	def _getBadge(self):
+		return self.badge
 
 	def _setValue(self, value):
 		self.removeAllChildren()
@@ -156,6 +167,11 @@ class Noci(html5.I):
 			self.appendChild(
 				html5.Img(value.get("dest", {}).get("downloadUrl") or self.fallback)
 			)
+		# Accept a string containing a path
+		elif isinstance(value, str) and "/" in value and os.path.splitext(value)[1].lower() in (".jpg", ".jpeg", ".gif", ".png", ".svg"):
+			self.appendChild(
+				html5.Img(value)
+			)
 		elif isinstance(value, str):
 			#we need a better detection
 			if value.startswith("icon-") or value.startswith("logo-"):
@@ -168,6 +184,9 @@ class Noci(html5.I):
 
 		else:
 			raise ValueError("Either provide fileBone-dict or string")
+
+		if self.badge:
+			self.appendChild(self._badge)
 
 	def _getValue(self):
 		return self.value
