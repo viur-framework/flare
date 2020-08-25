@@ -6,7 +6,7 @@ from .cache import Cache
 
 conf = {
 	"cache": Cache(),
-	"icons.pool": {},
+	#"icons.pool": {},
 	"safeEvalInstance": SafeEval(),
 	"saveEvalAllowedCallables": dict()
 }

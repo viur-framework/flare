@@ -20,7 +20,6 @@ class Avatar(Noci):
 		self.addClass("INDICATE")
 
 	def _setValue(self, value):
-		print(value)
 		if isinstance(value, dict) and "key" in value:
 			if "image" not in value:
 				value = value["key"]

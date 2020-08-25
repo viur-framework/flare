@@ -22,7 +22,7 @@ def fetchIconsFromJSON(url, then=None):
 		try:
 			icons = NetworkService.decode(req)
 			assert isinstance(icons, dict)
-			conf["icons.pool"].update(icons)
+			#conf["icons.pool"].update(icons)
 		except Exception as e:
 			logging.error("Error while parsing icons fetched from %r", url)
 			logging.exception(e)
@@ -49,7 +49,9 @@ def getIconHTML(icon, classList=None):
 	Retrieve SVG/HTML-code for icon, either from conf["icons.pool"] or a generated <i>-Tag
 	"""
 	classList = " ".join(classList) if classList else ""
-	return """<img src="/static/svgs/%s.svg" class="js-svg %s">""" % (icon.replace("icon-", ""), classList)
+	#todo visibility class
+	#language=HTML
+	return """<img src="/static/svgs/%s.svg" class="js-svg %s" style="visibility:hidden">""" % (icon, classList)
 
 
 def svgReplacer(e):
@@ -152,6 +154,11 @@ class Noci(html5.I):
 				html5.Img(value.get("dest", {}).get("downloadUrl") or self.fallback)
 			)
 		elif isinstance(value, str):
+			self.appendChild(getIconHTML(value))
+			return
+
+			#this fallback is not possible anymore?
+
 			icon = conf["icons.pool"].get(value)
 
 			if icon:
