@@ -7,7 +7,7 @@ import logging, string, os
 
 from . import html5
 from .config import conf
-from .network import NetworkService
+from .network import HTTPRequest
 
 
 def fetchIconsFromJSON(url, then=None):
@@ -58,18 +58,22 @@ def getIconHTML(icon, classList=None):
 
 def svgReplacer(e):
 	targetElem = e.target  # Element that just loaded
-	def nsServiceSuccess(ns):  # We've fetched the svg from the server
+
+	def replaceImage(content):  # We've fetched the svg from the server
 		if targetElem.parentElement:  # Ignore if it disappeared from the DOM
 			tmp = html5.domCreateElement("div")
-			tmp.innerHTML = ns.result
+			tmp.innerHTML = content
 			svgElem = tmp.querySelector("svg")
+
 			for cls in [x for x in targetElem.classList if x != "js-svg"]:
 				svgElem.classList.add(cls)
+
 			svgElem.style.pointerEvents = "none"
 			targetElem.parentElement.insertBefore(svgElem, targetElem)
 			targetElem.parentElement.removeChild(targetElem)
+
 	if targetElem.classList.contains("js-svg"):  # Start replacing only if we encountered an image with js-svg
-		NetworkService.request(None, e.target.src, successHandler=nsServiceSuccess)
+		HTTPRequest("GET", e.target.src, callbackSuccess=replaceImage)
 
 
 html5.document.addEventListener("load", svgReplacer, True)
@@ -130,7 +134,6 @@ class Noci(html5.I):
 		self.fallback = None
 		self.value = None
 		self.badge = None
-		self._badge = None
 		self.baseclass = None
 
 		self["baseclass"] = "i"
@@ -154,8 +157,6 @@ class Noci(html5.I):
 
 	def _setBadge(self, badge):
 		self.badge = badge
-		self._badge = html5.fromHTML("""<span class="badge"></span>""")[0]
-		self._badge.appendChild(self.badge, replace=True)
 		self["value"] = self["value"]
 
 	def _getBadge(self):
@@ -192,13 +193,13 @@ class Noci(html5.I):
 				value = value.replace("-", " ") # replace dashes by spaces
 				value = value.translate({ord(c): None for c in string.punctuation})  # remove all punctuations
 
-				self.appendChild("".join([tag[0] for tag in value.split(maxsplit=1)])) # Only allow first two words
+				self.appendChild("".join([tag[0] for tag in value.split(maxsplit=1)]))  # Only allow first two words
 
 		else:
 			raise ValueError("Either provide fileBone-dict or string")
 
-		if self.badge:
-			self.appendChild(self._badge)
+		if self.badge not in (None, "", False):
+			self.appendChild("""<span class="badge">{{badger}}</span>""", badger=self.badge)
 
 	def _getValue(self):
 		return self.value
