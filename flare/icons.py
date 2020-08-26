@@ -1,62 +1,20 @@
 """
 Generic icon handling, especially of embedded SVG images served from a pool of icons.
 """
-
-
-import logging, string, os
+import string, os
 
 from . import html5
-from .config import conf
 from .network import HTTPRequest
 
 
-def fetchIconsFromJSON(url, then=None):
-	"""
-	Utility function that is used to fetch icons from an URL using NetworkRequest,
-	and adding these icons to the icon pool.
-	"""
-	if then:
-		then()
-	return
-	def _fetchIconsSuccess(req):
-		try:
-			icons = NetworkService.decode(req)
-			assert isinstance(icons, dict)
-			#conf["icons.pool"].update(icons)
-		except Exception as e:
-			logging.error("Error while parsing icons fetched from %r", url)
-			logging.exception(e)
-
-		if then:
-			then()
-
-	def _fetchIconsFailure(req, code):
-		logging.error("Error %r while trying to fetch icons from %r", code, url)
-
-		if then:
-			then()
-
-	logging.info("Starting to fetch icons from %r", url)
-
-	NetworkService.request(
-		None, url,
-		successHandler=_fetchIconsSuccess,
-		failureHandler=_fetchIconsFailure
-	)
-
 def getIconHTML(icon, classList=None):
-	"""
-	Retrieve SVG/HTML-code for icon, either from conf["icons.pool"] or a generated <i>-Tag
-	"""
 	classList = " ".join(classList) if classList else ""
 	#todo visibility class
 	#language=HTML
 	return """<img src="/static/svgs/%s.svg" class="js-svg %s" style="visibility:hidden">""" % (icon, classList)
 
 
-
-
-def svgReplacer(e):
+def svgEmbedder(e):
 	targetElem = e.target  # Element that just loaded
 
 	def replaceImage(content):  # We've fetched the svg from the server
@@ -76,7 +34,8 @@ def svgReplacer(e):
 		HTTPRequest("GET", e.target.src, callbackSuccess=replaceImage)
 
 
-html5.document.addEventListener("load", svgReplacer, True)
+html5.document.addEventListener("load", svgEmbedder, True)
+
 
 @html5.tag
 class Icon(html5.Div):
@@ -100,11 +59,15 @@ class Icon(html5.Div):
 
 	def _setEmbedsvg(self, embedsvg):
 		self.removeAllChildren()
+		self.element.innerHTML = ""
+
+		self.embedsvg = embedsvg
+
 		if not embedsvg:
 			return
 
-		self.embedsvg = embedsvg
-		self.appendChild(getIconHTML(embedsvg))
+		#self.appendChild(getIconHTML(embedsvg))
+		self.element.innerHTML = getIconHTML(embedsvg)
 
 	def _getEmbedsvg(self):
 		return self.embedsvg
@@ -136,6 +99,7 @@ class Noci(html5.I):
 		self.badge = None
 		self.baseclass = None
 
+		self._badge = None
 		self["baseclass"] = "i"
 
 	def _setBaseclass(self, baseclass):
@@ -157,7 +121,18 @@ class Noci(html5.I):
 
 	def _setBadge(self, badge):
 		self.badge = badge
-		self["value"] = self["value"]
+
+		if self.badge in (None, "", False):
+			if self._badge:
+				self._badge.hide()
+
+			return
+
+		if not self._badge:
+			self._badge = self.appendChild("""<span class="badge"></span>""")[0]
+
+		self._badge.appendChild(self.badge, replace=True)
+		self._badge.show()
 
 	def _getBadge(self):
 		return self.badge
@@ -188,7 +163,8 @@ class Noci(html5.I):
 		elif isinstance(value, str):
 			#we need a better detection
 			if value.startswith("icon-") or value.startswith("logo-"):
-				self.appendChild(getIconHTML(value))
+				#self.appendChild(getIconHTML(value))
+				self.element.innerHTML = getIconHTML(value)
 			else:
 				value = value.replace("-", " ") # replace dashes by spaces
 				value = value.translate({ord(c): None for c in string.punctuation})  # remove all punctuations
@@ -198,8 +174,8 @@ class Noci(html5.I):
 		else:
 			raise ValueError("Either provide fileBone-dict or string")
 
-		if self.badge not in (None, "", False):
-			self.appendChild("""<span class="badge">{{badger}}</span>""", badger=self.badge)
+		if self._badge:
+			self.appendChild(self._badge)
 
 	def _getValue(self):
 		return self.value

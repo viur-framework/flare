@@ -314,11 +314,13 @@ class NetworkService(object):
 			:type secure: bool
 
 		"""
-		#logging.debug("NetworkService.request module=%r, url=%r, params=%r", module, url, params)
+		logging.debug("NetworkService.request module=%r, url=%r, params=%r", module, url, params)
 
-		return NetworkService(module, url, params,
-		                      successHandler, failureHandler, finishedHandler,
-		                      modifies, secure, kickoff)
+		return NetworkService(
+			module, url, params,
+			successHandler, failureHandler, finishedHandler,
+			modifies, secure, kickoff
+		)
 
 	def doFetch(self, url, params, skey):
 		"""

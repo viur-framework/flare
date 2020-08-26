@@ -19,7 +19,6 @@ class Timestamp(html5.Div):
 		super().__init__()
 		self.timestamp = None
 		self._updateInterval = None
-		self.addClass("INDICATE")
 
 	def _setValue(self, timestamp):
 		if isinstance(timestamp, str):

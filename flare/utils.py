@@ -31,6 +31,7 @@ def unescape(val, maxLength = 0):
 
 	return val
 
+
 def doesEventHitWidgetOrParents(event, widget):
 	"""
 		Test if event 'event' hits widget 'widget' (or *any* of its parents)
@@ -42,6 +43,7 @@ def doesEventHitWidgetOrParents(event, widget):
 		widget = widget.parent()
 
 	return None
+
 
 def doesEventHitWidgetOrChildren(event, widget):
 	"""
@@ -55,6 +57,7 @@ def doesEventHitWidgetOrChildren(event, widget):
 			return child
 
 	return None
+
 
 def textToHtml(node, text):
 	"""
@@ -71,7 +74,8 @@ def textToHtml(node, text):
 
 		node.appendChild(html5.TextNode(part))
 
-def parseInt(s, ret = 0):
+
+def parseInt(s, ret=0):
 	"""
 	Parses a value as int
 	"""
@@ -88,7 +92,8 @@ def parseInt(s, ret = 0):
 
 	return ret
 
-def parseFloat(s, ret = 0.0):
+
+def parseFloat(s, ret=0.0):
 	"""
 	Parses a value as float.
 	"""

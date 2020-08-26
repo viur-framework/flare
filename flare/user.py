@@ -17,7 +17,6 @@ class Avatar(Noci):
 		super().__init__()
 		self.user = None
 		self.fallbackClass = None
-		self.addClass("INDICATE")
 
 	def _setValue(self, value):
 		if isinstance(value, dict) and "key" in value:
@@ -57,7 +56,7 @@ class Avatar(Noci):
 
 	def _setFallbackclass( self, value ):
 		self.fallbackClass = value
-	
+
 @html5.tag
 class Username(html5.Div):
 	"""
