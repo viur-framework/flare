@@ -84,7 +84,11 @@ class HTTPRequest(object):
 				# todo: report to log?
 
 
-def NiceError(req, code, params="(no parameters provided)"):
+def NiceError(req, code, params="", then=None):
+	"""
+	Displays a descriptive error message using an Alert dialog to the user.
+	"""
+
 	reason = {
 		"401": "Nicht autorisierte Anfrage",
 		"403": "Verboten - Fehlendes Zugriffsrecht",
@@ -100,8 +104,17 @@ def NiceError(req, code, params="(no parameters provided)"):
 	from . import popup
 	popup.Alert(
 		"<strong>%s</strong>%s\n\n<em>%s/%s/%s</em>" % (reason, hint, req.module, req.url, params),
-		title="Fehler %d" % code
+		title="Fehler %d" % code,
+		okCallback=then
 	)
+
+
+def NiceErrorAndThen(function):
+	"""
+	Returns a callback which first displays a descriptive error message to the user and then calls another function.
+	"""
+	assert callable(function)
+	return lambda *args, **kwargs: NiceError(*args, **kwargs, then=lambda *args, **kwargs: function())
 
 
 class NetworkService(object):
