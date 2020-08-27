@@ -35,12 +35,16 @@ class Timestamp(html5.Div):
 		if not self.timestamp:
 			return
 
-		diff = datetime.datetime.now() - self.timestamp
+		now = datetime.datetime.now()
+		diff = now - self.timestamp
 
 		#todo: Translations...
 		if diff.days == 0:
 			if diff.seconds > 60 * 60:
-				self.appendChild(self.timestamp.strftime("heute um %H:%M"))
+				if self.timestamp.day == now.day:
+					self.appendChild(self.timestamp.strftime("heute um %H:%M"))
+				else:
+					self.appendChild(self.timestamp.strftime("gestern um %H:%M"))
 			elif diff.seconds > 2 * 60:
 				self.appendChild("vor %d Minuten" % (diff.seconds / 60))
 			elif diff.seconds > 60:
