@@ -116,14 +116,14 @@ class HtmlEditor(html5.Textarea):
 
 	def _getValue(self):
 		if not self.summernote:
-			return self.value
+			return self.element.value
 
 		ret = self.summernote.summernote("code")
 		return ret
 
 	def _setValue(self, val):
 		if not self.summernote:
-			self.value = val
+			self.element.value = val
 			return
 
 		self.summernote.off("summernote.change")
