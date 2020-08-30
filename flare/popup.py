@@ -3,7 +3,7 @@ Pre-defined dialog widgets for user interaction.
 """
 
 
-from . import html5, utils
+from . import html5, utils, icons
 from .button import Button
 
 
@@ -15,7 +15,7 @@ class Popup(html5.Div):
 				<div class="box-head" [name]="popupHead">
 					<div class="item" [name]="popupHeadItem">
 						<div class="item-image">
-							<i class="i i--small" [name]="popupIcon"></i>
+							<noci class="i i--small" [name]="popupIcon">
 						</div>
 						<div class="item-content">
 							<div class="item-headline" [name]="popupHeadline"></div>
@@ -42,12 +42,7 @@ class Popup(html5.Div):
 		if title:
 			self.popupHeadline.appendChild(title)
 
-		if icon:
-			self.popupIcon.appendChild(icon[0])
-		elif title:
-			self.popupIcon.appendChild(title[0])
-		else:
-			self.popupIcon.appendChild("Vi") #fixme!!! this _LIBRARY_ is not only used in the Vi...
+		self.popupIcon["value"] = icon or title
 
 		# id can be used to pass information to callbacks
 		self.id = id

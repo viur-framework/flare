@@ -248,7 +248,7 @@ class BaseMultiViewWidget( html5.Ul ):
 
 	def serialize( self ):
 		ret = [ ]
-		for widget in self.widgets:
+		for widget in self.children():
 			value = widget.serialize()
 			if value:
 				ret.append( value )
