@@ -58,7 +58,10 @@ class SkellistItem(Button):
 
 
 	def buildWidget( self ):
-		self.appendChild(self.skel["name"])
+		if "firstname" in self.skel and "lastname" in self.skel:
+			self.appendChild(self.skel["firstname"] + " " + self.skel["lastname"])
+		else:
+			self.appendChild(self.skel["name"])
 
 
 	def onActiveSelectionChanged( self, event ):
@@ -73,11 +76,12 @@ class SkellistItem(Button):
 
 class ListSelection(Popup):
 	def __init__( self,modulname, filter= None, title = None, id = None, className = None, icon = None, enableShortcuts = True, closeable = True, footer=True, *args, **kwargs ):
-		title = translate("select %s" %modulname)
+		title = translate("Select %s" %modulname)
 		footer=False
 		self.modulname = modulname
 		self.filter = filter or {}
 		super().__init__( title, id, className, icon, enableShortcuts, closeable, footer, *args, **kwargs )
+		self.addClass("popup--wide")
 		self.buildListSelection()
 
 	def requestClients( self ):

@@ -9,7 +9,7 @@ class PopoutItem(html5.Div):
 
 @html5.tag
 class Popout(html5.Div):
-	style = ["popout-opener", "popout-anchor", "popout--se"]
+	style = ["popout-opener", "popout-anchor", "popout--sw"]
 
 	def __init__(self, *args, **kwargs):
 		#language=HTML
