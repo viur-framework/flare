@@ -38,7 +38,63 @@ html5.document.addEventListener("load", svgEmbedder, True)
 
 
 @html5.tag
-class Icon(html5.Div):
+class Icon(html5.I):
+
+	def __init__(self, title, value=None, fallbackIcon=None, ):
+		super().__init__()
+		self.value = value
+		self.fallbackIcon = fallbackIcon
+		if title:
+			self.title=title
+			self["title"]=title
+
+		self._setValue()
+
+	def _setValue( self ):
+		if not self.value:
+			return
+
+		# language=HTML
+		self.appendChild( '<img [name]="image">')
+		self.image.onError = lambda e: self.onError( e )
+		self.image.sinkEvent( "onError" )
+
+		if any([self.value.endswith(ext) for ext in [".jpg", ".png", ".gif", ".bmp", ".webp", ".heic", ".jpeg"]]):
+			self.image["src"] = self.value
+
+		elif self.value.endswith(".svg"):
+			self.image[ "src" ] = self.value
+			self.image.addClass("js-svg")
+		else:
+			self.image[ "src" ] = "/static/svgs/%s.svg"%self.value
+			self.image.addClass( "js-svg" )
+
+	def onError(self, event):
+		if self.fallbackIcon:
+			self.image[ "src" ] = "/static/svgs/%s.svg"%self.fallbackIcon
+			self.image.addClass( "js-svg" )
+		else:
+			self.removeChild(self.image)
+			self.appendChild(self["title"][0])
+
+
+
+@html5.tag
+class IconBadge(Icon):
+	def __init__(self, title, value=None, fallbackIcon=None, badge=None):
+		super().__init__(title,value, fallbackIcon)
+		self.badge = badge
+		#language=HTML
+		self.appendChild('<span class="badge" [name]="badgeobject">%s</span>'%self.badge)
+
+	def _setBadge( self, value ):
+		self.badgeobject.appendChild(value, replace = True)
+
+	def _getBadge( self ):
+		return self.badge
+
+@html5.tag
+class Icon_(html5.Div):
 	"""
 	The Icon-widget & tag either loads an icon from the icon pool
 	or generates a dummy icon from the first letter.
