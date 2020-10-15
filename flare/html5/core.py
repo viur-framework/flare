@@ -755,6 +755,28 @@ class Widget(object):
 
 		return toInsert
 
+	def insertAfter(self, insert, child, **kwargs):
+		if not child:
+			return self.appendChild(insert)
+
+		assert child in self._children, "{} is not a child of {}".format(child, self)
+
+		toInsert = self.__collectChildren(insert, **kwargs)
+
+		for insert in toInsert:
+			if insert._parent:
+				insert._parent.removeChild(insert)
+
+			self.element.insertBefore(insert.element, child.element.nextSibling)
+			self._children.insert(self._children.index(child), insert)
+
+			insert._parent = self
+			if self._isAttached:
+				insert.onAttach()
+
+		return toInsert
+
+
 	def prependChild(self, *args, **kwargs):
 		if kwargs.get("replace", False):
 			self.removeAllChildren()
