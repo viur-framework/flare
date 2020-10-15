@@ -30,7 +30,7 @@ class RelationalEditWidget(BaseEditWidget):
 	style = ["flr-value", "flr-value--relational"]
 
 	def _createWidget(self):
-		tpl = html5.template()
+		tpl = html5.Template()
 		widgetList = self.fromHTML(
 			"""
 				<flr-input [name]="destWidget" class="input-group-item" readonly>
@@ -306,7 +306,7 @@ class FileEditWidget(RelationalEditWidget):
 	style = ["flr-value", "flr-value--file"]
 
 	def _createWidget(self):
-		tpl = html5.template()
+		tpl = html5.Template()
 		self.previewImg = FilePreviewImage()
 		self.appendChild(self.previewImg)
 

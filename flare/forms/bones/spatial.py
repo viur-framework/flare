@@ -6,7 +6,7 @@ from flare import html5
 class SpatialEditWidget( BaseEditWidget ):
 
 	def _createWidget( self ):
-		tpl = html5.template()
+		tpl = html5.Template()
 		tpl.appendChild( self.fromHTML(
 			"""
 			<flr-input [name]="latitude" type="number" placeholder="latitude">

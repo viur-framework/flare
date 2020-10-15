@@ -804,7 +804,7 @@ class Widget(object):
 		toAppend = self.__collectChildren(*args, **kwargs)
 
 		for child in toAppend:
-			if isinstance(child, template):
+			if isinstance(child, Template):
 				return self.appendChild(child._children)
 
 			if child._parent:
@@ -2465,7 +2465,7 @@ class Video(Widget, _attrSrc, _attrDimensions, _attrMultimedia):
 
 # Template -------------------------------------------------------------------------------------------------------------
 
-class template(Widget):
+class Template(Widget):
 	_tagName = "template"
 
 ########################################################################################################################

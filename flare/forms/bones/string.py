@@ -7,7 +7,7 @@ class StringEditWidget( BaseEditWidget ):
 	style = [ "flr-value", "flr-value--string" ]
 
 	def _createWidget( self ):
-		tpl = html5.template()
+		tpl = html5.Template()
 		tpl.appendChild( """
 			<flr-input class="input-group-item" [name]="widget">
 			<div class="label input-group-item input-group-item--last" [name]="length" hidden>0</div> <!-- fixme: add later ... -->
