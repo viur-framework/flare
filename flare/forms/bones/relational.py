@@ -4,7 +4,7 @@ import logging
 from js import console
 
 from flare import html5
-from flare.icons import getIconHTML
+from flare.icons import SvgIcon
 from flare.forms.widgets.file import FilePreviewImage, Uploader
 from flare.forms.widgets.relational import InternalEdit
 from flare.forms.widgets.tree import TreeLeafWidget, TreeNodeWidget
@@ -335,7 +335,7 @@ class FileEditWidget(RelationalEditWidget):
 						<p [name]="uploadResult" style="display: none;"></p>
 					</div>
 				</div>
-            """.format( getIconHTML("icon-upload-file") )
+            """.format( SvgIcon("icon-upload-file",title="Upload") )
 		))
 
 		self.filerow.hide()

@@ -3,8 +3,7 @@ Flare-styled button Widgets.
 """
 
 from . import html5
-from .icons import getIconHTML
-
+from flare.icons import SvgIcon
 
 @html5.tag
 class Button(html5.Button):
@@ -44,14 +43,11 @@ class Button(html5.Button):
 				self.callback()
 
 	def update(self):
-		html = ""
-
+		self.removeAllChildren()
 		if self.icon:
-			html += getIconHTML(self.icon)
-
-		html += self.text
-
-		self.element.innerHTML = html
+			self.prependChild(SvgIcon(self.icon,title=self.text))
+		if self.text:
+			self.appendChild(self.text)
 
 	def _setIcon(self, icon):
 		if not icon:

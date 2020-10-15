@@ -6,81 +6,91 @@ import string, os
 from . import html5
 from .network import HTTPRequest
 
+@html5.tag
+class SvgIcon(html5.svg.Svg):
+	def __init__(self, value=None, fallbackIcon=None, title="" ):
+		super().__init__()
+		self.value = value
+		self.title = title
+		self.fallbackIcon = fallbackIcon
 
-def getIconHTML(icon, classList=None):
-	classList = " ".join(classList) if classList else ""
-	#todo visibility class
-	#language=HTML
-	return """<img src="/static/svgs/%s.svg" class="js-svg %s" style="visibility:hidden">""" % (icon, classList)
+		self["xmlns"] = "http://www.w3.org/2000/svg"
+		self["class"] = ["icon"] #mostly used
 
+		if title:
+			self["title"]=title
 
-def svgEmbedder(e):
-	targetElem = e.target  # Element that just loaded
+		self.getIcon()
 
-	def replaceImage(content):  # We've fetched the svg from the server
-		if targetElem.parentElement:  # Ignore if it disappeared from the DOM
-			tmp = html5.domCreateElement("div")
-			tmp.innerHTML = content
-			svgElem = tmp.querySelector("svg")
+	def getIcon( self ):
+		if self.value.endswith(".svg"):
+			url = self.value
+		else:
+			url = "/static/svgs/%s.svg"%self.value
 
-			for cls in [x for x in targetElem.classList if x != "js-svg"]:
-				svgElem.classList.add(cls)
+		HTTPRequest( "GET", url, callbackSuccess = self.replaceSVG, callbackFailure = self.requestFallBack )
 
-			svgElem.style.pointerEvents = "none"
-			targetElem.parentElement.insertBefore(svgElem, targetElem)
-			targetElem.parentElement.removeChild(targetElem)
+	def replaceSVG( self, icondata ):
+		self.removeAllChildren()
+		svgnode = html5.fromHTML(icondata)[0]
+		self["viewbox"] = svgnode["viewbox"]
+		self["class"] = svgnode["class"]
+		self.appendChild(svgnode._children)
 
-	if targetElem.classList.contains("js-svg"):  # Start replacing only if we encountered an image with js-svg
-		HTTPRequest("GET", e.target.src, callbackSuccess=replaceImage)
+	def requestFallBack(self, data, status):
+		url = None
+		if self.fallbackIcon:
+			url = "/static/svgs/%s.svg" % self.fallbackIcon
+		#elif self.title:
+		#	#language=HTML
+		#	self["viewbox"] = "0 -15 20 20"
+		#	self.appendChild('''<text>%s</text>'''%self.title[0].upper())
+		else:
+			url = "/static/svgs/icon-error.svg" #fallback
 
-
-html5.document.addEventListener("load", svgEmbedder, True)
-
+		if url:
+			HTTPRequest( "GET", url, callbackSuccess = self.replaceSVG )
 
 @html5.tag
 class Icon(html5.I):
 
-	def __init__(self, title, value=None, fallbackIcon=None, ):
+	def __init__(self, value=None, fallbackIcon=None, title="" ):
 		super().__init__()
-		self.value = value
+		self[ "class" ] = "i"
+		self.title=title
+		self["title"]=title
 		self.fallbackIcon = fallbackIcon
-		if title:
-			self.title=title
-			self["title"]=title
+		self.value = value
 
-		self._setValue()
-
-	def _setValue( self ):
-		if not self.value:
-			return
-
-		# language=HTML
-		self.appendChild( '<img [name]="image">')
-		self.image.onError = lambda e: self.onError( e )
-		self.image.sinkEvent( "onError" )
-
-		if any([self.value.endswith(ext) for ext in [".jpg", ".png", ".gif", ".bmp", ".webp", ".heic", ".jpeg"]]):
+	def _setValue( self,value ):
+		self.value = value
+		if self.value and any([self.value.endswith(ext) for ext in [".jpg", ".png", ".gif", ".bmp", ".webp", ".heic", ".jpeg"]]):
+			# language=HTML
+			self.appendChild( '<img [name]="image">' )
+			self.image.onError = lambda e: self.onError( e )
+			self.image.sinkEvent( "onError" )
 			self.image["src"] = self.value
-
-		elif self.value.endswith(".svg"):
-			self.image[ "src" ] = self.value
-			self.image.addClass("js-svg")
 		else:
-			self.image[ "src" ] = "/static/svgs/%s.svg"%self.value
-			self.image.addClass( "js-svg" )
+			if self.value.endswith(".svg"):
+				url = self.value
+			else:
+				url = "/static/svgs/%s.svg" % self.value
+			self.appendChild( SvgIcon( url, self.fallbackIcon, self.title ) )
 
 	def onError(self, event):
 		if self.fallbackIcon:
-			self.image[ "src" ] = "/static/svgs/%s.svg"%self.fallbackIcon
-			self.image.addClass( "js-svg" )
-		else:
 			self.removeChild(self.image)
-			self.appendChild(self["title"][0])
-
-
+			self.appendChild( SvgIcon( "/static/svgs/%s.svg"%self.fallbackIcon, title = self.title ) )
+		elif self.title:
+			self.removeChild(self.image)
+			#language=HTML
+			self.appendChild(self.title[0].upper())
+		else:
+			self.removeChild( self.image )
+			self.appendChild( SvgIcon( "/static/svgs/icon-error.svg", title = self.title ) )
 
 @html5.tag
-class IconBadge(Icon):
+class BadgeIcon(Icon):
 	def __init__(self, title, value=None, fallbackIcon=None, badge=None):
 		super().__init__(title,value, fallbackIcon)
 		self.badge = badge
