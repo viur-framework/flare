@@ -54,13 +54,15 @@ class SvgIcon(html5.svg.Svg):
 @html5.tag
 class Icon(html5.I):
 
-	def __init__(self, value=None, fallbackIcon=None, title="" ):
+	def __init__(self, value=None, fallbackIcon=None, title="", classes=[] ):
 		super().__init__()
-		self[ "class" ] = "i"
+		self[ "class" ] = ["i"]+classes
 		self.title=title
 		self["title"]=title
 		self.fallbackIcon = fallbackIcon
 		self.value = value
+		if value:
+			self["value"] = value
 
 	def _setValue( self,value ):
 		self.value = value
