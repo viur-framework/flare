@@ -1,8 +1,6 @@
 """
 Pre-defined dialog widgets for user interaction.
 """
-
-
 from . import html5, utils, icons
 from .button import Button
 
@@ -15,7 +13,7 @@ class Popup(html5.Div):
 				<div class="box-head" [name]="popupHead">
 					<div class="item" [name]="popupHeadItem">
 						<div class="item-image">
-							<noci class="i i--small" [name]="popupIcon">
+							<icon class="i i--small" [name]="popupIcon">
 						</div>
 						<div class="item-content">
 							<div class="item-headline" [name]="popupHeadline"></div>
