@@ -117,6 +117,20 @@ def NiceErrorAndThen(function):
 	return lambda *args, **kwargs: NiceError(*args, **kwargs, then=lambda *args, **kwargs: function())
 
 
+skeyRequestQueue = []
+def processSkelQueue():
+	for r in skeyRequestQueue:
+		if r.status == "running":
+			break
+		elif r.status in ["succeeded","failed"]:
+			skeyRequestQueue.remove(r)
+		else:
+			r.kickoff()
+			break
+
+handleSkeyRequests = html5.window.setInterval(processSkelQueue, 500)
+
+
 class NetworkService(object):
 	"""
 		Generic wrapper around ajax requests.
@@ -329,11 +343,19 @@ class NetworkService(object):
 		"""
 		logging.debug("NetworkService.request module=%r, url=%r, params=%r", module, url, params)
 
-		return NetworkService(
-			module, url, params,
-			successHandler, failureHandler, finishedHandler,
-			modifies, secure, kickoff
-		)
+		if secure:
+			kickoff = False
+
+		dataRequest = NetworkService(
+				module, url, params,
+				successHandler, failureHandler, finishedHandler,
+				modifies, secure, kickoff
+			)
+
+		if secure:
+			skeyRequestQueue.append(dataRequest)
+
+		return dataRequest
 
 	def doFetch(self, url, params, skey):
 		"""
