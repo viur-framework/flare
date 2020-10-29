@@ -50,3 +50,6 @@ def _html5WidgetSetDisabled(widget, disabled):
 
 html5.Widget._super_setDisabled = html5.Widget._setDisabled
 html5.Widget._setDisabled = _html5WidgetSetDisabled
+
+def bindApp(app):
+	conf["app"] = app
