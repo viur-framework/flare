@@ -45,6 +45,9 @@
   "timestamp.py",
   "user.py",
   "utils.py",
+  "views/__init__.py",
+  "views/helpers.py",
+  "views/view.py",
   "widgets/__init__.py",
   "widgets/buttonbar.py"
 ]
