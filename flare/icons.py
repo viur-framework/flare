@@ -20,10 +20,15 @@ class SvgIcon(html5.svg.Svg):
 		if title:
 			self["title"]=title
 
+		if value:
+			self.getIcon()
+
+	def _setValue( self, value ):
+		self.value = value
 		self.getIcon()
 
 	def getIcon( self ):
-		if self.value.endswith(".svg"):
+		if self.value and self.value.endswith(".svg"):
 			url = self.value
 		else:
 			url = "/static/svgs/%s.svg"%self.value
