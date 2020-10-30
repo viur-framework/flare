@@ -3032,7 +3032,7 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 							logging.exception(e)
 							continue
 
-						wdg.addEventListener(att[1:], lambda e:callback(e,wdg))
+						wdg.addEventListener(att[1:], callback)
 
 					else:
 						logging.error("html5: bindTo is unset, can't use %r here", att)
