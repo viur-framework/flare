@@ -1,27 +1,34 @@
-import os,site,importlib
+import os,site,importlib, inspect
 from flare.config import conf
 from flare.views.view import View
 
 sitepackagespath = site.getsitepackages()[0]
 
-def generateView(viewname):
-	pass
+def generateView( view:View, moduleName, actionName, name = None, data = () ):
+	instView = view()
+	instView.params = {
+		"moduleName":moduleName,
+		"actionName":actionName,
+		"data":data
+	}
 
+	if name:
+		instView.name = name
+	else:
+		instView.name = moduleName + actionName
 
-
-
-
+	return instView
 
 def addView(view:View,name=None):
 	'''
 		add a View and make it available
 	'''
-	viewInst = view()
+	instView = view()
 
 	if not name:
-		name = viewInst.name
+		name = instView.name
 
-	conf["views_registered"].update({name:viewInst})
+	conf["views_registered"].update({name:instView})
 
 def registerViews(path):
 	'''
@@ -47,8 +54,7 @@ def registerViews(path):
 					continue
 
 				_symbol = getattr( _import, _name )
-
-				if issubclass(_symbol,View) and _name != View.__name__:
+				if inspect.isclass(_symbol) and issubclass(_symbol,View) and _name != View.__name__:
 					addView(_symbol)
 
 		except:

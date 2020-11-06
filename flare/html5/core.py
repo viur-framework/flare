@@ -350,6 +350,9 @@ class Widget(object):
 		if len(inspect.signature(callback).parameters) == 0:
 			callback = _wrapEventCallback(callback)
 
+		def call(e,*args,**kwargs):
+			callback(e,self)
+
 		self.element.addEventListener(event, callback)
 
 	def removeEventListener(self, event, callback):
@@ -1010,7 +1013,7 @@ class Widget(object):
 	def onKeyUp(self, event):
 		pass
 
-	def onClick(self, event):
+	def onClick(self, event,wdg=None):
 		pass
 
 	def onDblClick(self, event):

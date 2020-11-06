@@ -58,7 +58,7 @@ class View():
 
 				targetWidget.show()
 				targetWidget.appendChild( self.widgets[ target ] )
-
+View.params = {}
 
 class ViewWidget( html5.Div ):
 	def __init__( self, view ):
