@@ -10,8 +10,11 @@ class RecordEditWidget( BaseEditWidget ):
 	def _createWidget( self ):
 		return InternalEdit(
 			self.bone.boneStructure[ "using" ],
+			errorInformation = self.bone.errors,
 			readOnly = self.bone.readonly,
-			defaultCat = None  # fixme: IMHO not necessary
+			defaultCat = None,  # fixme: IMHO not necessary
+			errorQueue = self.bone.errorQueue,
+			prefix = "{}.rel".format( self.bone.boneName )
 		)
 
 	def _updateWidget( self ):

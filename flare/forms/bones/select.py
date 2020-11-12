@@ -123,8 +123,8 @@ class SelectMultipleBone( BaseBone ):
 	Base "Catch-All" delegate for everything not handled separately.
 	"""
 
-	def __init__( self, moduleName, boneName, skelStructure ):
-		super().__init__( moduleName, boneName, skelStructure )
+	def __init__( self, moduleName, boneName, skelStructure, errors, errorQueue=None ):
+		super().__init__( moduleName, boneName, skelStructure,errors,errorQueue )
 		self.valuesDict = { k: v for k, v in self.boneStructure[ "values" ] }  # fixme this could be obsolete when core renders dict...
 
 	@staticmethod

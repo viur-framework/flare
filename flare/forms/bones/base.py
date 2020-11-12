@@ -1,9 +1,16 @@
 import json
+from enum import IntEnum
 from flare.button import Button
 from flare.ignite import *
 from flare.forms import boneSelector, conf
 
+class ReadFromClientErrorSeverity(IntEnum):
+	NotSet = 0
+	InvalidatesOther = 1
+	Empty = 2
+	Invalid = 3
 
+str(ReadFromClientErrorSeverity(int("0"))).split(".")[1]
 
 class BaseEditWidget( html5.Div ):
 	"""
@@ -72,10 +79,10 @@ class BaseMultiEditWidgetEntry( html5.Div ):
 	Base class for an entry in a MultiBone container.
 	"""
 
-	def __init__( self, widget: html5.Widget ):
+	def __init__( self, widget: html5.Widget,errorInformation=None ):
 		super().__init__()
 		self.widget = widget
-
+		self.errorInformation = errorInformation
 		# Proxy some functions of the original widget
 		for fct in [ "unserialize", "serialize", "focus" ]:
 			setattr( self, fct, getattr( self.widget, fct ) )
@@ -337,20 +344,22 @@ class BaseBone( object ):
 	Base "Catch-All" delegate for everything not handled separately.
 	"""
 
-	def __init__( self, moduleName, boneName, skelStructure ):
+	def __init__( self, moduleName, boneName, skelStructure, errors, errorQueue=None ):
 		super().__init__()
 
 		self.moduleName = moduleName
 		self.boneName = boneName
 		self.skelStructure = skelStructure
 		self.boneStructure = self.skelStructure[ self.boneName ]
+		self.errors = errors
+		self.errorQueue = errorQueue
 
 		self.readonly = bool( self.boneStructure.get( "readonly" ) )
 		self.required = bool( self.boneStructure.get( "required" ) )
 		self.multiple = bool( self.boneStructure.get( "multiple" ) )
 		self.languages = self.boneStructure.get( "languages" )
 
-	def editWidget( self, value = None ) -> html5.Widget:
+	def editWidget( self, value = None, errorInformation=None ) -> html5.Widget:
 		widgetFactory = self.editWidgetFactory
 
 		if self.multiEditWidgetFactory and self.multiple:
@@ -361,7 +370,7 @@ class BaseBone( object ):
 			languageWidgetFactory = widgetFactory  # have to make a separate "free" variable
 			widgetFactory = lambda bone, **kwargs: self.languageEditWidgetFactory( bone, languageWidgetFactory, **kwargs )
 
-		widget = widgetFactory( self )
+		widget = widgetFactory( self,errorInformation=errorInformation )
 		widget.unserialize( value )
 		return widget
 
