@@ -1,6 +1,7 @@
 class init {
 
 	constructor(config) {
+		this.config = config
 		window.languagePluginLoader.then(() => {
 			let kickoff = config.kickoff || "";
 
@@ -29,8 +30,16 @@ class init {
 
 	loadSources(module, baseURL, files) {
 		let promises = [];
+		let bar = null;
+		let info = null;
+		try{
+			bar = document.getElementById("loadingbar")
+			info = document.getElementById("fileinfo")
+			bar.max += files.length
+		}catch (e) {}
 
 		for (let f in files) {
+
 			promises.push(
 				new Promise((resolve, reject) => {
 					let file = files[f];
@@ -42,13 +51,17 @@ class init {
 								let path = ("/lib/python3.7/site-packages/" + module + "/" + file).split("/");
 								let lookup = "";
 
+								if (bar){
+									bar.value +=1
+									info.innerHTML = files[f]
+								}
+
 								for (let i in path) {
 									if (!path[i]) {
 										continue;
 									}
 
 									lookup += (lookup ? "/" : "") + path[i];
-
 									if (parseInt(i) === path.length - 1) {
 										window.pyodide._module.FS.writeFile(lookup, code);
 										console.debug(`fetched ${lookup}`);
@@ -118,6 +131,11 @@ class init {
 		}
 
 		return Promise.all(promises).then(() => {
+			try{
+				let bar = document.getElementById("loadingbar")
+				bar.max -= 1 //progressbar starts at 1
+			}catch (e) {}
+
 			for( let module of Object.keys(modules) ) {
 				window.pyodide.loadedPackages[module] = "default channel";
 			}
@@ -126,6 +144,12 @@ class init {
 				'import importlib as _importlib\n' +
 				'_importlib.invalidate_caches()\n'
 			);
+
+			//wrapper
+			let wrapper = document.getElementById("wrapper")
+			wrapper.style.display="none"
+			document.body.classList.add("is-loading")
+
 		});
 	}
 
