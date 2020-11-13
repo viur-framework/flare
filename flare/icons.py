@@ -5,6 +5,7 @@ import string, os
 
 from . import html5
 from .network import HTTPRequest
+from flare.config import conf
 
 @html5.tag
 class SvgIcon(html5.svg.Svg):
@@ -31,7 +32,7 @@ class SvgIcon(html5.svg.Svg):
 		if self.value and self.value.endswith(".svg"):
 			url = self.value
 		else:
-			url = "/static/svgs/%s.svg"%self.value
+			url = conf["basePathSvgs"]+"/%s.svg"%self.value
 
 		HTTPRequest( "GET", url, callbackSuccess = self.replaceSVG, callbackFailure = self.requestFallBack )
 
@@ -45,13 +46,13 @@ class SvgIcon(html5.svg.Svg):
 	def requestFallBack(self, data, status):
 		url = None
 		if self.fallbackIcon:
-			url = "/static/svgs/%s.svg" % self.fallbackIcon
+			url = conf["basePathSvgs"]+"/%s.svg" % self.fallbackIcon
 		#elif self.title:
 		#	#language=HTML
 		#	self["viewbox"] = "0 -15 20 20"
 		#	self.appendChild('''<text>%s</text>'''%self.title[0].upper())
 		else:
-			url = "/static/svgs/icon-error.svg" #fallback
+			url = conf["basePathSvgs"]+"/icon-error.svg" #fallback
 
 		if url:
 			HTTPRequest( "GET", url, callbackSuccess = self.replaceSVG )
@@ -85,19 +86,19 @@ class Icon(html5.I):
 			if self.value.endswith(".svg"):
 				url = self.value
 			else:
-				url = "/static/svgs/%s.svg" % self.value
+				url = conf["basePathSvgs"]+"/%s.svg" % self.value
 			self.appendChild( SvgIcon( url, self.fallbackIcon, self.title ) )
 
 	def onError(self, event):
 		if self.fallbackIcon:
 			self.removeChild(self.image)
-			self.appendChild( SvgIcon( "/static/svgs/%s.svg"%self.fallbackIcon, title = self.title ) )
+			self.appendChild( SvgIcon( conf["basePathSvgs"]+"/%s.svg"%self.fallbackIcon, title = self.title ) )
 		elif self.title:
 			self.removeChild(self.image)
 			self.appendChild(self.title[0].upper())
 		else:
 			self.removeChild( self.image )
-			self.appendChild( SvgIcon( "/static/svgs/icon-error.svg", title = self.title ) )
+			self.appendChild( SvgIcon( conf["basePathSvgs"]+"/icon-error.svg", title = self.title ) )
 
 @html5.tag
 class BadgeIcon(Icon):

@@ -9,7 +9,8 @@ conf = {
 	"cache": Cache(),
 	#"icons.pool": {},
 	"safeEvalInstance": SafeEval(),
-	"saveEvalAllowedCallables": dict()
+	"saveEvalAllowedCallables": dict(),
+	"basePathSvgs":"/static/svgs"
 }
 
 conf.update(view_conf)
