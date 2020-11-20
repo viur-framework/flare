@@ -133,7 +133,7 @@ class init {
 		return Promise.all(promises).then(() => {
 			try{
 				let bar = document.getElementById("loadingbar")
-				bar.max -= 1 //progressbar starts at 1
+				bar.max = bar.value
 			}catch (e) {}
 
 			for( let module of Object.keys(modules) ) {
@@ -145,10 +145,13 @@ class init {
 				'_importlib.invalidate_caches()\n'
 			);
 
-			//wrapper
-			let wrapper = document.getElementById("wrapper")
-			wrapper.style.display="none"
-			document.body.classList.add("is-loading")
+
+			try{
+				//wrapper
+				let wrapper = document.getElementById("wrapper")
+				wrapper.style.display="none"
+				document.body.classList.add("is-loading")
+			}catch (e) {}
 
 		});
 	}
