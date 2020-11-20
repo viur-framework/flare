@@ -16,6 +16,7 @@ class Button(html5.Button):
 		self.addClass("btn", className)
 		self.sinkEvent("onClick")
 		self.icon = None
+		self.initIcon = self.icon
 		self.text = ""
 
 		if icon is not None:
@@ -41,6 +42,9 @@ class Button(html5.Button):
 				self.callback(self)
 			except:
 				self.callback()
+
+	def resetIcon( self ):
+		self["icon"] = self.initIcon
 
 	def update(self):
 		self.removeAllChildren()
