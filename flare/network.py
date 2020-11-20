@@ -17,26 +17,35 @@ class DeferredCall(object):
 		before the Network-Call yields results.
 	"""
 
-	def __init__(self, func, *args, **kwargs):
+	def __init__( self, func, *args, **kwargs ):
 		"""
 			:param func: Callback function
 			:type func: Callable
 		"""
-		super(DeferredCall, self).__init__()
+		super( DeferredCall, self ).__init__()
 		delay = 25
+		self._callback = None
+
 		if "_delay" in kwargs.keys():
-			delay = kwargs["_delay"]
-			del kwargs["_delay"]
+			delay = kwargs[ "_delay" ]
+			del kwargs[ "_delay" ]
+
+		if "_callback" in kwargs.keys():
+			self._callback = kwargs[ "_callback" ]
+			del kwargs[ "_callback" ]
+
 		self._tFunc = func
 		self._tArgs = args
 		self._tKwArgs = kwargs
-		html5.window.setTimeout(self.run, delay)
+		html5.window.setTimeout( self.run, delay )
 
-	def run(self):
+	def run( self ):
 		"""
 			Internal callback that executes the callback function
 		"""
-		self._tFunc(*self._tArgs, **self._tKwArgs)
+		self._tFunc( *self._tArgs, **self._tKwArgs )
+		if self._callback:
+			self._callback( self )
 
 
 class HTTPRequest(object):
