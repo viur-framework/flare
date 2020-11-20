@@ -30,6 +30,19 @@ def addView(view:View,name=None):
 
 	conf["views_registered"].update({name:instView})
 
+def updateDefaultView(name):
+	conf[ "views_default" ] = name
+
+def removeView(name,targetView=None):
+	#try:
+	del conf[ "views_registered" ][name]
+	if not targetView:
+		targetView = conf["views_default"]
+
+	conf[ "views_state" ].updateState( "activeView", targetView ) #switch to default View
+	#except:pass
+
+
 def registerViews(path):
 	'''
 		add all Views in a folder
