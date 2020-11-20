@@ -138,12 +138,12 @@ class Item(html5.Div):
 
 @html5.tag
 class Table(html5.Table):
-	_parserTagName = "flr-table"
+	_parserTagName = "ignt-table"
 
 	def __init__(self, *args, **kwargs):
 		super(Table, self).__init__(*args, **kwargs)
-		self.head.addClass("flr-table-head")
-		self.body.addClass("flr-table-body")
+		self.head.addClass("ignt-table-head")
+		self.body.addClass("ignt-table-body")
 
 	def prepareRow(self, row):
 		assert row >= 0, "Cannot create rows with negative index"
@@ -155,7 +155,7 @@ class Table(html5.Table):
 
 		while row >= 0:
 			tableRow = html5.Tr()
-			tableRow.addClass("flr-table-body-row")
+			tableRow.addClass("ignt-table-body-row")
 			self.body.appendChild(tableRow)
 			row -= 1
 
@@ -174,17 +174,17 @@ class Table(html5.Table):
 
 				while col >= 0:
 					tableCell = html5.Td()
-					tableCell.addClass("flr-table-body-cell")
+					tableCell.addClass("ignt-table-body-cell")
 					rowChild.appendChild(tableCell)
 					col -= 1
 
 				return
 	def fastGrid( self, rows, cols, createHidden=False ):
-		colsstr = "".join(['<td class="flr-table-body-cell"></td>' for i in range(0, cols)])
-		tblstr = '<tbody [name]="body" class="flr-table-body" >'
+		colsstr = "".join(['<td class="ignt-table-body-cell"></td>' for i in range(0, cols)])
+		tblstr = '<tbody [name]="body" class="ignt-table-body" >'
 
 		for r in range(0, rows):
-			tblstr += '<tr class="flr-table-body-row %s">%s</tr>' %("is-hidden" if createHidden else "",colsstr)
+			tblstr += '<tr class="ignt-table-body-row %s">%s</tr>' %("is-hidden" if createHidden else "",colsstr)
 		tblstr +="</tbody>"
 
 		self.fromHTML(tblstr)
