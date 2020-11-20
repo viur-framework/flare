@@ -35,7 +35,7 @@ class ListWidget(html5.Div):
 		listselectionPopup.state.register("acceptSelection",self)
 
 
-	def onAcceptSelectionChanged( self, event ):
+	def onAcceptSelectionChanged( self, event,*args,**kwargs ):
 		if event and "widget" in dir(event):
 			self.callback(self,[event.widget.skel])
 
@@ -64,7 +64,7 @@ class SkellistItem(Button):
 			self.appendChild(self.skel["name"])
 
 
-	def onActiveSelectionChanged( self, event ):
+	def onActiveSelectionChanged( self, event,*args,**kwargs ):
 		if not event:
 			self.removeClass( "btn--primary" )
 			return 0
@@ -89,7 +89,7 @@ class ListSelection(Popup):
 		self.currentlistHandler.requestList.register( self )
 		self.currentlistHandler.requestData()
 
-		self.state = StateHandler( self )
+		self.state = StateHandler((), self )
 		self.state.updateState( "activeSelection", None )
 		self.state.updateState( "acceptSelection", None )
 
@@ -102,7 +102,7 @@ class ListSelection(Popup):
 			self.state.register("activeSelection", skelwidget) #register to change State for active State handling
 			self.listelements.appendChild(skelwidget)
 
-	def onActiveSelectionChanged( self,event ):
+	def onActiveSelectionChanged( self,event,*args,**kwargs ):
 		if event:
 			self.selectbtn[ "disabled" ] = False
 		else:
@@ -147,14 +147,14 @@ class ListSelection(Popup):
 		self.requestClients()
 		self.setContent(popupwrap)
 
-	def onApplyfilterChanged( self,value ):
+	def onApplyfilterChanged( self,value,*args,**kwargs ):
 		self.currentlistHandler.filter({"search":value})
 
 
-	def onAcceptSelectionChanged( self,event ):
+	def onAcceptSelectionChanged( self,event,*args,**kwargs ):
 		pass
 
-	def onActiveButtonChanged( self,event ):
+	def onActiveButtonChanged( self,event,*args,**kwargs ):
 		if event.widget.name == "reloadbtn":
 			self.reloadList()
 		elif event.widget.name == "selectbtn":

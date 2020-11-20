@@ -17,7 +17,7 @@ class requestHandler():
 		self.secure = secure
 		setattr(self, self.eventName, EventDispatcher(self.eventName))
 		self.requestFailed = EventDispatcher("requestFailed")
-		self.state = StateHandler(self)
+		self.state = StateHandler((),self)
 		self.state.updateState("listStatus", 'init')
 
 	def requestData(self, *args, **kwargs):
@@ -47,7 +47,7 @@ class requestHandler():
 		# print(resp)
 		self.requestFailed.fire( req )
 
-	def onListStatusChanged( self,event ):
+	def onListStatusChanged( self,event, *args, **kwargs ):
 		pass
 
 	def getDescrFromValue(self, definition, val ):

@@ -24,7 +24,7 @@ class View():
 
 		flare.views.conf[ "views_state" ].register( "activeView", self )
 
-	def onActiveViewChanged( self, viewName,wdg ):
+	def onActiveViewChanged( self, viewName,*args,**kwargs ):
 		if self.name == viewName:
 			self.loadView()
 
@@ -58,6 +58,8 @@ class View():
 
 				targetWidget.show()
 				targetWidget.appendChild( self.widgets[ target ] )
+
+
 View.params = {}
 
 class ViewWidget( html5.Div ):
@@ -67,10 +69,10 @@ class ViewWidget( html5.Div ):
 		self.view = view
 		self.initWidget()
 
-		self.state = StateHandler( self )
+		self.state = StateHandler( (),self )
 		self.state.updateState( "viewfocused", None )
 
-	def onViewfocusedChanged( self, viewname ):
+	def onViewfocusedChanged( self, viewname, *args, **kwargs ):
 		pass
 
 	def initWidget( self ):

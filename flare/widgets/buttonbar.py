@@ -8,10 +8,10 @@ class ButtonBar( html5.Div ):
 		super().__init__()
 		self.addClass( "bar" )
 
-		self.state = StateHandler( self )
+		self.state = StateHandler((), self )
 		self.state.updateState( "activeButton", None )
 
-	def onActiveButtonChanged( self, event ):
+	def onActiveButtonChanged( self, event,*args,**kwargs ):
 		pass
 
 	def addButton( self, name, btnStr ):
@@ -34,7 +34,7 @@ class ButtonBarButton( Button ):
 	def __init__( self ):
 		super().__init__()
 
-	def onActiveButtonChanged( self, event ):
+	def onActiveButtonChanged( self, event,*args,**kwargs ):
 		if html5.doesEventHitWidgetOrChildren( event, self ):
 			self.addClass( "btn--primary" )
 		else:
@@ -54,15 +54,15 @@ class ButtonBarSearch(html5.Div):
 			<button class="btn btn--small" :callback="applyFilter">filtern</button>
 		''')
 
-		self.state = StateHandler(self)
+		self.state = StateHandler((),self)
 		self.state.updateState("applyfilter", None)
 
 	def applyFilter(self, widget):
 		currentValue = self.widget["value"]
 		self.state.updateState("applyfilter", currentValue)
 
-	def onApplyfilterChanged(self, event):
+	def onApplyfilterChanged(self, event,*args,**kwargs):
 		pass
 
-	def onActiveButtonChanged(self, event):
+	def onActiveButtonChanged(self, event,*args,**kwargs):
 		pass
