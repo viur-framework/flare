@@ -5,7 +5,7 @@ from flare import html5
 
 class SpatialEditWidget( BaseEditWidget ):
 
-	def _createWidget( self ):
+	def createWidget( self ):
 		tpl = html5.Template()
 		tpl.appendChild( self.fromHTML(
 			"""
@@ -14,6 +14,14 @@ class SpatialEditWidget( BaseEditWidget ):
 			"""
 		))
 		return tpl
+
+	def updateWidget( self ):
+		if self.bone.readonly:
+			self.latitude.disable()
+			self.longitude.disable()
+		else:
+			self.latitude.enable()
+			self.longitude.enable()
 
 	def unserialize( self, value = None ):
 		self.latitude[ "value" ], self.longitude[ "value" ] = value or (0, 0)

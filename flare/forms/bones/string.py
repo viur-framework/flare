@@ -1,13 +1,15 @@
 from flare import html5, utils
-from flare.forms import boneSelector, conf
+from flare.forms import boneSelector
+from flare.config import conf
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
 
 class StringEditWidget( BaseEditWidget ):
 	style = [ "flr-value", "flr-value--string" ]
 
-	def _createWidget( self ):
+	def createWidget( self ):
 		tpl = html5.Template()
+		#language=HTML
 		tpl.appendChild( """
 			<flr-input class="input-group-item" [name]="widget">
 			<div class="label input-group-item input-group-item--last" [name]="length" hidden>0</div> <!-- fixme: add later ... -->
@@ -17,6 +19,12 @@ class StringEditWidget( BaseEditWidget ):
 		self.sinkEvent( "onChange", "onKeyUp" )
 		self.timeout = None
 		return tpl
+
+	def updateWidget( self ):
+		if self.bone.readonly:
+			self.widget.disable()
+		else:
+			self.widget.enable()
 
 	def onChange( self, event ):
 		if self.timeout:

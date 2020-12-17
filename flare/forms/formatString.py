@@ -1,4 +1,5 @@
 from flare import utils
+import re
 
 def formatOneEntry(key, format, data, structure = None, prefix = None, language = None, context=None, _rec = 0):
 	res = format

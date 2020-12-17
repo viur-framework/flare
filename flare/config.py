@@ -2,15 +2,22 @@
 Flare configuration.
 """
 from .html5.safeeval import SafeEval
-from .cache import Cache
+
 from flare.views import conf as view_conf
 
 conf = {
-	"cache": Cache(),
-	#"icons.pool": {},
 	"safeEvalInstance": SafeEval(),
 	"saveEvalAllowedCallables": dict(),
-	"basePathSvgs":"/static/svgs"
+	"basePathSvgs":"/static/svgs",
+	"currentLanguage": "de",
 }
 
 conf.update(view_conf)
+
+def updateConf(_conf):
+	global conf
+	conf.update(_conf)
+	return conf
+
+
+

@@ -8,10 +8,10 @@ from .base import BaseBone, BaseEditWidget, BaseViewWidget
 class BooleanEditWidget( BaseEditWidget ):
 	style = [ "flr-value", "flr-value--boolean" ]
 
-	def _createWidget( self ):
+	def createWidget( self ):
 		return Switch()
 
-	def _updateWidget( self ):
+	def updateWidget( self ):
 		if self.bone.readonly:
 			self.widget.disable()
 		else:

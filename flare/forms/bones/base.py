@@ -2,7 +2,8 @@ import json
 from enum import IntEnum
 from flare.button import Button
 from flare.ignite import *
-from flare.forms import boneSelector, conf
+from flare.forms import boneSelector
+from flare.config import conf
 
 class ReadFromClientErrorSeverity(IntEnum):
 	NotSet = 0
@@ -24,7 +25,7 @@ class BaseEditWidget( html5.Div ):
 		self.bone = bone
 		self.widget = None
 
-		widget = self._createWidget()
+		widget = self.createWidget()
 		if isinstance( widget, html5.Widget ):
 			if not self.widget:
 				self.widget = widget
@@ -32,20 +33,26 @@ class BaseEditWidget( html5.Div ):
 			if not widget.parent():
 				self.appendChild( widget )
 
-			self._updateWidget()
+			self.updateWidget()
 
-	def _createWidget( self ):
+	def createWidget( self ):
 		"""
 		Function for creating the Widget or multiple Widgets that represent the bone.
 		"""
 		return Input()
 
-	def _updateWidget( self ):
+	def updateWidget( self ):
 		"""
 		Function for updating the Widget or multiple Widgets that represent the bone.
 		"""
-		self.widget[ "required" ] = self.bone.required
-		self.widget[ "readonly" ] = self.bone.readonly
+		#self.widget[ "required" ] = self.bone.required
+		#self.widget[ "readonly" ] = self.bone.readonly
+		pass
+		if self.bone.readonly:
+			self.widget.disable()
+		else:
+			self.widget.enable()
+
 
 	def unserialize( self, value = None ):
 		self.widget[ "value" ] = value or ""
@@ -353,11 +360,13 @@ class BaseBone( object ):
 		self.boneStructure = self.skelStructure[ self.boneName ]
 		self.errors = errors
 		self.errorQueue = errorQueue
-
+		print("-----------")
+		print(self.boneStructure)
 		self.readonly = bool( self.boneStructure.get( "readonly" ) )
 		self.required = bool( self.boneStructure.get( "required" ) )
 		self.multiple = bool( self.boneStructure.get( "multiple" ) )
 		self.languages = self.boneStructure.get( "languages" )
+
 
 	def editWidget( self, value = None, errorInformation=None ) -> html5.Widget:
 		widgetFactory = self.editWidgetFactory

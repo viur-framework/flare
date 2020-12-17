@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime, logging
 from flare import html5
-from flare.forms import boneSelector, conf
+from flare.forms import boneSelector
+from flare.config import conf
 from flare.i18n import translate
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
@@ -9,37 +10,49 @@ from .base import BaseBone, BaseEditWidget, BaseViewWidget
 class DateEditWidget( BaseEditWidget ):
 	style = [ "flr-value", "flr-value--date" ]
 
-	def __init__( self, bone, **kwargs ):
+	def createWidget( self ):
 		self.serverToClient = [ ]
 
-		self.dateInput = None
-		self.timeInput = None
+		self.hasDate = self.bone.boneStructure.get( "date", True )
+		self.hasTime = self.bone.boneStructure.get( "time", True )
 
-		super().__init__( bone, **kwargs )
-		assert self.dateInput or self.timeInput, "You may not configure a dateBone(date=False, time=False)"
 
-	def _createWidget( self ):
-		if self.bone.boneStructure.get( "date", True ):
-			self.dateInput = self.appendChild(
-				"""<flr-input class="input-group-item" type="date" />"""
-			)[ 0 ]
-			self.serverToClient.append( "%d.%m.%Y" )  # fixme: Still using German format server-side?
+		tpl = html5.Template()
+		# language=HTML
+		tpl.appendChild( """
+					<div class='flr-wrapper'>
+						<flr-input type="date" v-if="{{hasDate}}" class="input-group-item" [name]="dateInput">
+						<flr-input type="time" step="1" v-if="{{hasTime}}" class="input-group-item" [name]="timeInput">
+					</div>
+				""",
+					hasDate = self.hasDate,
+					hasTime = self.hasTime,
+					bindTo = self )
 
-		if self.bone.boneStructure.get( "time", True ):
-			self.timeInput = self.appendChild(
-				"""<flr-input class="input-group-item" type="time" step="1" />"""
-			)[ 0 ]
-			self.timeInput[ "readonly" ] = bool( self.bone.boneStructure.get( "readonly" ) )
+		if self.hasDate:
+			self.serverToClient.append( "%d.%m.%Y" )
+
+		if self.hasTime:
 			self.serverToClient.append( "%H:%M:%S" )
 
-	def _updateWidget( self ):
-		if self.dateInput:
-			self.dateInput[ "required" ] = self.bone.required
-			self.dateInput[ "readonly" ] = self.bone.readonly
+		return tpl
 
-		if self.timeInput:
+	def updateWidget( self ):
+		if self.hasDate:
+			self.dateInput[ "required" ] = self.bone.required
+
+			if self.bone.readonly:
+				self.dateInput.disable()
+			else:
+				self.dateInput.enable()
+
+		if self.hasTime:
 			self.timeInput[ "required" ] = self.bone.required
-			self.timeInput[ "readonly" ] = self.bone.readonly
+
+			if self.bone.readonly:
+				self.timeInput.disable()
+			else:
+				self.timeInput.enable()
 
 	def unserialize( self, value = None ):
 		if value:
@@ -75,6 +88,8 @@ class DateEditWidget( BaseEditWidget ):
 
 		if self.timeInput:
 			if self.timeInput[ "value" ]:
+				if len( self.timeInput[ "value" ].split( ":" ) ) < 3:
+					self.timeInput[ "value" ] = self.timeInput[ "value" ] + ":00"
 				try:
 					time = datetime.datetime.strptime( self.timeInput[ "value" ], "%H:%M:%S" )
 					value = value.replace( hour = time.hour, minute = time.minute, second = time.second )

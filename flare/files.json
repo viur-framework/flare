@@ -21,6 +21,7 @@
   "forms/bones/text.py",
   "forms/formatString.py",
   "forms/formconf.py",
+  "forms/formerrors.py",
   "forms/formtags.py",
   "forms/widgets/file.py",
   "forms/widgets/htmleditor.py",

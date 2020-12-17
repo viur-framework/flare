@@ -2,15 +2,15 @@
 import re, logging
 from flare import utils
 from flare.ignite import *
-from flare.forms import boneSelector, conf
-from .base import BaseBone, BaseEditWidget
+from flare.forms import boneSelector
+from flare.config import conf
+from .base import BaseBone, BaseEditWidget,BaseViewWidget
 
 
 class NumericEditWidget( BaseEditWidget ):
 	style = [ "flr-value", "flr-value--numeric" ]
 
-	def __init__( self, bone, **kwargs ):
-		super().__init__( bone, **kwargs )
+	def createWidget( self ):
 
 		self.value = None
 
@@ -38,16 +38,21 @@ class NumericEditWidget( BaseEditWidget ):
 				if fmt == "dot":
 					self.currencyDecimalDelimiter = "."
 					self.currencyThousandDelimiter = ","
-		# else: fixme are there more configs?
+
+		tpl = html5.Template()
+		#language=html
+		tpl.appendChild( '''
+			<flr-input [name]="widget" type="{{inputType}}" class="input-group-item flr-input" />
+		''',
+			inputType= "text" if self.currency else "number",
+			bindTo=self)
 
 		self.sinkEvent( "onChange" )
-		self.widget = Input()
-		self.widget.addClass( "input-group-item" )
 
-		# Standard- or currency mode
+		return tpl
+
+	def updateWidget( self ):
 		if not self.currency:
-			self.widget[ "type" ] = "number"
-
 			if self.precision:
 				if self.precision <= 16:
 					self.widget[ "step" ] = "0." + ("0" * (self.precision - 1)) + "1"
@@ -62,7 +67,6 @@ class NumericEditWidget( BaseEditWidget ):
 
 			if self.max is not None:
 				self.widget[ "max" ] = self.max
-
 		else:
 			assert self.currencyThousandDelimiter[ 0 ] not in "^-+()[]"
 			assert self.currencyDecimalDelimiter[ 0 ] not in "^-+()[]"
@@ -71,12 +75,10 @@ class NumericEditWidget( BaseEditWidget ):
 											   (self.currencyThousandDelimiter[ 0 ],
 												self.currencyDecimalDelimiter[ 0 ]) )
 
-		self.appendChild( self.widget )
-		self._updateWidget()
-
-	def _createWidget( self ):
-		# this is done inside the constructor
-		return None
+		if self.bone.readonly:
+			self.widget.disable()
+		else:
+			self.widget.enable()
 
 	def setValue( self, value ):
 		if not self.currency:
@@ -145,26 +147,18 @@ class NumericEditWidget( BaseEditWidget ):
 		self.widget[ "value" ] = self.setValue( value )
 
 	def serialize( self ):
-		return self.value
+		return self.value or 0
 
 
-class NumericViewWidget( NumericEditWidget ):
-
-	def __createWidget( self ):
-		return self
-
-	def __configureWidget( self ):
-		pass
+class NumericViewWidget( BaseViewWidget ):
 
 	def unserialize( self, value = None ):
-		self.value = value
-
 		if value is None:
 			value = conf[ "emptyValue" ]
-		else:
-			value = self.setValue( value )
 
-		self.appendChild( html5.TextNode( value ), replace = True )
+		self.value = value
+
+		self.appendChild( html5.TextNode( self.value ), replace = True )
 
 
 class NumericBone( BaseBone ):

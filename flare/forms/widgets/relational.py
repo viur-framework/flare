@@ -7,7 +7,7 @@ class InternalEdit(html5.Div):
 	style = ["flr-internal-edit"]
 
 	def __init__( self, skelStructure, values = None, errorInformation = None, readOnly = False,
-				  context = None, defaultCat = "", module = None, boneparams = None ):
+				  context = None, defaultCat = "", module = None, boneparams = None, errorQueue = None, prefix = None ):
 		super().__init__()
 		self.form = viurForm( moduleName=module, skel=values, structure=skelStructure )
 		self.form.buildInternalForm()

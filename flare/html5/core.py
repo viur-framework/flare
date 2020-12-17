@@ -9,13 +9,13 @@ HTML5 Widget abstraction library
 
 import logging, string, inspect
 
-try:
-	from ..config import conf
-	sEval = conf["safeEvalInstance"]
-except:
-	# if a toplevel conf in missing
-	from .safeeval import SafeEval
-	sEval = SafeEval()
+#try:
+from ..config import conf
+sEval = conf["safeEvalInstance"]
+#except:
+#	# if a toplevel conf in missing
+#	from .safeeval import SafeEval
+#	sEval = SafeEval()
 
 ########################################################################################################################
 # DOM-access functions and variables
@@ -3045,7 +3045,15 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 					if bindTo:
 						try:
 							# update whitelist
+
+							print(conf)
+
+							print(conf["saveEvalAllowedCallables"])
 							sEval.allowedCallables = conf["saveEvalAllowedCallables"]
+
+							print("-.-.-")
+							print(sEval.compile(val))
+							print(sEval.execute( sEval.compile(val), {} ))
 							showWdg = sEval.execute( sEval.compile(val), {} )
 							if not showWdg:
 								appendItem = False

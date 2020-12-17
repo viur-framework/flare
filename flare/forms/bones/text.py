@@ -1,5 +1,6 @@
 from flare.ignite import *
-from flare.forms import boneSelector, conf
+from flare.forms import boneSelector
+from flare.config import conf
 from flare.forms.widgets.htmleditor import HtmlEditor
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
@@ -7,7 +8,7 @@ from .base import BaseBone, BaseEditWidget, BaseViewWidget
 class TextEditWidget( BaseEditWidget ):
 	style = [ "flr-value", "flr-value--text" ]
 
-	def _createWidget( self ):
+	def createWidget( self ):
 		if self.bone.boneStructure[ "validHtml" ]:
 			widget = HtmlEditor()
 			widget.boneName = self.bone.boneName  # fixme WTF?
@@ -25,7 +26,7 @@ class TextEditWidget( BaseEditWidget ):
 		# self.changeEvent = EventDispatcher("boneChange")  # fixme: later...
 		return widget
 
-	def _updateWidget( self ):
+	def updateWidget( self ):
 		if self.bone.readonly:
 			if isinstance( self.widget, HtmlEditor ):
 				self.widget.disable()

@@ -83,7 +83,7 @@ class Icon(html5.I):
 			self.image.sinkEvent( "onError" )
 			self.image["src"] = self.value
 		else:
-			if self.value.endswith(".svg"):
+			if self.value and self.value.endswith(".svg"):
 				url = self.value
 			else:
 				url = conf["basePathSvgs"]+"/%s.svg" % self.value

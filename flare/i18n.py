@@ -33,7 +33,7 @@ def buildTranslations(pathToFolder):
 		if key.startswith( "lng" ):
 			_lngMap[ key[ 3: ].lower() ] = { k.lower(): v for k, v in getattr( translations, key ).items() }
 
-
+	return _lngMap
 
 def translate( key, **kwargs ):
 	"""
@@ -46,7 +46,7 @@ def translate( key, **kwargs ):
 	"""
 	def processTr( inStr, **kwargs ):
 		for k,v in kwargs.items():
-			inStr = inStr.replace("{%s}" % k, str(v))
+			inStr = inStr.replace("{{%s}}" % k, str(v))
 
 		return inStr
 

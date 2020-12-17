@@ -1,15 +1,32 @@
-from flare.forms import boneSelector, conf
+from flare import html5
+from flare.forms import boneSelector
+from flare.config import conf
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
 
 class ColorEditWidget( BaseEditWidget ):
 	style = [ "flr-value", "flr-value--color" ]
 
-	def _createWidget( self ):
-		return self.fromHTML( """
-			<input [name]="widget" type="color">
-			<button [name]="unsetBtn" text="Unset" icon="cross" class="btn--delete">
-		""" )
+	def createWidget( self ):
+		tpl = html5.Template()
+		# language=HTML
+		tpl.appendChild( """
+							<input [name]="widget" type="color" class="input flr-input">
+							<button [name]="unsetBtn" text="Unset" icon="icon-cross" class="btn--delete">
+						""",
+						 bindTo = self )
+
+		return tpl
+
+	def updateWidget( self ):
+		if self.bone.readonly:
+			self.widget.disable()
+			self.unsetBtn.disable()
+		else:
+			self.widget.enable()
+			self.unsetBtn.enable()
+
+
 
 	def onUnsetBtnClick( self ):
 		self.widget[ "value" ] = ""
@@ -34,8 +51,8 @@ class ColorViewWidget( BaseViewWidget ):
 class ColorBone( BaseBone ):
 	editWidgetFactory = ColorEditWidget
 	viewWidgetFactory = ColorViewWidget
-	multiEditWidgetFactory = None
-	multiViewWidgetFactory = None
+	#multiEditWidgetFactory = None
+	#multiViewWidgetFactory = None
 
 	@staticmethod
 	def checkFor( moduleName, boneName, skelStructure, *args, **kwargs ):

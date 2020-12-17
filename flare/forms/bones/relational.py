@@ -9,7 +9,8 @@ from flare.forms.widgets.file import FilePreviewImage, Uploader
 from flare.forms.widgets.relational import InternalEdit
 from flare.forms.widgets.tree import TreeLeafWidget, TreeNodeWidget
 from flare.forms.widgets.list import ListWidget
-from flare.forms import boneSelector, conf, formatString, moduleWidgetSelector
+from flare.config import conf
+from flare.forms import boneSelector, formatString, moduleWidgetSelector
 from .base import BaseBone, BaseEditWidget, BaseMultiEditWidget
 
 
@@ -29,7 +30,7 @@ def _getDefaultValues(structure):
 class RelationalEditWidget(BaseEditWidget):
 	style = ["flr-value", "flr-value--relational"]
 
-	def _createWidget(self):
+	def createWidget(self):
 		tpl = html5.Template()
 		widgetList = self.fromHTML(
 			"""
@@ -41,7 +42,7 @@ class RelationalEditWidget(BaseEditWidget):
 		return tpl
 
 
-	def _updateWidget(self):
+	def updateWidget(self):
 		if self.bone.readonly:
 			self.destWidget.disable()
 			self.selectBtn.hide()
@@ -150,6 +151,8 @@ class RelationalEditWidget(BaseEditWidget):
 
 		# todo: set context
 
+		print("AAAA")
+
 		# Start widget with selector callback
 		selector.setSelector(
 			lambda selector, selection: self.unserialize({
@@ -159,6 +162,7 @@ class RelationalEditWidget(BaseEditWidget):
 			multi=self.bone.multiple,
 			allow=self.bone.selectorAllow
 		)
+		print("BBBB")
 
 	def onDeleteBtnClick(self):
 		self.unserialize()
@@ -254,6 +258,9 @@ class RelationalBone(BaseBone):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
+
+		print(conf)
+
 		self.formatString = self.boneStructure["format"]
 		self.destModule = self.boneStructure["module"]
 		self.destInfo = conf["modules"].get(self.destModule, {"handler":"list"})
@@ -286,8 +293,7 @@ class TreeItemBone(RelationalBone):
 
 	@staticmethod
 	def checkFor(moduleName, boneName, skelStructure, *args, **kwargs):
-		# fixme: this is rather "relational.tree.leaf" than a "treeitem"...
-		return skelStructure[boneName]["type"] == "relational.treeitem" or skelStructure[boneName]["type"].startswith("relational.treeitem.")
+		return skelStructure[boneName]["type"] == "relational.tree.node" or skelStructure[boneName]["type"].startswith("relational.tree.node.")
 
 boneSelector.insert(2, TreeItemBone.checkFor, TreeItemBone)
 
@@ -298,17 +304,16 @@ class TreeDirBone(RelationalBone):
 
 	@staticmethod
 	def checkFor(moduleName, boneName, skelStructure, *args, **kwargs):
-		# fixme: this is rather "relational.tree.node" than a "treedir"...
-		return skelStructure[boneName]["type"] == "relational.treedir" or skelStructure[boneName]["type"].startswith("relational.treedir.")
+		return skelStructure[boneName]["type"] == "relational.tree.node" or skelStructure[boneName]["type"].startswith("relational.tree.node.")
 
 boneSelector.insert(2, TreeDirBone.checkFor, TreeDirBone)
 
-# --- fileBone ---
+# --- fileBone direct upload without repo---
 
-class FileEditWidget(RelationalEditWidget):
+class FileEditDirectWidget(RelationalEditWidget):
 	style = ["flr-value", "flr-value--file"]
 
-	def _createWidget(self):
+	def createWidget(self):
 		tpl = html5.Template()
 		self.previewImg = FilePreviewImage()
 		self.appendChild(self.previewImg)
@@ -331,14 +336,14 @@ class FileEditWidget(RelationalEditWidget):
 					</div>
 					<div class="flr-widgets-item">
 						<div [name]="dropArea" class="supports-upload">
-						{0}
+							<svgicon value='icon-upload-file' title='Upload'> </svgicon>
 							<label for="inplace-upload" class="flr-inplace-upload-label"><strong>Datei auswählen</strong><span [name]="dropText"> oder hierhin ziehen</span>.</label>
 							<input id="inplace-upload" class="flr-inplace-upload" type="file" [name]="files" files selected"/>
 						</div>
 						<p [name]="uploadResult" style="display: none;"></p>
 					</div>
 				</div>
-            """.format( SvgIcon("icon-upload-file",title="Upload") )
+            """
 		))
 
 		self.filerow.hide()
@@ -352,6 +357,22 @@ class FileEditWidget(RelationalEditWidget):
 				
 		self.sinkEvent("onChange")
 		return tpl
+
+	def updateWidget(self):
+		if self.bone.readonly:
+			self.destWidget.disable()
+			self.selectBtn.hide()
+			self.deleteBtn.hide()
+			self.dropArea.hide()
+		else:
+			self.destWidget.enable()
+			self.selectBtn.show()
+			self.dropArea.show()
+
+			# Only allow to delete entry when not multiple and not required!
+			if not self.bone.multiple and not self.bone.required:
+				self.deleteBtn.show()
+				self.selectBtn.removeClass("input-group-item--last")
 
 	def onChange( self, event ):
 		if event.target.files:
@@ -393,7 +414,7 @@ class FileEditWidget(RelationalEditWidget):
 		self.value = {"dest": entry, "rel": None}
 		self.previewImg.setFile(entry)
 		self.updateString()
-		self._updateWidget()
+		self.updateWidget()
 		self.removeChild(uploader)
 		self.uploadResult.hide()
 		self.filerow.show()
@@ -431,23 +452,45 @@ class FileViewWidget(RelationalViewWidget):
 	def unserialize(self, value=None):
 		self.appendChild(FilePreviewImage(value["dest"] if value else None), replace=True)
 
+class FileDirectBone(TreeItemBone):
+	editWidgetFactory = FileEditDirectWidget
+	viewWidgetFactory = FileViewWidget
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.destInfo = conf["modules"].get(self.destModule, {"handler":"tree.simple.file"})
+
+
+	@staticmethod
+	def checkFor(moduleName, boneName, skelStructure, *args, **kwargs):
+		return skelStructure[boneName]["type"] == "relational.tree.leaf.file" or skelStructure[boneName]["type"].startswith("relational.tree.leaf.file.")
+
+boneSelector.insert(3, FileDirectBone.checkFor, FileDirectBone)
+
+
+# --- fileBone ---
+
+class FileEditWidget(RelationalEditWidget):
+	style = ["flr-value", "flr-value--relational","flr-value--file"]
+
+	def createWidget(self):
+		self.previewImg = FilePreviewImage()
+		self.appendChild(self.previewImg)
+
+		return super().createWidget()
+
+	def unserialize(self, value=None):
+		super().unserialize(value)
+
+		if self.value:
+			self.previewImg.setFile(self.value["dest"])
 
 class FileBone(TreeItemBone):
 	editWidgetFactory = FileEditWidget
 	viewWidgetFactory = FileViewWidget
 
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-		self.destInfo = conf["modules"].get(self.destModule, {"handler":"tree.file"})
-
-
 	@staticmethod
-	def checkFor(moduleName, boneName, skelStructure, *args, **kwargs):
+	def checkFor( moduleName, boneName, skelStructure, *args, **kwargs ):
+		return skelStructure[boneName]["type"] == "relational.tree.leaf.file" or skelStructure[boneName]["type"].startswith("relational.tree.leaf.file.")
 
-		#print(moduleName, boneName, skelStructure[boneName]["type"], skelStructure[boneName]["type"] == "relational.file" or skelStructure[boneName]["type"].startswith("relational.file."))
-		return skelStructure[boneName]["type"] == "treeitem.file" or skelStructure[boneName]["type"].startswith("relational.tree.leaf.file.file")
-		#fixme: This type should be relational.tree.file and NOT relational.file.... WTF
-		#return skelStructure[boneName]["type"] == "relational.treeitem.file" or skelStructure[boneName]["type"].startswith("relational.treeitem.file.")
-
-
-boneSelector.insert(3, FileBone.checkFor, FileBone)
+boneSelector.insert(5, FileBone.checkFor, FileBone)

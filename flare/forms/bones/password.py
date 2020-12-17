@@ -1,4 +1,4 @@
-from flare.forms import boneSelector, conf, InvalidBoneValueException
+from flare.forms import boneSelector, InvalidBoneValueException
 from flare.i18n import translate
 from .base import BaseBone, BaseEditWidget
 
@@ -6,11 +6,10 @@ from .base import BaseBone, BaseEditWidget
 class PasswordEditWidget(BaseEditWidget):
 	style = ["flr-value", "flr-value--password", "flr-value-container", "input-group"]
 
-	def _createWidget(self):
-		self.appendChild("""<flr-input [name]="widget" type="password" class="input-group-item">""")
+	def createWidget(self):
+		self.appendChild("""<flr-input [name]="widget" type="password" class="flr-input input-group-item">""")
 
-		user = conf["currentUser"]
-		if self.bone.readonly or (user and "root" in user["access"]):
+		if self.bone.readonly:
 			self.verify = None
 		else:
 			self.appendChild("""
@@ -20,6 +19,20 @@ class PasswordEditWidget(BaseEditWidget):
 				<flr-input id="{{id}}" [name]="verify" type="password">
 			""",
 			vars={"txt": translate("reenter password"), "id": "flr-%s-reenter" % self.bone.boneName })
+
+			#self.widget.element.autocomplete = "new-password"
+		return self.widget
+
+
+	def updateWidget( self ):
+		if self.bone.readonly:
+			self.widget.disable()
+			if self.verify:
+				self.verify.disable()
+		else:
+			self.widget.enable()
+			if self.verify:
+				self.verify.enable()
 
 	def serialize(self):
 		if not self.verify or self.widget["value"] == self.verify["value"]:

@@ -20,7 +20,7 @@ def unescape(val, maxLength = 0):
 		:returns: The unquoted string.
 		:rtype: str
 	"""
-	val = val \
+	val = str(val) \
 			.replace("&lt;", "<") \
 			.replace("&gt;", ">") \
 			.replace("&quot;", "\"") \

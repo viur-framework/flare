@@ -6,6 +6,7 @@ from flare.popup import Popup
 from flare.event import EventDispatcher
 from flare.forms import moduleWidgetSelector, displayDelegateSelector
 from flare.network import NetworkService, DeferredCall
+from flare.button import Button
 from flare.forms.widgets.tree import TreeNodeWidget, TreeLeafWidget, TreeBrowserWidget
 
 
@@ -27,7 +28,7 @@ class Search(html5.Div):
 		self.searchInput = Input()
 		self.searchInput["type"] = "text"
 		self.appendChild(self.searchInput)
-		self.btn = html5.ext.Button(translate("Search"), callback=self.doSearch)
+		self.btn = Button(translate("Search"), callback=self.doSearch)
 		self.appendChild(self.btn)
 		self.sinkEvent("onKeyDown")
 		self.last_search = ""
@@ -71,11 +72,11 @@ class FileImagePopup(Popup):
 		img["src"] = getImagePreview(preview.currentFile, size=None)
 		self.popupBody.appendChild(img)
 
-		btn = html5.ext.Button(translate("Download"), self.onDownloadBtnClick)
+		btn = Button(translate("Download"), self.onDownloadBtnClick)
 		btn.addClass("btn--download")
 		self.popupFoot.appendChild(btn)
 
-		btn = html5.ext.Button(translate("Close"), self.onClick)
+		btn = Button(translate("Close"), self.onClick)
 		btn.addClass("btn--close")
 		self.popupFoot.appendChild(btn)
 
@@ -400,5 +401,5 @@ class FileWidget(TreeBrowserWidget):
 		return (moduleInfo[ "handler" ].startswith( "tree.file" ) or moduleInfo[ "handler" ].startswith( "tree.simple.file" ) )
 
 
-moduleWidgetSelector.insert(1, FileWidget.canHandle, FileWidget)
-displayDelegateSelector.insert(1, FileWidget.canHandle, FileWidget)
+moduleWidgetSelector.insert(0, FileWidget.canHandle, FileWidget)
+displayDelegateSelector.insert(0, FileWidget.canHandle, FileWidget)

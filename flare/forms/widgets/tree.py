@@ -9,8 +9,9 @@ from flare.network import NetworkService
 from flare.config import conf
 from flare.i18n import translate
 from flare.forms.formatString import formatString
-
+from flare.icons import SvgIcon,Icon
 #fixme embedsvg
+
 
 class TreeItemWidget(html5.Li):
 	def __init__(self, module, data, structure, widget, *args, **kwargs):
@@ -24,7 +25,7 @@ class TreeItemWidget(html5.Li):
 			:param widget: tree widget
 		"""
 		super(TreeItemWidget, self).__init__()
-		self.addClass("flr-tree-item item has-hover is-drop-target is-draggable")
+		self.addClass("vi-tree-item item has-hover is-drop-target is-draggable")
 		self.module = module
 		self.data = data
 
@@ -241,20 +242,13 @@ class TreeItemWidget(html5.Li):
 
 	def EntryIcon(self):
 		self.nodeImage.removeClass("is-hidden")
-		#svg = embedsvg.get("icons-folder")
-		svg = None
-		if svg:
-			nodeIcon = html5.I()
-			nodeIcon.addClass("i")
-			nodeIcon.element.innerHTML = svg + nodeIcon.element.innerHTML
-			self.nodeImage.appendChild(nodeIcon)
+		#svg = embedsvg.get("icon-folder")
+		svg = Icon( "icon-folder" )
+		self.nodeImage.appendChild(svg)
 
 	def toggleArrow(self):
 		self.nodeToggle["title"] = translate("Expand/Collapse")
-		#embedSvg = embedsvg.get("icons-arrow-right")
-		embedSvg = None
-		if embedSvg:
-			self.nodeToggle.element.innerHTML = embedSvg + self.nodeToggle.element.innerHTML
+		self.nodeToggle.prependChild( SvgIcon( "icon-arrow-right", title = translate("Expand/Collapse") ) )
 
 	def buildDescription(self):
 		"""
@@ -263,11 +257,11 @@ class TreeItemWidget(html5.Li):
 		# Find any bones in the structure having "frontend_default_visible" set.
 		hasDescr = False
 
-		for boneName, boneInfo in self.structure:
+		for boneName, boneInfo in self.structure.items():
 			if "params" in boneInfo.keys() and isinstance(boneInfo["params"], dict):
 				params = boneInfo["params"]
 				if "frontend_default_visible" in params and params["frontend_default_visible"]:
-					structure = {k: v for k, v in self.structure}
+					structure = {k: v for k, v in self.structure.items()}
 					wdg = boneSelector.select(self.module, boneName, structure)
 
 					if wdg is not None:
@@ -340,7 +334,6 @@ class TreeItemWidget(html5.Li):
 			self.childrenLoaded = True
 			self.widget.requestChildren(self)
 
-
 class TreeLeafWidget(TreeItemWidget):
 	skelType = "leaf"
 
@@ -363,18 +356,10 @@ class TreeLeafWidget(TreeItemWidget):
 			Leafs have a different Icon
 		'''
 		self.nodeImage.removeClass("is-hidden")
-		#svg = embedsvg.get("icons-file")
-		svg = None
-		if svg:
-			nodeIcon = html5.I()
-			nodeIcon.addClass("i")
-			nodeIcon.element.innerHTML = svg + nodeIcon.element.innerHTML
-			self.nodeImage.appendChild(nodeIcon)
-
+		self.nodeImage.appendChild(Icon("icon-file"))
 
 class TreeNodeWidget(TreeItemWidget):
 	skelType = "node"
-
 
 class TreeWidget(html5.Div):
 	"""
@@ -408,8 +393,8 @@ class TreeWidget(html5.Div):
 		return moduleInfo["handler"] == "tree" or moduleInfo["handler"].startswith("tree.")
 
 
-moduleWidgetSelector.insert(1, TreeWidget.canHandle, TreeWidget)
-displayDelegateSelector.insert(1, TreeWidget.canHandle, TreeWidget)
+moduleWidgetSelector.insert(0, TreeWidget.canHandle, TreeWidget)
+displayDelegateSelector.insert(0, TreeWidget.canHandle, TreeWidget)
 
 
 class BrowserLeafWidget(TreeLeafWidget):
@@ -448,5 +433,5 @@ class TreeBrowserWidget(TreeWidget):
 		return moduleInfo["handler"] == "tree.browser" or moduleInfo["handler"].startswith("tree.browser.")
 
 
-moduleWidgetSelector.insert(1, TreeBrowserWidget.canHandle, TreeBrowserWidget)
-displayDelegateSelector.insert(1, TreeBrowserWidget.canHandle, TreeBrowserWidget)
+moduleWidgetSelector.insert(0, TreeBrowserWidget.canHandle, TreeBrowserWidget)
+displayDelegateSelector.insert(0, TreeBrowserWidget.canHandle, TreeBrowserWidget)

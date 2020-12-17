@@ -21,9 +21,8 @@ from . import observable
 from . import popout
 from . import popup
 from . import utils
-
-from .config import conf
-
+from .cache import Cache
+from .config import updateConf
 
 # Monkey patch some html5.Widget-functions for better ignite-integration
 # Reason for this can be found in issue #2.
@@ -51,6 +50,13 @@ def _html5WidgetSetDisabled(widget, disabled):
 html5.Widget._super_setDisabled = html5.Widget._setDisabled
 html5.Widget._setDisabled = _html5WidgetSetDisabled
 
+def loadProjectConf(aconf):
+	conf = updateConf(aconf)
+	return conf
+
 def bindApp(app,injectdata):
-	conf["app"] = app
-	conf.update(injectdata)
+	injectdata["app"] = app
+	injectdata["cache"] = Cache()
+	conf = updateConf(injectdata)
+	return conf
+

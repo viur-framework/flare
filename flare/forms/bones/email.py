@@ -1,18 +1,26 @@
-from flare.forms import boneSelector, conf
+from flare.forms import boneSelector
+from flare.config import conf
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
 class EmailEditWidget(BaseEditWidget):
-	def _updateWidget(self):
+	def updateWidget(self):
 		self.widget["type"] = "email"
 		self.widget.addClass("input-group-item")
+
+		if self.bone.readonly:
+			self.widget.disable()
+		else:
+			self.widget.enable()
+
 
 class EmailViewWidget(BaseViewWidget):
 	def unserialize(self, value=None):
 		self.value = value
 
 		if value:
+			#"""<a href="mailto:{{value}}">{{value}}</a>""", #fixme style parameter to activate mailTo link
 			self.appendChild(
-				"""<a href="mailto:{{value}}">{{value}}</a>""",
+				"""{{value}}""",
 				vars={"value": value},
 				replace=True
 			)

@@ -265,11 +265,11 @@ class boneField(html5.Div):
 
 			formparam = {"formName":self.form.formName}
 			try:
-				boneFactory = boneSelector.select( self.moduleName, self.boneName, self.structure, **formparam )( self.moduleName, self.boneName, self.structure )
+				boneFactory = boneSelector.select( self.moduleName, self.boneName, self.structure, **formparam )( self.moduleName, self.boneName, self.structure,self.form.errors )
 				self.bonewidget = boneFactory.editWidget()
 			except Exception as e:
 				logging.exception(e)
-				self.bonewidget = html5.Div("Bone not Found %s"%self.boneName)
+				self.bonewidget = html5.Div("Bone not Found: %s"%self.boneName)
 				self.appendChild( self.bonewidget )
 				return 0
 

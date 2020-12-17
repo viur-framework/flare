@@ -1,5 +1,6 @@
 from flare import html5
-from flare.forms import boneSelector, conf, formatString
+from flare.forms import boneSelector, formatString
+from flare.config import conf
 from flare.forms.widgets.relational import InternalEdit
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
@@ -7,7 +8,7 @@ from .base import BaseBone, BaseEditWidget, BaseViewWidget
 class RecordEditWidget( BaseEditWidget ):
 	style = [ "flr-value", "flr-value--record" ]
 
-	def _createWidget( self ):
+	def createWidget( self ):
 		return InternalEdit(
 			self.bone.boneStructure[ "using" ],
 			errorInformation = self.bone.errors,
@@ -17,7 +18,7 @@ class RecordEditWidget( BaseEditWidget ):
 			prefix = "{}.rel".format( self.bone.boneName )
 		)
 
-	def _updateWidget( self ):
+	def updateWidget( self ):
 		if self.bone.readonly:
 			self.widget.disable()
 		else:
@@ -45,7 +46,8 @@ class RecordViewWidget( BaseViewWidget ):
 				self.bone.boneStructure[ "format" ],
 				value,
 				self.bone.boneStructure[ "using" ],
-				language = self.language
+				language = self.language,
+				prefix = ['dest'] #use dest prefix! < rel and record use the same format dest.XXX
 			)
 
 		else:

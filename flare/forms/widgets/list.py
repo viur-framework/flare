@@ -44,7 +44,7 @@ class ListWidget(html5.Div):
 	def canHandle(moduleName, moduleInfo):
 		return moduleInfo["handler"] == "list" or moduleInfo["handler"].startswith("list.")
 
-moduleWidgetSelector.insert(1, ListWidget.canHandle, ListWidget)
+moduleWidgetSelector.insert(0, ListWidget.canHandle, ListWidget)
 
 @html5.tag
 class SkellistItem(Button):

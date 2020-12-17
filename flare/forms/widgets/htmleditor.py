@@ -1,11 +1,12 @@
 import logging
 
-from js import Event as JSevent, encodeURI as JSencodeURI#, summernoteEditor
+from js import Event as JSevent, encodeURI as JSencodeURI, summernoteEditor
 from flare import html5
 from flare.network import DeferredCall
 from flare.config import conf
 from flare.i18n import translate
 from flare.button import Button
+from flare.popup import Alert
 from .file import FileWidget
 
 class TextInsertImageAction(Button):
@@ -76,7 +77,7 @@ class HtmlEditor(html5.Textarea):
 			self.summernote = summernoteEditor(elem, lang)
 		except:
 			if retry >= 3:
-				html5.ext.Alert("Unable to connect summernote, please contact technical support...")
+				Alert("Unable to connect summernote, please contact technical support...")
 				return
 
 			logging.debug("Summernote initialization failed, retry will start in 1sec")
