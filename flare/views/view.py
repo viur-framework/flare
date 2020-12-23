@@ -70,7 +70,6 @@ class ViewWidget( html5.Div ):
 		self.initWidget()
 
 		self.state = StateHandler( (),self )
-		self.state.updateState( "viewfocused", None )
 
 	def onViewfocusedChanged( self, viewname, *args, **kwargs ):
 		pass
