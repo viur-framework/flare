@@ -75,8 +75,8 @@ class Icon(html5.I):
 			self.value = value.get("dest", {}).get("downloadUrl")
 		else:
 			self.value = value
-
-		if self.value and any([self.value.endswith(ext) for ext in [".jpg", ".png", ".gif", ".bmp", ".webp", ".heic", ".jpeg"]]):
+		# sig= test is really ugly we need a better solution
+		if self.value and ("sig=" in self.value or any([self.value.endswith(ext) for ext in [".jpg", ".png", ".gif", ".bmp", ".webp", ".heic", ".jpeg"]])):
 			# language=HTML
 			self.appendChild( '<img [name]="image">' )
 			self.image.onError = lambda e: self.onError( e )
