@@ -28,16 +28,23 @@ class NumericEditWidget( BaseEditWidget ):
 		# Style parameters
 		style = (self.bone.boneStructure.get( "params" ) or { }).get( "style", "" )
 		for s in style.split( " " ):
-			if s.lower().startswith( "amount." ):
-				self.currency = s.split( ".", 1 )[ 1 ]
-				if self.bone.boneStructure.get( "precision" ) is None:
-					self.precision = 2  # default precision for amounts
+			if s.lower().startswith( "currency" ):
+				if "." in s:
+					self.currency = s.split( ".", 1 )[ 1 ]
+				else:
+					self.currency = "€"
+
+				if self.precision is None:
+					self.precision = 2
 
 			if s.lower().startswith( "delimiter." ):
 				fmt = s.split( ".", 1 )[ 1 ]
 				if fmt == "dot":
 					self.currencyDecimalDelimiter = "."
 					self.currencyThousandDelimiter = ","
+		# else: fixme are there more configs?
+
+		self.precision = self.precision or 0
 
 		tpl = html5.Template()
 		#language=html
@@ -68,6 +75,8 @@ class NumericEditWidget( BaseEditWidget ):
 			if self.max is not None:
 				self.widget[ "max" ] = self.max
 		else:
+			self.widget[ "type" ] = self.widget[ "step" ] = self.widget[ "min" ] = self.widget[ "max" ] = None
+
 			assert self.currencyThousandDelimiter[ 0 ] not in "^-+()[]"
 			assert self.currencyDecimalDelimiter[ 0 ] not in "^-+()[]"
 
@@ -87,7 +96,7 @@ class NumericEditWidget( BaseEditWidget ):
 			else:
 				self.value = utils.parseInt( value or 0 )
 
-			return str( self.value )
+			return self.value
 
 		if value is None or str( value ).strip() is "":
 			self.value = None
@@ -136,8 +145,8 @@ class NumericEditWidget( BaseEditWidget ):
 
 			except Exception as e:
 				logging.exception( e )
-
-		self.widget.addClass( "is-invalid" )
+		if self.widget:
+			self.widget.addClass( "is-invalid" )
 		return value
 
 	def onChange( self, event ):

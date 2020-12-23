@@ -7,10 +7,11 @@ class SpatialEditWidget( BaseEditWidget ):
 
 	def createWidget( self ):
 		tpl = html5.Template()
+		#language=HTML
 		tpl.appendChild( self.fromHTML(
 			"""
-			<flr-input [name]="latitude" type="number" placeholder="latitude">
-			<flr-input [name]="longitude" type="number" placeholer="longitute">
+			<flr-input [name]="latitude" type="number" placeholder="latitude" step="any">
+			<flr-input [name]="longitude" type="number" placeholer="longitute" step="any">
 			"""
 		))
 		return tpl

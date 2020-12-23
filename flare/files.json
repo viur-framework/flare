@@ -23,6 +23,7 @@
   "forms/formconf.py",
   "forms/formerrors.py",
   "forms/formtags.py",
+  "forms/formtooltip.py",
   "forms/widgets/file.py",
   "forms/widgets/htmleditor.py",
   "forms/widgets/list.py",

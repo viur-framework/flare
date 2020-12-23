@@ -20,7 +20,7 @@ class PasswordEditWidget(BaseEditWidget):
 			""",
 			vars={"txt": translate("reenter password"), "id": "flr-%s-reenter" % self.bone.boneName })
 
-			#self.widget.element.autocomplete = "new-password"
+			self.widget.element.autocomplete = "new-password"
 		return self.widget
 
 

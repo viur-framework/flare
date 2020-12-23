@@ -150,9 +150,6 @@ class RelationalEditWidget(BaseEditWidget):
 			conf["selectors"][self.bone.destModule] = selector
 
 		# todo: set context
-
-		print("AAAA")
-
 		# Start widget with selector callback
 		selector.setSelector(
 			lambda selector, selection: self.unserialize({
@@ -162,7 +159,6 @@ class RelationalEditWidget(BaseEditWidget):
 			multi=self.bone.multiple,
 			allow=self.bone.selectorAllow
 		)
-		print("BBBB")
 
 	def onDeleteBtnClick(self):
 		self.unserialize()
@@ -211,10 +207,10 @@ class RelationalMultiEditWidget(BaseMultiEditWidget):
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.addBtn["text"] = "Select"
-		self.addBtn["icon"] = "icon-check"
+		self.addBtn["text"] = "Add"
+		self.addBtn["icon"] = "icon-add"
 		self.addBtn.removeClass("btn--add")
-		self.addBtn.addClass("btn--select")
+		self.addBtn.addClass("btn--add")
 
 	def onAddBtnClick(self):
 		selector = conf["selectors"].get(self.bone.destModule)
@@ -246,6 +242,7 @@ class RelationalMultiEditWidget(BaseMultiEditWidget):
 				"rel": _getDefaultValues(self.bone.boneStructure["using"])
 							if self.bone.boneStructure["using"] else None
 			})
+		self.parent().show()
 
 
 class RelationalBone(BaseBone):
@@ -257,9 +254,6 @@ class RelationalBone(BaseBone):
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-
-
-		print(conf)
 
 		self.formatString = self.boneStructure["format"]
 		self.destModule = self.boneStructure["module"]

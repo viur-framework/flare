@@ -146,7 +146,7 @@ class FilePreviewImage(html5.Div):
 		if preview:
 			self.removeClass("no-preview")
 
-		self.previewIcon = Icon(self.currentFile.get("name"), preview or svg)
+		self.previewIcon = Icon(preview or svg,fallbackIcon = "icon-image-file", title = self.currentFile.get("name"))
 		self.appendChild(self.previewIcon)
 
 		if self.currentFile:

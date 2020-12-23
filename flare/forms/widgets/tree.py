@@ -198,6 +198,11 @@ class TreeItemWidget(html5.Li):
 		"""
 		event.stopPropagation()
 		event.preventDefault()
+
+		data = event.dataTransfer.getData("Text")
+		if not data:
+			return
+
 		srcKey, skelType = event.dataTransfer.getData("Text").split("/")
 
 		if self.currentStatus == "inner":

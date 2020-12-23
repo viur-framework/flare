@@ -1,9 +1,12 @@
-import json
+import json,time
 from enum import IntEnum
 from flare.button import Button
 from flare.ignite import *
 from flare.forms import boneSelector
 from flare.config import conf
+from flare.i18n import translate
+from flare.forms.formtooltip import ToolTip
+from flare.forms.formerrors import collectBoneErrors, checkErrors,ToolTipError
 
 class ReadFromClientErrorSeverity(IntEnum):
 	NotSet = 0
@@ -94,8 +97,10 @@ class BaseMultiEditWidgetEntry( html5.Div ):
 		for fct in [ "unserialize", "serialize", "focus" ]:
 			setattr( self, fct, getattr( self.widget, fct ) )
 
+
+		#language=HTML
 		self.appendChild(
-			"""<div [name]="dragArea" class="label flr-bone-dragger"><icon embedsvg="icon-drag-handle" ></icon></div>""",
+			"""<div [name]="dragArea" class="flr-bone-dragger"><svgicon value="icon-drag-handle" ></svgicon></div>""",
 			self.widget,
 			"""<button [name]="removeBtn" class="btn--delete" text="Delete" icon="icon-cross" />"""
 		)
@@ -111,7 +116,10 @@ class BaseMultiEditWidgetEntry( html5.Div ):
 			self.dragArea[ "draggable" ] = True
 
 	def onRemoveBtnClick( self ):
+		if len(self.parent().children()) == 1: #we remove the last Item now
+			self.parent().hide()
 		self.parent().removeChild( self )
+
 
 	def onDragStart( self, event ):
 		if self.parent()[ "disabled" ]:
@@ -186,11 +194,13 @@ class BaseMultiEditWidget( html5.Div ):
 	style = [ "flr-value-container" ]
 
 	def __init__( self, bone, widgetFactory: callable, **kwargs ):
+		#language=HTML
 		super().__init__( """
-			<div [name]="widgets" class="flr-bone-widgets"></div>
 			<div [name]="actions" class="flr-bone-actions input-group">
 				<button [name]="addBtn" class="btn--add" text="Add" icon="icon-add"></button>
 			</div>
+			<div [name]="widgets" class="flr-bone-multiple-wrapper"></div>
+			
 		""" )
 
 		self.bone = bone
@@ -200,15 +210,13 @@ class BaseMultiEditWidget( html5.Div ):
 		self.widgets._widgetToDrag = None
 		self.widgets._widgetIsOver = None  # "We have clearance, Clarence." - "Roger, Roger. What's our vector, Victor?"
 
+		if len(self.widgets.children())==0:
+			self.widgets.hide()
+
 		if self.bone.boneStructure[ "readonly" ]:
 			self.addBtn.hide()
 
 	def onAddBtnClick( self ):
-		last = self.widgets.children( -1 )
-		if last and not last.serialize():
-			last.focus()
-			return
-
 		entry = self.addEntry()
 		entry.focus()
 
@@ -221,6 +229,7 @@ class BaseMultiEditWidget( html5.Div ):
 			entry.unserialize( value )
 
 		self.widgets.appendChild( entry )
+		self.widgets.show()
 		return entry
 
 	def unserialize( self, value ):
@@ -276,9 +285,10 @@ class BaseLanguageEditWidget( html5.Div ):
 	"""
 
 	def __init__( self, bone, widgetFactory: callable, **kwargs ):
+		#language=HTML
 		super().__init__( """
 			<div [name]="widgets" class="flr-bone-widgets"></div>
-			<div [name]="actions" class="flr-bone-actions input-group"></div>
+			<div [name]="actions" class="flr-bone-actions input-group vi-bone-language-actions"></div>
 		""" )
 
 		languages = bone.skelStructure[ bone.boneName ][ "languages" ]
@@ -312,6 +322,10 @@ class BaseLanguageEditWidget( html5.Div ):
 			self.widgets.appendChild( langWidget )
 
 			self._languageWidgets[ lang ] = (langBtn, langWidget)
+
+		#language=HTML
+		self.actions.appendChild('''<div class="lang-tab-spacer"></div>''')
+
 
 	def onLangBtnClick( self, sender ):
 		for btn, widget in self._languageWidgets.values():
@@ -360,12 +374,13 @@ class BaseBone( object ):
 		self.boneStructure = self.skelStructure[ self.boneName ]
 		self.errors = errors
 		self.errorQueue = errorQueue
-		print("-----------")
-		print(self.boneStructure)
+
 		self.readonly = bool( self.boneStructure.get( "readonly" ) )
 		self.required = bool( self.boneStructure.get( "required" ) )
 		self.multiple = bool( self.boneStructure.get( "multiple" ) )
 		self.languages = self.boneStructure.get( "languages" )
+
+		self.boneErrors = [ translate( e[ "errorMessage" ] ) for e in collectBoneErrors( self.errors, self.boneName, self.boneStructure ) ]
 
 
 	def editWidget( self, value = None, errorInformation=None ) -> html5.Widget:
@@ -397,6 +412,77 @@ class BaseBone( object ):
 		widget = widgetFactory( self )
 		widget.unserialize( value )
 		return widget
+
+	def labelWidget( self ):
+		descrLbl = html5.Label( self.boneName if conf[ "showBoneNames" ] else self.boneStructure.get( "descr", self.boneName ) )
+		descrLbl.addClass( "label", "flr-label", "flr-label--%s" % self.boneStructure[ "type" ].replace( ".", "-" ), "flr-label--%s" % self.boneName )
+
+		if self.required:
+			descrLbl.addClass( "is-required" )
+
+		if self.boneErrors:
+			descrLbl.addClass("is-invalid")
+
+		return descrLbl
+
+	def tooltipWidget( self ):
+		if ("params" in self.boneStructure.keys()
+			and isinstance( self.boneStructure[ "params" ], dict )
+			and "tooltip" in self.boneStructure[ "params" ].keys()):
+			return ToolTip( shortText = self.boneName if conf[ "showBoneNames" ] else self.boneStructure.get( "descr", self.boneName ), longText = self.boneStructure[ "params" ][ "tooltip" ] )
+		return ""
+
+	def errorWidget( self ):
+		if not self.boneErrors:
+			return False
+
+		return ToolTipError(longText=", ".join(self.boneErrors))
+
+
+
+
+
+	def boneWidget( self ):
+		boneId = "%s___%s"%(self.boneName,str( time.time() ).replace( ".", "_" ))
+		boneFactory = boneSelector.select( self.moduleName, self.boneName, self.skelStructure )( self.moduleName, self.boneName, self.skelStructure, self.errors, errorQueue = self.errorQueue )
+
+		widget = boneFactory.editWidget( errorInformation = self.errors )
+		widget["id"] = boneId
+
+		label = self.labelWidget()
+		label["for"] = boneId
+
+		tooltip = self.tooltipWidget()
+
+		error = self.errorWidget()
+
+		containerDiv = html5.Div()
+
+
+
+		containerDiv.addClass( "flr-bone", "flr-bone--%s " % self.boneStructure[ "type" ].replace( ".", "-" ), "flr-bone--%s" % self.boneName )
+		if self.multiple:
+			containerDiv.addClass("flr-bone-multiple")
+		if self.languages:
+			containerDiv.addClass("flr-bone-languages")
+
+		containerDiv.appendChild( label )
+
+		valueDiv = html5.Div()
+		valueDiv.addClass("flr-value-wrapper")
+		valueDiv.appendChild(widget)
+		valueDiv.appendChild(tooltip)
+
+		if error:
+			valueDiv.appendChild(error)
+
+		containerDiv.appendChild( valueDiv )
+
+			#containerDiv.appendChild( fieldErrors )
+
+
+		return (containerDiv,label,widget,error)
+
 
 	'''
 	def toString(self, value):

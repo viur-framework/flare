@@ -21,7 +21,7 @@ class BooleanEditWidget( BaseEditWidget ):
 		self.widget[ "checked" ] = bool( value )
 
 	def serialize( self ):
-		return self.widget[ "checked" ]
+		return "yes" if self.widget[ "checked" ] else "no"
 
 
 class BooleanViewWidget( BaseViewWidget ):
@@ -34,8 +34,6 @@ class BooleanViewWidget( BaseViewWidget ):
 class BooleanBone( BaseBone ):
 	editWidgetFactory = BooleanEditWidget
 	viewWidgetFactory = BooleanViewWidget
-	multiEditWidgetFactory = None
-	multiViewWidgetFactory = None
 
 	@staticmethod
 	def checkFor( moduleName, boneName, skelStructure, *args, **kwargs ):

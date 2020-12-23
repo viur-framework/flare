@@ -51,8 +51,6 @@ class ColorViewWidget( BaseViewWidget ):
 class ColorBone( BaseBone ):
 	editWidgetFactory = ColorEditWidget
 	viewWidgetFactory = ColorViewWidget
-	#multiEditWidgetFactory = None
-	#multiViewWidgetFactory = None
 
 	@staticmethod
 	def checkFor( moduleName, boneName, skelStructure, *args, **kwargs ):
