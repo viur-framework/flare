@@ -3045,15 +3045,8 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 					if bindTo:
 						try:
 							# update whitelist
-
-							print(conf)
-
-							print(conf["saveEvalAllowedCallables"])
 							sEval.allowedCallables = conf["saveEvalAllowedCallables"]
 
-							print("-.-.-")
-							print(sEval.compile(val))
-							print(sEval.execute( sEval.compile(val), {} ))
 							showWdg = sEval.execute( sEval.compile(val), {} )
 							if not showWdg:
 								appendItem = False

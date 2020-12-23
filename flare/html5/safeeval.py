@@ -105,7 +105,6 @@ class SafeEval:
 		:param names: a mapping of local objects which is used as 'locals' namespace
 		:return: whatever the expression wants to return
 		"""
-		print("execute", list(self.nodes.keys()), node, names)
 		return self.nodes[type(node)](node, names)
 
 	def compile(self, expr: str) -> ast.AST:
