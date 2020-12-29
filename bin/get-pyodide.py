@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os, sys, json, requests
 
-VERSION = "0.15.0"
+VERSION = "0.16.1"
 CDN = "https://pyodide-cdn2.iodide.io"
 URL = "{CDN}/v{VERSION}/full/{file}"
 DIR = "pyodide"

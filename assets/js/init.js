@@ -1,3 +1,10 @@
+/*
+This JavaScript is used to pre-load Python modules downloaded from raw Python source files into the emulated
+emscripten virtual file system so that they can be called from Pyodide.
+
+Please see docs/setup.md in the section "HTML skeleton" for further information on how to use this script.
+*/
+
 class init {
 
 	constructor(config) {
@@ -48,10 +55,10 @@ class init {
 					fetch(url, {}).then((response) => {
 						if (response.status === 200)
 							return response.text().then((code) => {
-								let path = ("/lib/python3.7/site-packages/" + module + "/" + file).split("/");
+								let path = ("/lib/python3.8/site-packages/" + module + "/" + file).split("/");
 								let lookup = "";
 
-								if (bar){
+								if (bar) {
 									bar.value +=1
 									info.innerHTML = files[f]
 								}

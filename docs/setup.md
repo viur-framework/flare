@@ -14,7 +14,7 @@ Below is a shortened version of the code from *hello.html* delivered together wi
 	<link rel="stylesheet" href="assets/css/style.min.css"/>
 
 	<!-- (1) -->
-    <script src="https://pyodide-cdn2.iodide.io/v0.15.0/full/pyodide.js"></script>
+    <script src="https://pyodide-cdn2.iodide.io/v0.16.1/full/pyodide.js"></script>
 	<!-- <script src="pyodide/pyodide.js"></script> -->
     
     <!-- (2) -->
@@ -79,7 +79,7 @@ We only describe the files in `/myapp`:
 <html>
 <head>
 	<meta charset="UTF-8">
-    <script src="https://pyodide-cdn2.iodide.io/v0.15.0/full/pyodide.js"></script>
+    <script src="https://pyodide-cdn2.iodide.io/v0.16.1/full/pyodide.js"></script>
 	<script src="/flare/assets/js/init.js"></script>
 	<script>
 		window.addEventListener(
