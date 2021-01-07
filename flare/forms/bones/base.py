@@ -14,7 +14,7 @@ class ReadFromClientErrorSeverity(IntEnum):
 	Empty = 2
 	Invalid = 3
 
-str(ReadFromClientErrorSeverity(int("0"))).split(".")[1]
+#str(ReadFromClientErrorSeverity(int("0"))).split(".")[1] ???
 
 class BaseEditWidget( html5.Div ):
 	"""
@@ -200,7 +200,7 @@ class BaseMultiEditWidget( html5.Div ):
 				<button [name]="addBtn" class="btn--add" text="Add" icon="icon-add"></button>
 			</div>
 			<div [name]="widgets" class="flr-bone-multiple-wrapper"></div>
-			
+
 		""" )
 
 		self.bone = bone
@@ -365,7 +365,7 @@ class BaseBone( object ):
 	Base "Catch-All" delegate for everything not handled separately.
 	"""
 
-	def __init__( self, moduleName, boneName, skelStructure, errors, errorQueue=None ):
+	def __init__( self, moduleName, boneName, skelStructure, errors=None, errorQueue=None ):
 		super().__init__()
 
 		self.moduleName = moduleName

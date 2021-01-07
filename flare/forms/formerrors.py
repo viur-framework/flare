@@ -14,10 +14,9 @@ def collectBoneErrors(errorList, currentKey,boneStructure):
 		Empty = 2
 		Invalid = 3
 	'''
-
-
 	boneErrors = []
-	for error in errorList:
+
+	for error in errorList or []:
 		if error["fieldPath"] and error["fieldPath"][0] == currentKey:
 			isError = False
 			if (error["severity"] == 0 or error["severity"] == 2) and boneStructure["required"]:
@@ -30,6 +29,7 @@ def collectBoneErrors(errorList, currentKey,boneStructure):
 				thisError = error.copy()
 				thisError["fieldPath"] = error["fieldPath"][1:]
 				boneErrors.append(thisError)
+
 	return boneErrors
 
 

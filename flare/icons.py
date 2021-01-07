@@ -38,10 +38,13 @@ class SvgIcon(html5.svg.Svg):
 
 	def replaceSVG( self, icondata ):
 		self.removeAllChildren()
-		svgnode = html5.fromHTML(icondata)[0]
-		self["viewbox"] = svgnode["viewbox"]
-		self["class"] = svgnode["class"]
-		self.appendChild(svgnode._children)
+
+		for node in html5.fromHTML(icondata):
+			if isinstance(node, html5.svg.Svg):
+				self["viewbox"] = node["viewbox"]
+				self["class"] = node["class"]
+				self.appendChild(node._children)
+				break
 
 	def requestFallBack(self, data, status):
 		url = None
