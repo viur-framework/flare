@@ -5,14 +5,16 @@ Flare-styled button Widgets.
 from . import html5
 from flare.icons import SvgIcon
 
+
 @html5.tag
 class Button(html5.Button):
 	"""
 	Extended version for a button with a text and icon, which binds itself to an event function.
 	"""
+	_htmlTagName = "flr-button"
 
 	def __init__(self, text=None, callback=None, className="", icon=None):
-		super(Button, self).__init__()
+		super().__init__()
 		self.addClass("btn", className)
 		self.sinkEvent("onClick")
 		self.icon = None

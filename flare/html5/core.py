@@ -277,7 +277,7 @@ class Widget(object):
 	_tagName = None # Defines the tag-name that is used for DOM-Element construction
 	_leafTag = False    # Defines whether ths Widget may contain other Widgets (default) or is a leaf
 	_namespace = None   # Namespace
-	_parserTagName = None   # Alternative tag name under which this Widget is registered in HTML parser
+	_htmlTagName = None # Alternative tag name under which this Widget is registered in HTML parser
 	style = []  # CSS-classes to directly assign to this Widget at construction.
 
 	def __init__(self, *args, appendTo=None, style=None, **kwargs):
@@ -2659,9 +2659,9 @@ def tag(cls):
 	assert issubclass(cls, Widget)
 	# This is a little bit ugly but works for the svg...
 	if str(cls.__module__).split(".")[-2] == "html5":
-		registerTag(cls._parserTagName or cls._tagName or cls.__name__, cls)
+		registerTag(cls._htmlTagName or cls._tagName or cls.__name__, cls)
 	else:
-		registerTag(cls._parserTagName or cls.__name__, cls)   # do NOT check for cls._tagName here!!!
+		registerTag(cls._htmlTagName or cls.__name__, cls)   # do NOT check for cls._tagName here!!!
 
 	return cls
 
@@ -2691,7 +2691,7 @@ def _buildTags(debug=False):
 		except:
 			continue
 
-		registerTag(cls._parserTagName or cls._tagName or cls.__name__, cls, override=False)
+		registerTag(cls._htmlTagName or cls._tagName or cls.__name__, cls, override=False)
 
 	if debug:
 		for tag in sorted(__tags.keys()):
