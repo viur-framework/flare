@@ -1,6 +1,12 @@
 import logging
 
-from js import Event as JSevent, encodeURI as JSencodeURI, summernoteEditor
+from js import Event as JSevent, encodeURI as JSencodeURI
+
+try:
+	from js import summernoteEditor
+except:
+	summernoteEditor = None
+
 from flare import html5
 from flare.network import DeferredCall
 from flare.config import conf
