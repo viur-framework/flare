@@ -3017,7 +3017,8 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 				elif att.startswith(":"):
 					if bindTo:
 						try:
-							wdg[att[1:]] = getattr(bindTo, val)
+							#wdg[att[1:]] = getattr(bindTo, val)
+							setattr( wdg, att[ 1: ], getattr( bindTo, val ) )
 						except Exception as e:
 							logging.exception(e)
 
