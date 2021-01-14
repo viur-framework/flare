@@ -359,7 +359,7 @@ class boneField(html5.Div):
 
 @html5.tag
 class sendForm(Button):
-
+	_htmlTagName = "sendForm"
 	def __init__( self, text = None, callback = None, className = "btn--submit btn--primary", icon = None, badge = None,form=None ):
 		super().__init__(text,callback,className,icon)
 		self.form = form
