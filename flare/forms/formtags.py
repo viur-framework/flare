@@ -6,7 +6,7 @@ from flare.button import Button
 from flare.event import EventDispatcher
 
 
-@html5.tag
+@html5.tag("flare-form")
 class viurForm(html5.Form):
 	"""
 	Handles an input form for a VIUR skeleton.
@@ -225,7 +225,7 @@ class viurForm(html5.Form):
 
 
 
-@html5.tag
+@html5.tag("flare-form-field")
 class boneField(html5.Div):
 
 	def __init__(self, boneName=None, form=None, defaultvalue=None):
@@ -357,13 +357,11 @@ class boneField(html5.Div):
 			self.bonelabel.toggleClass("is-valid","is-invalid")
 		self.bonewidget.toggleClass("is-valid","is-invalid")
 
-@html5.tag
+@html5.tag("flare-form-submit")
 class sendForm(Button):
-	_htmlTagName = "sendForm"
 	def __init__( self, text = None, callback = None, className = "btn--submit btn--primary", icon = None, badge = None,form=None ):
 		super().__init__(text,callback,className,icon)
 		self.form = form
-
 
 	def onAttach(self):
 		if "form" not in dir(self) or not self.form:

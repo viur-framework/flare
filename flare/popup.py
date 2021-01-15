@@ -1,11 +1,13 @@
 """
 Pre-defined dialog widgets for user interaction.
 """
+
 from . import html5, utils, icons
 from .button import Button
 
 
 class Popup(html5.Div):
+
 	def __init__(self, title=None, id=None, className=None, icon=None, enableShortcuts=True, closeable=True, *args, **kwargs):
 		# language=HTML
 		super().__init__("""
@@ -13,7 +15,7 @@ class Popup(html5.Div):
 				<div class="box-head" [name]="popupHead">
 					<div class="item" [name]="popupHeadItem">
 						<div class="item-image">
-							<icon class="i i--small" [name]="popupIcon"></icon>
+							<flare-icon class="i i--small" [name]="popupIcon"></flare-icon>
 						</div>
 						<div class="item-content">
 							<div class="item-headline" [name]="popupHeadline"></div>
@@ -101,11 +103,9 @@ class Prompt(Popup):
 				<input class="input" [name]="inputElem" value="{{value}}" placeholder="{{placeholder}}" />
 			</div>
 			""",
-			vars={
-				"text": text,
-				"value": value,
-				"placeholder": placeholder
-			}
+			text=text,
+			value=value,
+			placeholder=placeholder
 		)
 
 		# Cancel
@@ -258,106 +258,11 @@ class Confirm(Popup):
 		self.drop()
 
 
-class SelectDialog(Popup):
-
-	def __init__(self, prompt, items=None, title=None, okBtn="OK", cancelBtn="Cancel", forceSelect=False,
-	             callback=None, *args, **kwargs):
-		super().__init__(title, *args, **kwargs)
-		self["class"].append("popup--selectdialog")
-
-		self.callback = callback
-		self.items = items
-		assert isinstance(self.items, list)
-
-		# Prompt
-		if prompt:
-			lbl = html5.Span()
-			lbl["class"].append("prompt")
-
-			if isinstance(prompt, html5.Widget):
-				lbl.appendChild(prompt)
-			else:
-				utils.textToHtml(lbl, prompt)
-
-			self.popupBody.appendChild(lbl)
-
-		# Items
-		if not forceSelect and len(items) <= 3:
-			for idx, item in enumerate(items):
-				if isinstance(item, dict):
-					title = item.get("title")
-					cssc = item.get("class")
-				elif isinstance(item, tuple):
-					title = item[1]
-					cssc = None
-				else:
-					title = item
-
-				btn = Button(title, callback=self.onAnyBtnClick)
-				btn.idx = idx
-
-				if cssc:
-					btn.addClass(cssc)
-
-				self.popupBody.appendChild(btn)
-		else:
-			self.select = html5.Select()
-			self.popupBody.appendChild(self.select)
-
-			for idx, item in enumerate(items):
-				if isinstance(item, dict):
-					title = item.get("title")
-				elif isinstance(item, tuple):
-					title = item[1]
-				else:
-					title = item
-
-				opt = html5.Option(title)
-				opt["value"] = str(idx)
-
-				self.select.appendChild(opt)
-
-			if okBtn:
-				self.popupFoot.appendChild(Button(okBtn, callback=self.onOkClick))
-
-			if cancelBtn:
-				self.popupFoot.appendChild(Button(cancelBtn, callback=self.onCancelClick))
-
-	def onAnyBtnClick(self, sender):
-		item = self.items[sender.idx]
-
-		if isinstance(item, dict) and item.get("callback") and callable(item["callback"]):
-			item["callback"](item)
-
-		if self.callback:
-			self.callback(item)
-
-		self.items = None
-		self.close()
-
-	def onCancelClick(self, sender=None):
-		self.close()
-
-	def onOkClick(self, sender=None):
-		assert self.select["selectedIndex"] >= 0
-		item = self.items[int(self.select.children(self.select["selectedIndex"])["value"])]
-
-		if isinstance(item, dict) and item.get("callback") and callable(item["callback"]):
-			item["callback"](item)
-
-		if self.callback:
-			self.callback(item)
-
-		self.items = None
-		self.select = None
-		self.close()
-
-
 class TextareaDialog(Popup):
 	def __init__(self, text, value="", successHandler=None, abortHandler=None, successLbl="OK", abortLbl="Cancel",
 	             *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self["class"].append("popup--textareadialog")
+		self.addClass("popup--textareadialog")
 
 		self.successHandler = successHandler
 		self.abortHandler = abortHandler

@@ -2,15 +2,16 @@
 ViUR-user-module-related tools and widgets.
 """
 from . import html5
-from .icons import Noci
+from .icons import Icon
 from .config import conf
 
 
-@html5.tag
-class Avatar(Noci):
+@html5.tag("flare-avatar")
+class Avatar(Icon):
 	"""
-	i-Tag that represents a user avatar. When the user is not know currently, it is automatically fetched
-	into the cache for further usage.
+	Icon-Component that represents a user avatar.
+
+	When the user is not, it is automatically fetched into the cache for further usage.
 	"""
 
 	def __init__(self):
@@ -23,30 +24,31 @@ class Avatar(Noci):
 			if "image" not in value:
 				value = value["key"]
 
-		#request missing data
+		# request missing data
 		if isinstance(value, str):
 			conf["cache"].request({
-					"module": "user",
-					"action": "view",
-					"params": value
-				},
+				"module": "user",
+				"action": "view",
+				"params": value
+			},
 				finishHandler=self._onUserAvailable
 			)
-		#try to set Image
+		# try to set Image
 		elif isinstance(value, dict) and all([k in value for k in ["key", "image"]]) and value["image"]:
 			self.user = value
 			if self.fallbackClass:
-				self.removeClass( self.fallbackClass )
+				self.removeClass(self.fallbackClass)
 			super()._setValue(value["image"])
 		else:
-			#if not fallback use initials
-			if not self.fallback and isinstance(value, dict) and all([k in value for k in ["key", "firstname", "lastname"]]):
-				super()._setValue( " ".join( [ value[ "firstname" ], value[ "lastname" ] ] ) )
-			#if a fallback is set use this instead
+			# if not fallback use initials
+			if not self.fallback and isinstance(value, dict) and all(
+					[k in value for k in ["key", "firstname", "lastname"]]):
+				super()._setValue(" ".join([value["firstname"], value["lastname"]]))
+			# if a fallback is set use this instead
 			elif self.fallback:
 				if self.fallbackClass:
 					self.addClass(self.fallbackClass)
-				super()._setValue( self.fallback )
+				super()._setValue(self.fallback)
 			# if no fallback und no first- and lastname available use hardcoded icon
 			else:
 				super()._setValue("icon-user")
@@ -54,14 +56,16 @@ class Avatar(Noci):
 	def _onUserAvailable(self, res):
 		self["value"] = res["user"]
 
-	def _setFallbackclass( self, value ):
+	def _setFallbackclass(self, value):
 		self.fallbackClass = value
 
-@html5.tag
+
+@html5.tag("flare-username")
 class Username(html5.Div):
 	"""
-	Div-Tag that represents a user name. When the user is not know currently, it is automatically fetched
-	into the cache for further usage.
+	Div-Tag that represents a user name.
+
+	When the user is not, it is automatically fetched into the cache for further usage.
 	"""
 	_leafTag = True
 
@@ -77,10 +81,10 @@ class Username(html5.Div):
 
 		if isinstance(value, str):
 			conf["cache"].request({
-					"module": "user",
-					"action": "view",
-					"params": value
-				},
+				"module": "user",
+				"action": "view",
+				"params": value
+			},
 				finishHandler=self._onUserAvailable,
 				failureHandler=lambda *args, **kwargs: self.appendChild("???")  # I cannot render this user
 			)
@@ -94,8 +98,7 @@ class Username(html5.Div):
 				self.appendChild(value["key"])
 
 		else:
-			self.appendChild("???") # I cannot render this user
+			self.appendChild("???")  # I cannot render this user
 
 	def _onUserAvailable(self, res):
 		self["value"] = res["user"]
-

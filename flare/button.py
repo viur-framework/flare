@@ -6,12 +6,11 @@ from . import html5
 from flare.icons import SvgIcon
 
 
-@html5.tag
+@html5.tag("flare-button")
 class Button(html5.Button):
 	"""
 	Extended version for a button with a text and icon, which binds itself to an event function.
 	"""
-	_htmlTagName = "flr-button"
 
 	def __init__(self, text=None, callback=None, className="", icon=None):
 		super().__init__()

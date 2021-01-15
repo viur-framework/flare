@@ -1,30 +1,26 @@
 """
-Ignite-specific form Widgets with specialized classes and behavior.
+Flare-specific form Widgets with specialized classes and behavior.
 """
-
 
 from . import html5
 
 
-@html5.tag
+@html5.tag("flare-label")
 class Label(html5.Label):
-	_parserTagName = "flr-label"
 
 	def __init__(self, *args, **kwargs):
 		super(Label, self).__init__(style="label flr-label", *args, **kwargs)
 
 
-@html5.tag
+@html5.tag("flare-input")
 class Input(html5.Input):
-	_parserTagName = "flr-input"
 
 	def __init__(self, *args, **kwargs):
 		super(Input, self).__init__(style="input flr-input", *args, **kwargs)
 
 
-@html5.tag
+@html5.tag("flare-switch")
 class Switch(html5.Div):
-	_parserTagName = "flr-switch"
 
 	def __init__(self, *args, **kwargs):
 		super(Switch, self).__init__(style="switch flr-switch", *args, **kwargs)
@@ -44,9 +40,8 @@ class Switch(html5.Div):
 		return self.input["checked"]
 
 
-@html5.tag
+@html5.tag("flare-check")
 class Check(html5.Input):
-	_parserTagName = "flr-check"
 
 	def __init__(self, *args, **kwargs):
 		super(Check, self).__init__(style="check flr-check", *args, **kwargs)
@@ -61,9 +56,8 @@ class Check(html5.Input):
 		self.appendChild(checkLabel)
 
 
-@html5.tag
+@html5.tag("flare-radio")
 class Radio(html5.Div):
-	_parserTagName = "flr-radio"
 
 	def __init__(self, *args, **kwargs):
 		super(Radio, self).__init__(style="radio flr-radio", *args, **kwargs)
@@ -78,9 +72,8 @@ class Radio(html5.Div):
 		self.appendChild(radioLabel)
 
 
-@html5.tag
+@html5.tag("flare-select")
 class Select(html5.Select):
-	_parserTagName = "flr-select"
 
 	def __init__(self, *args, **kwargs):
 		super(Select, self).__init__(style="select flr-select", *args, **kwargs)
@@ -92,25 +85,22 @@ class Select(html5.Select):
 		self.appendChild(defaultOpt)
 
 
-@html5.tag
+@html5.tag("flare-textarea")
 class Textarea(html5.Textarea):
-	_parserTagName = "flr-textarea"
 
 	def __init__(self, *args, **kwargs):
 		super(Textarea, self).__init__(style="textarea flr-textarea", *args, **kwargs)
 
 
-@html5.tag
+@html5.tag("flare-progress")
 class Progress(html5.Progress):
-	_parserTagName = "flr-progress"
 
 	def __init__(self, *args, **kwargs):
 		super(Progress, self).__init__(style="progress flr-progress", *args, **kwargs)
 
 
-@html5.tag
+@html5.tag("flare-item")
 class Item(html5.Div):
-	_parserTagName = "flr-item"
 
 	def __init__(self, title=None, descr=None, className=None, *args, **kwargs):
 		super(Item, self).__init__(style="item flr-item", *args, **kwargs)
@@ -136,9 +126,8 @@ class Item(html5.Div):
 			self.appendChild(self.itemSubline)
 
 
-@html5.tag
+@html5.tag("flare-table")
 class Table(html5.Table):
-	_parserTagName = "ignt-table"
 
 	def __init__(self, *args, **kwargs):
 		super(Table, self).__init__(*args, **kwargs)
@@ -179,12 +168,13 @@ class Table(html5.Table):
 					col -= 1
 
 				return
-	def fastGrid( self, rows, cols, createHidden=False ):
-		colsstr = "".join(['<td class="ignt-table-body-cell"></td>' for i in range(0, cols)])
+
+	def fastGrid(self, rows, cols, createHidden=False):
+		colsstr = "".join(['<td class="ignt-table-body-cell"></td>' for _ in range(0, cols)])
 		tblstr = '<tbody [name]="body" class="ignt-table-body" >'
 
 		for r in range(0, rows):
-			tblstr += '<tr class="ignt-table-body-row %s">%s</tr>' %("is-hidden" if createHidden else "",colsstr)
-		tblstr +="</tbody>"
+			tblstr += '<tr class="ignt-table-body-row %s">%s</tr>' % ("is-hidden" if createHidden else "", colsstr)
+		tblstr += "</tbody>"
 
 		self.fromHTML(tblstr)

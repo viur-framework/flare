@@ -28,7 +28,7 @@ class ButtonBar( html5.Div ):
 		self.state.updateState( "activeButton", widget )
 
 
-@html5.tag
+@html5.tag("flare-buttonbar-button")
 class ButtonBarButton( Button ):
 
 	def __init__( self ):
@@ -41,7 +41,7 @@ class ButtonBarButton( Button ):
 			self.removeClass( "btn--primary" )
 
 
-@html5.tag
+@html5.tag("flare-buttonbar-search")
 class ButtonBarSearch(html5.Div):
 
 	def __init__(self):

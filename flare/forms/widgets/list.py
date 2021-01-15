@@ -46,7 +46,7 @@ class ListWidget(html5.Div):
 
 moduleWidgetSelector.insert(0, ListWidget.canHandle, ListWidget)
 
-@html5.tag
+#@html5.tag  # fixme: What should be the tag-name for this?
 class SkellistItem(Button):
 
 	def __init__( self, skel ):

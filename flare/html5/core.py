@@ -274,10 +274,11 @@ def _wrapEventCallback(callback):
 
 
 class Widget(object):
-	_tagName = None # Defines the tag-name that is used for DOM-Element construction
-	_leafTag = False    # Defines whether ths Widget may contain other Widgets (default) or is a leaf
 	_namespace = None   # Namespace
-	_htmlTagName = None # Alternative tag name under which this Widget is registered in HTML parser
+	_tagName = None     # Defines the DOM element name that is used for construction
+	_leafTag = False    # Defines whether ths Widget may contain other Widgets (default) or is a leaf
+						# This will be checked by appendChild()
+
 	style = []  # CSS-classes to directly assign to this Widget at construction.
 
 	def __init__(self, *args, appendTo=None, style=None, **kwargs):
@@ -2655,15 +2656,44 @@ def registerTag(tagName, widgetClass, override=True):
 	__tags[tagName.lower()] = (widgetClass, attr)
 
 
-def tag(cls):
-	assert issubclass(cls, Widget)
-	# This is a little bit ugly but works for the svg...
-	if str(cls.__module__).split(".")[-2] == "html5":
-		registerTag(cls._htmlTagName or cls._tagName or cls.__name__, cls)
-	else:
-		registerTag(cls._htmlTagName or cls.__name__, cls)   # do NOT check for cls._tagName here!!!
+def tag(arg):
+	"""
+	Decorator to register a sub-class of html5.Widget either under its class-name or an associated tag-name.
 
-	return cls
+	Examples:
+	```python
+	# register class Foo as <foo>-Tag
+	@html5.tag
+	class Foo(html5.Div):
+		pass
+
+	# register class Bar as <baz>-Tag
+	@html5.tag("baz")
+	class Bar(html5.Div):
+		pass
+	```
+	"""
+	if isinstance(arg, str):
+		def wrapper(cls):
+			#print("%r registered as <%s>" % (cls, arg))
+			registerTag(arg, cls)
+			return cls
+
+		return wrapper
+
+	else:
+		cls = arg
+		assert issubclass(cls, Widget), "Decorated class must be a sub-class of Widget!"
+
+		# when inside html5, use cls._tagName as the tagName
+		if str(cls.__module__).split(".")[-2] == "html5":
+			tagName = cls._tagName or cls.__name__
+		else:
+			tagName = cls.__name__
+
+		print("%r registered as <%s>" % (cls, tagName))
+		registerTag(tagName, cls)
+		return cls
 
 
 def _buildTags(debug=False):
@@ -2691,7 +2721,7 @@ def _buildTags(debug=False):
 		except:
 			continue
 
-		registerTag(cls._htmlTagName or cls._tagName or cls.__name__, cls, override=False)
+		registerTag(cls._tagName or cls.__name__, cls, override=False)
 
 	if debug:
 		for tag in sorted(__tags.keys()):
@@ -2699,12 +2729,15 @@ def _buildTags(debug=False):
 
 
 class HtmlAst(list):
-	pass
+	"""
+	Abstract syntax tree element used by parseHTML()
+	"""
 
 
 def parseHTML(html, debug=False):
 	"""
-	Parses the provided HTML-code according to the objects defined in the html5-library.
+	Parses the provided HTML-code according to the tags registered by html5.registerTag() or components that used
+	the html5.tag-decorator.
 	"""
 
 	def convertEncodedText(txt):

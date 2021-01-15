@@ -7,12 +7,11 @@ from . import html5
 from . import utils
 
 
-@html5.tag
+@html5.tag("flare-timestamp")
 class Timestamp(html5.Div):
 	"""
 	Div-Tag that represents a date-and-time value that automatically updates when time flows...
 	"""
-
 	_leafTag = True
 
 	def __init__(self):

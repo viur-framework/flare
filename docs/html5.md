@@ -159,13 +159,15 @@ Removes all child elements from the parent element
 These methods are helpful for adding classes dynamically.
 
 #### addClass()
-Adds a class to the html5 element and checks to prevent adding the same class.
+
+Adds a class to the html5.Widget and checks to prevent adding the same class.
 ```
 nav = self.appendChild("""<ul></ul>""")
 nav.addClass('navlist')
 ```
 
 #### removeClass()
+
 Checks if the object has that class and removes it
 ```
 nav = self.appendChild("""<ul class='big-red-warning-border-color'></ul>""")
@@ -173,10 +175,12 @@ nav.removeClass('big-red-warning-border-color')
 ```
 
 #### toggleClass()
-Toggles a class on and off, depending on wether it has already been added or not.
+
+Toggles a class on and off, depending on whether it has already been added or not.
 If the element already has the class, it is removed. If the element does not have the class already, it is added to it.
 
 #### hasClass()
+
 Checks if the element has a given class or not. Returns True if class name is found and False otherwise.
 ```
 nav = self.appendChild("""<ul class='big-red-warning-border-color'></ul>""")
@@ -205,12 +209,31 @@ todo
 
 ### html5.parseHTML()
 
-todo
+Parses the provided HTML-code according to the tags registered by html5.registerTag() or components that use the html5.tag-decorator.
+
+The function returns an abstract syntax tree representation (HtmlAst) of the HTML-code that can be rendered by `html5.fromHTML()`.
+
 
 ### html5.fromHTML()
 
-todo
+Renders HTML-code or compiled HTML-code (HtmlAst).
+
 
 ### @html5.tag
 
-todo
+Decorator to register a sub-class of `html5.Widget` either under its class-name or an associated tag-name.
+
+Examples:
+```python
+from flare import html5
+
+# register class Foo as <foo>-Tag
+@html5.tag
+class Foo(html5.Div):
+    pass
+
+# register class Bar as <baz>-Tag
+@html5.tag("baz")
+class Bar(html5.Div):
+    pass
+```

@@ -5,7 +5,7 @@ Input widget with additional event handling.
 
 from . import html5
 
-
+# todo @html5.tag? But flare-input is already specified!
 class Input(html5.Input):
 	def __init__(self, type="text", placeholder=None, callback=None, id=None, focusCallback=None, *args, **kwargs):
 		"""
