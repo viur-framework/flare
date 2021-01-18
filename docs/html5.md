@@ -2,7 +2,7 @@
 
 Any **flare** components are entirely established on top of the *html5*-library.
 
-The *html5* library is flare's core module and key feature, and manages access to the browser's DOM and its items, by implementing a Python object wrapper class for any HTML5 element. Such an element is called *widget*. For example, `html5.Div()` is the widget representing a div-element, or `html5.A()` a widget representing an a-element. Widgets can be sub-classed into specialized components, which contain other widgets and components and interact together.
+The *html5* library is flare's core module and key feature, and manages access to the browser's DOM and its items, by implementing a Python object wrapper class for any HTML-element. Such an element is called *widget*. For example, `html5.Div()` is the widget representing a div-element, or `html5.A()` a widget representing an a-element. Widgets can be sub-classed into specialized components, which contain other widgets and components and interact together.
 
 The document's body and head can directly be accessed by the static widgets `html5.Head()` and `html5.Body()`.
 
@@ -61,7 +61,7 @@ ul.prependChild(html5.Li(1337 * 42))
 ul.appendChild("<li>me too</li>", html5.Li("and same as I"))
 ```
 
-The HTML parser can also do more: When component classes (any class that inherits directly from an html5.Widget, like `html5.Div` or so) are decorated with the [html5.tag](#html5.tag)-decorator, these are automatically made available in the HTML-parser for recognition.
+The HTML parser can also do more: When component classes (any class that inherits directly from html5.Widget, like html5.Div or so) are decorated with the [html5.tag](#html5.tag)-decorator, these are automatically made available in the HTML-parser for recognition.
 
 ## Inheritance is normal
 
@@ -108,10 +108,10 @@ Following sections describe the most widely used functions of the `html5.Widget`
 
 ### Constructor
 
-All Widgets in html5 share the same `__init__`-function, having the following signature:
+All widgets share the same `__init__`-function, having the following signature:
 
 ```python
-def Widget.__init__(self, *args, appendTo=None, style=None, **kwargs)
+def __init__(self, *args, appendTo=None, style=None, **kwargs)
 ```
 
 - `*args` are any positional arguments that are passed to `self.appendChild()`. These can be either other widgets or strings containing HTML-code. Non-container widgets like `html5.Br()` or `html5.Hr()` don't allow anything passed to this parameter, and throw an Exception.
@@ -119,57 +119,80 @@ def Widget.__init__(self, *args, appendTo=None, style=None, **kwargs)
 - `style` allows to specify CSS-classes which are added to the constructed widget using
 - `**kwargs` specifies any other parameters that are passed to `appendChild()`, like variables.  
 
-### appendChild(), prependChild(), insertBefore(), fromHTML(), removeChild()
-These methods manipulate the DOM and it's html elements
+### Building
+
+These methods manipulate the DOM and it's nodes
 
 #### appendChild()
-Appends a new child to the parent element:
-```
+
+Appends another html5.Widget as child to the parent element:
+
+```python
 self.appendChild("""<ul class='navlist'></ul>""")
 self.nav.appendChild("""<li>Navigation Point 1</li>""")
 ```
-If replace=True is passed as an argument next to the html code, this method will discard all children of the parent element
-and replace them.
 
 #### prependChild()
+
 Prepends a new child to the parent element
-```
+```python
 self.appendChild("""<ul class='navlist'></ul>""")
 navpoint2 = self.nav.appendChild("""<li>Navigation Point 2</li>""")
 navpoint2.prependChild(("""<li>Navigation Point 1</li>"""))
 ```
-If replace=True is passed as an argument next to the html code, this method will discard all children of the parent element
-and replace them.
+
+#### replaceChild()
+
+Same as appendChild(), but removes the current children of the Widget first.
 
 #### insertBefore()
+
 Inserts a new child element before the target child element
-```
+
+```python
 self.appendChild("""<ul class='navlist'></ul>""")
 navpoint = self.nav.appendChild("""<li>Navigation Point 1</li>""")
-navpoint3 = self.nav.appendChild(("""<li>Navigation Point 3</li>"""))
-navpoint2 = self.nav.insertBefore(("""<li>Navigation Point 2</li>"""), navpoint3)
+navpoint3 = self.nav.appendChild("""<li>Navigation Point 3</li>""")
+navpoint2 = self.nav.insertBefore("""<li>Navigation Point 2</li>""", navpoint3)
 ```
+
 If the child element that the new element is supposed to be inserted before does not exist, the new element is appended to the parent instead.
 
-#### fromHTML()
-Instantiates a widget from an html string that we can access in our python code.
+#### removeChild(), removeAllChildren()
 
-#### removeChild()
-Removes the child from the parent element
+Either reemoves one child from the parent element or all available children.
 
-#### removeAllChildren()
-Removes all child elements from the parent element
 
-### addClass(), removeClass(), toggleClass(), hasClass()
+### Visibility and Usability
+
+Widgets can be switched hidden or disabled. Form elements, for example, might be disabled when a specific condition isn't met. These functions here help to quickly change visibility and usability of widgets, including their child widgets.
+
+### enable(), disable()
+
+Enable or disable the widget in the DOM. Useful for forms and similar UI applications.
+
+To check whether a widget is disabled or not, evaluate `widget["disabled"]`. In the HTML-parser, this flag can be set using the `disabled` attribute, e.g. `<div disabled>I'm disabled</div>`.
+
+### hide(), show()
+
+Hides or shows a widget on demand.
+
+To check whether a widget is hidden or not, evaluate `widget["hidden"]`. In the HTML-parser, this flag can be set using the `hidden` attribute, e.g. `<div hidden>You can't see me.</div>`.
+
+
+### class-attribute modification (styling)
+
 These methods are helpful for adding classes dynamically.
 
 #### addClass()
 
-Adds a class to the html5.Widget and checks to prevent adding the same class.
+Adds a class to the html5.Widget and checks to prevent adding the same class multiple times.
 ```
 nav = self.appendChild("""<ul></ul>""")
 nav.addClass('navlist')
 ```
+
+Adding a class multiple times might be wanted and is valid. In this case, modify the widget's `class`-attribute directly by assigning a list to it.
 
 #### removeClass()
 
@@ -181,8 +204,8 @@ nav.removeClass('big-red-warning-border-color')
 
 #### toggleClass()
 
-Toggles a class on and off, depending on whether it has already been added or not.
-If the element already has the class, it is removed. If the element does not have the class already, it is added to it.
+Toggles a class *on* or *off*, depending on whether it has the specified class already or not.
+
 
 #### hasClass()
 
@@ -193,12 +216,6 @@ if nav.hasClass('big-red-warning-border-color'):
     print("Help! There is a big red border around this element! Remove the class so we can feel safe again")
 ```
 
-### enable(), disable()
-These methods will enable or disable an element in the DOM. Useful for forms and similar UI applications.
-
-### hide(), show()
-Will hide or show and element on demand. This is done by adding the hidden attribute to the element or removing it accordingly.
-
 ### Event handling
 
 todo
@@ -208,7 +225,8 @@ todo
 
 ### Conditional rendering
 
-For conditional rendering, the attributes `flare-if`, `flare-elif` and `flare-else` can be used on all tags for conditional rendering. This allows for any simple Python expression that evaluates to True.
+The attributes `flare-if`, `flare-elif` and `flare-else` can be used on all tags for conditional rendering.
+This allows for any simple Python expression that evaluates to True or any computed non-boolean value representing True.
 
 ```python
 html5.Body().appendChild("""
@@ -221,7 +239,7 @@ html5.Body().appendChild("""
 """, i=50, j=151)
 ```
 
-As variables, any `kwargs`-arguments given to `html5.fromHTML()` (or related functions) can be involved inside the evaluation.
+As variables, any *kwargs*-arguments given to html5.fromHTML() (or related functions) can be involved inside the evaluation.
 
 ### Widget configuration
 
@@ -241,7 +259,7 @@ Renders HTML-code or compiled HTML-code (HtmlAst).
 
 ### @html5.tag
 
-Decorator to register a sub-class of `html5.Widget` either under its class-name or an associated tag-name.
+Decorator to register a sub-class of `html5.Widget` either under its class-name, or an associated tag-name.
 
 Examples:
 ```python
