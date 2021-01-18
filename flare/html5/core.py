@@ -7,7 +7,7 @@ HTML5 Widget abstraction library
 """
 
 
-import logging, string, inspect
+import string, re, logging, inspect
 from typing import Any, Callable, Dict
 
 
@@ -2641,10 +2641,10 @@ def isShift(event):
 # HTML parser
 ########################################################################################################################
 
-# Global variables required by HTML parser
+# Global variables required by HTML parser & renderer
 __tags = None
 __domParser = None
-
+__reVarReplacer = re.compile("{{(([^}]|}[^}])*)}}")
 
 def registerTag(tagName, widgetClass, override=True):
 	assert issubclass(widgetClass, Widget), "widgetClass must be a sub-class of Widget!"
@@ -2974,10 +2974,20 @@ def fromHTML(html: [str, HtmlAst], appendTo: Widget=None, bindTo: Widget=None, d
 		kwargs.update(vars)
 
 	def replaceVars(txt):
-		for var, val in kwargs.items():
-			txt = txt.replace("{{%s}}" % var, str(val) if val is not None else "")
+		if not htmlExpressionEvaluator:
+			return txt
 
-		return txt
+		# Internal function for replacing {{ values["from"][4]["string"] + 1 }}...
+		ret = ""
+
+		while match := __reVarReplacer.search(txt):
+			ret += txt[:match.start()]
+			txt = txt[match.end():]
+
+			val = htmlExpressionEvaluator.execute(match.group(1), kwargs)
+			ret += str(val) if val is not None else ""
+
+		return ret + txt
 
 	def interpret(parent, items):
 		ifResult = None

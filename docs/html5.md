@@ -221,9 +221,28 @@ if nav.hasClass('big-red-warning-border-color'):
 
 ## HTML parser reference
 
-### Conditional rendering
+### Data-based rendering
+
+#### Using variables
+
+Any variables provided via kwargs to [html5.fromHTML()](#html5fromhtml) can be inserted in attributes or as TextNode-elements with their particular content when surrounded by `{{` and `}}`. Inside this notation, full Python expression syntax is allowed, so that even calculations or concatenations can be done.
+
+```python
+html5.Body().appendChild("""
+    <div class="color-{{ l[1] + 40 }}">{{ d[ "world" ] + "World" * 3 }} and {{ d }}</div>
+""", l=[1,2,3], d={"world": "Hello"})
+```
+
+renders into 
+
+```html
+<div class="color-42">HelloWorldWorldWorld and {'world': 'Hello'}</div>
+```
+
+#### flare-if, flare-elif, flare-else
 
 The attributes `flare-if`, `flare-elif` and `flare-else` can be used on all tags for conditional rendering.
+
 This allows for any simple Python expression that evaluates to True or any computed non-boolean value representing True.
 
 ```python
@@ -237,7 +256,7 @@ html5.Body().appendChild("""
 """, i=50, j=151)
 ```
 
-As variables, any *kwargs*-arguments given to html5.fromHTML() (or related functions) can be involved inside the evaluation.
+As variables, any arguments given to [html5.fromHTML()](#html5fromhtml) (or related functions) as kwargs can be used.
 
 
 ### html5.parseHTML()
@@ -262,10 +281,10 @@ Renders HTML-code or compiled HTML-code (HtmlAst).
 - appendTo: Defines the Widget where to append the generated widgets to
 - bindTo: Defines the Widget where to bind widgets using the `[name]`-attribute to
 - debug: Debugging output
-- **kwargs: Any specified kwargs can be used as variables, either for `{{replacement}}` in attributes or texts or as variables used for [conditional rendering](#conditional-rendering).
+- **kwargs: Any specified kwargs are available as [variables to any expressions](#using-variables).
 
 
-HTML-code can optionally be pre-compiled with [html5.parseHTML()](#html5parsehtml), and then executed multiple times (but with differend variables) by fromHTML. This is useful when generating lists of same elements with only replaced variable data.
+HTML-code can optionally be pre-compiled with [html5.parseHTML()](#html5parsehtml), and then executed multiple times (but with different variables) by fromHTML. This is useful when generating lists of same elements with only replaced variable data.
 
 
 ### @html5.tag
