@@ -6,7 +6,8 @@ The *html5* library is flare's core module and key feature, and manages access t
 
 The document's body and head can directly be accessed by the static widgets `html5.Head()` and `html5.Body()`.
 
-All these widgets are inheriting from an abstract widget wrapper class called `html5.Widget`. `html5.Widget` is the overall superclass which contains most of the functions used when working with DOM elements. Therefore, all widgets are usually handled the same way, except leaf-type widgets, which may not contain any children.
+All these widgets are inheriting from an abstract widget wrapper called `html5.Widget`. `html5.Widget` is the overall superclass which contains most of the functions used when working with DOM elements. Therefore, all widgets are usually handled the same way, except leaf-type widgets, which may not contain any children.
+
 
 ## First steps
 
@@ -40,7 +41,7 @@ Summarized:
 
 ## Parsing widgets from HTML-code
 
-Above result can also be achieved much faster, by using the build-in HTML5-parser and renderer.
+Above result can also be achieved much faster, by using the build-in [HTML5-parser and renderer](#html-parser-reference).
 
 ```python
 from flare import *
@@ -61,7 +62,7 @@ ul.prependChild(html5.Li(1337 * 42))
 ul.appendChild("<li>me too</li>", html5.Li("and same as I"))
 ```
 
-The HTML parser can also do more: When component classes (any class that inherits directly from html5.Widget, like html5.Div or so) are decorated with the [html5.tag](#html5.tag)-decorator, these are automatically made available in the HTML-parser for recognition.
+The HTML parser can also do more: When component classes (any class that inherits directly from html5.Widget, like html5.Div or so) are decorated with the [html5.tag](#html5tag)-decorator, these are automatically made available in the HTML-parser for recognition.
 
 ## Inheritance is normal
 
@@ -102,7 +103,8 @@ html5.Body().appendChild(
 
 In this example, we just made our first custom component: The `Link`-class can be arbitrarily used.
 
-## Widget fundamentals
+
+## Widget basics
 
 Following sections describe the most widely used functions of the `html5.Widget`-class which are inherited by any widget or huger component in flare.
 
@@ -119,7 +121,7 @@ def __init__(self, *args, appendTo=None, style=None, **kwargs)
 - `style` allows to specify CSS-classes which are added to the constructed widget using
 - `**kwargs` specifies any other parameters that are passed to `appendChild()`, like variables.  
 
-### Building
+### Insertion and removal
 
 These methods manipulate the DOM and it's nodes
 
@@ -163,26 +165,26 @@ If the child element that the new element is supposed to be inserted before does
 Either reemoves one child from the parent element or all available children.
 
 
-### Visibility and Usability
+### Visibility and usability
 
 Widgets can be switched hidden or disabled. Form elements, for example, might be disabled when a specific condition isn't met. These functions here help to quickly change visibility and usability of widgets, including their child widgets.
 
-### enable(), disable()
-
-Enable or disable the widget in the DOM. Useful for forms and similar UI applications.
-
-To check whether a widget is disabled or not, evaluate `widget["disabled"]`. In the HTML-parser, this flag can be set using the `disabled` attribute, e.g. `<div disabled>I'm disabled</div>`.
-
-### hide(), show()
+#### hide(), show()
 
 Hides or shows a widget on demand.
 
 To check whether a widget is hidden or not, evaluate `widget["hidden"]`. In the HTML-parser, this flag can be set using the `hidden` attribute, e.g. `<div hidden>You can't see me.</div>`.
 
+#### enable(), disable()
 
-### class-attribute modification (styling)
+Enable or disable the widget in the DOM. Useful for forms and similar UI applications.
 
-These methods are helpful for adding classes dynamically.
+To check whether a widget is disabled or not, evaluate `widget["disabled"]`. In the HTML-parser, this flag can be set using the `disabled` attribute, e.g. `<div disabled>I'm disabled</div>`.
+
+
+### class-attribute modification
+
+These methods are helpful for adding CSS-classes quickly.
 
 #### addClass()
 
@@ -196,7 +198,7 @@ Adding a class multiple times might be wanted and is valid. In this case, modify
 
 #### removeClass()
 
-Checks if the object has that class and removes it
+Checks if the widget has that class and removes it
 ```
 nav = self.appendChild("""<ul class='big-red-warning-border-color'></ul>""")
 nav.removeClass('big-red-warning-border-color')
@@ -215,10 +217,6 @@ nav = self.appendChild("""<ul class='big-red-warning-border-color'></ul>""")
 if nav.hasClass('big-red-warning-border-color'):
     print("Help! There is a big red border around this element! Remove the class so we can feel safe again")
 ```
-
-### Event handling
-
-todo
 
 
 ## HTML parser reference
@@ -241,20 +239,33 @@ html5.Body().appendChild("""
 
 As variables, any *kwargs*-arguments given to html5.fromHTML() (or related functions) can be involved inside the evaluation.
 
-### Widget configuration
-
-todo
 
 ### html5.parseHTML()
 
-Parses the provided HTML-code according to the tags registered by html5.registerTag() or components that use the html5.tag-decorator.
+```python
+def parseHTML(html: str, debug: bool=False) -> HtmlAst
+```
 
-The function returns an abstract syntax tree representation (HtmlAst) of the HTML-code that can be rendered by `html5.fromHTML()`.
+Parses the provided HTML-code according to the tags registered by html5.registerTag() or components that use the [html5.tag](#html5tag)-decorator.
+
+The function returns an abstract syntax tree representation (HtmlAst) of the HTML-code that can be rendered by [html5.fromHTML()](#html5fromhtml).
 
 
 ### html5.fromHTML()
 
+```python
+def fromHTML(html: [str, HtmlAst], appendTo: Widget=None, bindTo: Widget=None, debug: bool=False, **kwargs) -> [Widget]
+```
+
 Renders HTML-code or compiled HTML-code (HtmlAst).
+
+- appendTo: Defines the Widget where to append the generated widgets to
+- bindTo: Defines the Widget where to bind widgets using the `[name]`-attribute to
+- debug: Debugging output
+- **kwargs: Any specified kwargs can be used as variables, either for `{{replacement}}` in attributes or texts or as variables used for [conditional rendering](#conditional-rendering).
+
+
+HTML-code can optionally be pre-compiled with [html5.parseHTML()](#html5parsehtml), and then executed multiple times (but with differend variables) by fromHTML. This is useful when generating lists of same elements with only replaced variable data.
 
 
 ### @html5.tag

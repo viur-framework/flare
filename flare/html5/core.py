@@ -8,6 +8,8 @@ HTML5 Widget abstraction library
 
 
 import logging, string, inspect
+from typing import Any, Callable, Dict
+
 
 # htmlExpressionEvaluator is used for interpreting conditional expressions
 # By default, this points to a SafeEval() instance, but can be changed
@@ -2741,7 +2743,7 @@ class HtmlAst(list):
 	"""
 
 
-def parseHTML(html, debug=False):
+def parseHTML(html: str, debug: bool=False) -> HtmlAst:
 	"""
 	Parses the provided HTML-code according to the tags registered by html5.registerTag() or components that used
 	the html5.tag-decorator.
@@ -2928,7 +2930,8 @@ def parseHTML(html, debug=False):
 
 	return stack[0][2]
 
-def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs):
+
+def fromHTML(html: [str, HtmlAst], appendTo: Widget=None, bindTo: Widget=None, debug: bool=False, **kwargs) -> [Widget]:
 	"""
 	Parses the provided HTML code according to the objects defined in the html5-library.
 	html can also be pre-compiled by `parseHTML()` so that it executes faster.
@@ -2964,7 +2967,10 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 
 	assert isinstance(html, HtmlAst)
 
-	if isinstance(vars, dict):
+	# Deprecated: vars-variable
+	vars = kwargs.get("vars")
+	if vars and isinstance(vars, dict):
+		logging.warning("Using fromHTML(vars=...) is deprecated. Please directly provide your variables as kwargs.")
 		kwargs.update(vars)
 
 	def replaceVars(txt):
