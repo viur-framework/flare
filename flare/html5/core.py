@@ -9,6 +9,10 @@ HTML5 Widget abstraction library
 
 import logging, string, inspect
 
+# htmlExpressionEvaluator is used for interpreting conditional expressions
+# By default, this points to a SafeEval() instance, but can be changed
+# to any other interpreter providing an execute(code, vars) function.
+# See for usage below.
 htmlExpressionEvaluator = None
 
 ########################################################################################################################
@@ -712,6 +716,10 @@ class Widget(object):
 			c.onDetach()
 
 	def __collectChildren(self, *args, **kwargs):
+		"""
+		Internal function for collecting children from args.
+		This is used by appendChild(), prependChild(), insertChild() etc.
+		"""
 		if kwargs.get("bindTo") is None:
 			kwargs["bindTo"] = self
 
@@ -796,6 +804,7 @@ class Widget(object):
 
 	def appendChild(self, *args, **kwargs):
 		if kwargs.get("replace", False):
+			logging.warning("replace=True is deprecated. Use Widget.replaceChild() for this!")
 			self.removeAllChildren()
 			del kwargs["replace"]
 
@@ -816,6 +825,10 @@ class Widget(object):
 				child.onAttach()
 
 		return toAppend
+
+	def replaceChild(self, *args, **kwargs):
+		self.removeAllChildren()
+		self.appendChild(*args, **kwargs)
 
 	def removeChild(self, child):
 		assert child in self._children, "{} is not a child of {}".format(child, self)
