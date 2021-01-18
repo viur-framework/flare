@@ -9,13 +9,7 @@ HTML5 Widget abstraction library
 
 import logging, string, inspect
 
-#try:
-from ..config import conf
-sEval = conf["safeEvalInstance"]
-#except:
-#	# if a toplevel conf in missing
-#	from .safeeval import SafeEval
-#	sEval = SafeEval()
+htmlExpressionEvaluator = None
 
 ########################################################################################################################
 # DOM-access functions and variables
@@ -2967,6 +2961,7 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 		return txt
 
 	def interpret(parent, items):
+		ifResult = None
 		ret = []
 
 		for item in items:
@@ -2979,10 +2974,51 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 				ret.append(txt)
 				continue
 
+			# Extract tags, atts and children from HtmlAst
 			tag = item[0]
 			atts = item[1]
 			children = item[2]
-			appendItem = True
+
+			# Early attribute checking for the conditional stuff
+			haveConditional = False
+			for att in ("if", "elif", "else") if htmlExpressionEvaluator else ():
+				val = atts.get(f"flare-{att}")
+				if val is None:
+					continue
+
+				#print(att, val, ifResult)
+
+				haveConditional = True
+				val = replaceVars(val)
+
+				if att in ("if", "elif"):
+					if att == "elif":
+						assert ifResult is not None, "flare-elif without preceding flare-if/flare-elif"
+						if ifResult:
+							item = None
+							break
+
+					if not htmlExpressionEvaluator.execute(val, kwargs):
+						item = None
+						ifResult = False
+					else:
+						ifResult = True
+
+					break
+
+				elif att == "else":
+					assert ifResult is not None, "flare-else without preceding flare-if/flare-elif"
+					if ifResult:
+						item = None
+
+					ifResult = None
+					break
+
+			if not item:
+				continue
+
+			if not haveConditional:
+				ifResult = None
 
 			# Special handling for tables: A "thead" and "tbody" are already part of table!
 			if tag in ["thead", "tbody"] and isinstance(parent, Table):
@@ -3050,8 +3086,7 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 				elif att.startswith(":"):
 					if bindTo:
 						try:
-							#wdg[att[1:]] = getattr(bindTo, val)
-							setattr( wdg, att[ 1: ], getattr( bindTo, val ) )
+							setattr(wdg, att[1:], getattr(bindTo, val))
 						except Exception as e:
 							logging.exception(e)
 
@@ -3074,23 +3109,6 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 					else:
 						logging.error("html5: bindTo is unset, can't use %r here", att)
 
-				# use a safeval string to decide if the current item should be added
-				elif att == "v-if":
-					if bindTo:
-						try:
-							# update whitelist
-							sEval.allowedCallables = conf["saveEvalAllowedCallables"]
-
-							showWdg = sEval.execute( sEval.compile(val), {} )
-							if not showWdg:
-								appendItem = False
-								break
-						except Exception as e:
-							logging.exception(e)
-
-					else:
-						logging.error("html5: bindTo is unset, can't use %r here", att)
-
 				# Otherwise, either store widget attribute or save value on widget.
 				else:
 					try:
@@ -3104,9 +3122,6 @@ def fromHTML(html, appendTo=None, bindTo=None, debug=False, vars=None, **kwargs)
 
 					except Exception as e:
 						logging.exception(e)
-
-			if not appendItem:
-				continue
 
 			interpret(wdg, children)
 

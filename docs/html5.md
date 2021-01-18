@@ -206,7 +206,22 @@ todo
 
 ## HTML parser reference
 
-todo
+### Conditional rendering
+
+For conditional rendering, the attributes `flare-if`, `flare-elif` and `flare-else` can be used on all tags for conditional rendering. This allows for any simple Python expression that evaluates to True.
+
+```python
+html5.Body().appendChild("""
+    <div>begin</div>
+    <div flare-if="i <= 10">i is just low</div>
+    <div flare-elif="i <= 50 and j >=100">i and j have normal values</div>
+    <div flare-elif="i > 50 and j >= 50">i and j have moderate values</div>
+    <div flare-else>i and j are something different</div>
+    <div>end</div>
+""", i=50, j=151)
+```
+
+As variables, any `kwargs`-arguments given to `html5.fromHTML()` (or related functions) can be involved inside the evaluation.
 
 ### Widget configuration
 

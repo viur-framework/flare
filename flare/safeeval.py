@@ -99,12 +99,15 @@ class SafeEval:
 			left = right
 		return True
 
-	def execute(self, node: ast.AST, names: Dict[str, Any]) -> Any:
+	def execute(self, node: [str, ast.AST], names: Dict[str, Any]) -> Any:
 		"""Evaluates the current node with optional data
 		:param node: The compare node to evaluate
 		:param names: a mapping of local objects which is used as 'locals' namespace
 		:return: whatever the expression wants to return
 		"""
+		if isinstance(node, str):
+			node = self.compile(node)
+
 		return self.nodes[type(node)](node, names)
 
 	def compile(self, expr: str) -> ast.AST:

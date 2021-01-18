@@ -1,23 +1,30 @@
 """
 Flare configuration.
 """
-from .html5.safeeval import SafeEval
+from .html5 import core
+from .safeeval import SafeEval
 
-from flare.views import conf as view_conf
+from typing import Dict
 
-conf = {
-	"safeEvalInstance": SafeEval(),
-	"saveEvalAllowedCallables": dict(),
-	"basePathSvgs":"/static/svgs",
-	"currentLanguage": "de",
-}
+def updateConf(other: Dict):
+	"""
+	Merges other into conf
+	"""
 
-conf.update(view_conf)
-
-def updateConf(_conf):
 	global conf
-	conf.update(_conf)
+	conf.update(other)
 	return conf
 
 
+# Main config
+conf = {
+	"basePathSvgs": "/static/svgs",
+	"currentLanguage": "de",
+}
 
+# Assign SafeEval as htmlExpressionEvaluator
+core.htmlExpressionEvaluator = SafeEval()
+
+# Merge view_conf into main config
+from flare.views import conf as view_conf
+updateConf(view_conf)
