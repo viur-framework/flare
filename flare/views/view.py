@@ -1,3 +1,5 @@
+import logging
+
 import flare.views
 from flare.observable import StateHandler
 from flare.network import getUrlHashAsObject
@@ -8,7 +10,7 @@ class View():
 
 	def __init__( self, dictOfWidgets = None, name = None ):
 		'''
-			dictOfWidgets: {mainAppConteiner:Widget}
+			dictOfWidgets: {mainAppContainer:Widget}
 
 			mainAppConteiner musst be a widget which is on parent Widget available
 			Widget musst inheriance from ViewWidget
@@ -25,20 +27,27 @@ class View():
 		flare.views.conf[ "views_state" ].register( "activeView", self )
 
 	def onActiveViewChanged( self, viewName,*args,**kwargs ):
+		logging.debug("onActiveViewChanged: %r", viewName)
 		if self.name == viewName:
 			self.loadView()
 
 	def loadView( self ):
 		for target, widget in self.widgets.items():
+			logging.debug("loadView: %r, %r, %r", target, widget, conf[ "app" ])
 			try:
 				targetWidget = getattr( conf[ "app" ], target )
-			except:
-				ValueError( 'Target or conf["app"] %s not found!' % target )
+			except Exception as err:
+				logging.error( 'Target or conf["app"] %r not found!', target)
+				logging.exception(err)
+				ValueError( 'Target or conf["app"] %s not found!' % target)
 				return
 
+			logging.debug("before removeAllCHildren: %r, %r, %r", target, widget, targetWidget)
 			targetWidget.removeAllChildren()
+			logging.debug("after removeAllCHildren")
 
 			if widget is None:
+				logging.debug("widget is None: %r, %r, %r", target, widget, targetWidget)
 				targetWidget.hide()
 			else:
 				if not self.loaded:
@@ -52,10 +61,13 @@ class View():
 					#	wdgt = html5.Div("ERROR: widget must have a view parameter")
 					self.widgets.update( { target: self.wdgt } )
 					self.loaded = True
+					logging.debug("created view widget?: %r, %r, %r, %r", self.wdgt, self.instancename, self.widgets, self.loaded)
 
 				if self.wdgt:
-					self.wdgt.state.updateState("viewfocused",self.name)
+					logging.debug("updateState viewfocused: %r", self.name)
+					self.wdgt.state.updateState("viewfocused", self.name)
 
+				logging.debug("before targetWidget show and appendContent")
 				targetWidget.show()
 				targetWidget.appendChild( self.widgets[ target ] )
 
