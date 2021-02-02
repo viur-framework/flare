@@ -203,7 +203,10 @@ class Uploader(Progress):
 		self.context = context
 
 		r = NetworkService.request("file", "getUploadURL",
-			params={"node": node} if node else {},
+			params={"fileName":file.name,
+					"mimeType":file.type,
+					"size":file.size,
+					"node": node} if node else {},
 			successHandler=self.onUploadUrlAvailable,
 			failureHandler=self.onFailed,
 			secure=True
