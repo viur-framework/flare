@@ -1,3 +1,4 @@
+import logging
 import os,site,importlib, inspect
 from flare.config import conf
 from flare.views.view import View
@@ -23,6 +24,7 @@ def addView(view:View,name=None):
 	'''
 		add a View and make it available
 	'''
+	logging.debug("addView: %r, %r", view, name)
 	instView = view()
 
 	if not name:
@@ -51,6 +53,7 @@ def registerViews(path):
 	rootModule = path.replace(sitepackagespath,"").replace("/",".")[1:]
 
 	for viewFile in os.listdir(path):
+		logging.debug("found  view_ %r", viewFile)
 
 		if viewFile == "__init__.py" or not viewFile.endswith( ".py" ):
 			continue
@@ -70,8 +73,9 @@ def registerViews(path):
 				if inspect.isclass(_symbol) and issubclass(_symbol,View) and _name != View.__name__:
 					addView(_symbol)
 
-		except:
-			print( "Unable to import View from '%s'" % viewFile )
+		except Exception as err:
+			logging.error( "Unable to import View from '%s'" % viewFile )
+			logging.exception(err)
 			raise
 
 
