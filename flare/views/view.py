@@ -64,9 +64,9 @@ class View():
 						self.loaded[target] = True
 						logging.debug("created view widget?: %r, %r, %r, %r", self.wdgt, self.instancename, self.widgets, self.loaded)
 
-					if self.wdgt:
+					if self.widgets[target]:
 						logging.debug("updateState viewfocused: %r", self.name)
-						self.wdgt.state.updateState("viewfocused", self.name)
+						self.widgets[target].state.updateState("viewfocused", self.name)
 
 					logging.debug("before targetWidget show and appendContent")
 					targetWidget.show()
