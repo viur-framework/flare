@@ -4,7 +4,7 @@ Wrapper to handle ViUR-related Ajax requests.
 
 
 import logging
-
+from flare.event import EventDispatcher
 import os, sys, json, string, random
 from . import html5
 
@@ -309,6 +309,8 @@ class NetworkService(object):
 		self.failureHandler = [failureHandler] if failureHandler else []
 		self.finishedHandler = [finishedHandler] if finishedHandler else []
 
+		self.requestFinishedEvent = EventDispatcher('finished')
+		self.requestFinishedEvent.register( self )
 		self.modifies = modifies
 		self.secure = secure
 
@@ -328,7 +330,7 @@ class NetworkService(object):
 
 	@staticmethod
 	def request(module, url, params=None, successHandler=None, failureHandler=None,
-	            finishedHandler=None, modifies=False, secure=False, kickoff=True):
+	            finishedHandler=None, modifies=False, secure=False, kickoff=True, group=None):
 		"""
 			Performs an AJAX request. Handles caching and security-keys.
 
@@ -352,8 +354,9 @@ class NetworkService(object):
 		"""
 		logging.debug("NetworkService.request module=%r, url=%r, params=%r", module, url, params)
 
-		if secure:
-			kickoff = False
+		if group or secure:
+			#secure and grouped requests will be handled later
+			kickoff=False
 
 		dataRequest = NetworkService(
 				module, url, params,
@@ -361,7 +364,12 @@ class NetworkService(object):
 				modifies, secure, kickoff
 			)
 
-		if secure:
+		if group:
+			group.addRequest(dataRequest)
+
+		if not group and secure:
+			# single secure requests will be queued to ensure a fresh skey
+			#a group is triggered externally and processed sequentially
 			skeyRequestQueue.append(dataRequest)
 
 		return dataRequest
@@ -415,6 +423,7 @@ class NetworkService(object):
 					s(self)
 				for s in self.finishedHandler:
 					s(self)
+				self.requestFinishedEvent.fire(True)
 			except:
 				if self.modifies:
 					DeferredCall(
@@ -470,6 +479,8 @@ class NetworkService(object):
 		for s in self.finishedHandler:
 			s(self)
 
+		self.requestFinishedEvent.fire(False)
+
 	def onTimeout(self, text):
 		"""
 			Internal hook for the AJAX call.
@@ -482,6 +493,34 @@ class NetworkService(object):
 		self.failureHandler = []
 		self.params = None
 
+	def onFinished( self, success ):
+		pass
+
+class requestGroup():
+
+
+	def __init__(self, callback=None):
+		self.callback = callback
+		self.requestList = []
+		self.allRequestsSuccessful=True
+
+
+	def addRequest( self, request ):
+		self.requestList.append(request)
+
+	def call( self ):
+		req = self.requestList.pop(0) #get first request.
+		req.requestFinishedEvent.register(self)
+		req.kickoff()
+
+	def onFinished(self, success):
+		if not success:
+			self.allRequestsSuccessful=False
+
+		if len(self.requestList)>0:
+			self.call()
+		else:
+			self.callback(self.allRequestsSuccessful)
 
 def getUrlHashAsString():
 	urlHash = html5.window.location.hash
