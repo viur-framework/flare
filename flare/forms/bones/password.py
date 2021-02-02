@@ -7,7 +7,7 @@ class PasswordEditWidget(BaseEditWidget):
 	style = ["flr-value", "flr-value--password", "flr-value-container", "input-group"]
 
 	def createWidget(self):
-		self.appendChild("""<flr-input [name]="widget" type="password" class="flr-input input-group-item">""")
+		self.appendChild("""<flare-input [name]="widget" type="password" class="flr-input input-group-item">""")
 
 		if self.bone.readonly:
 			self.verify = None
@@ -16,7 +16,7 @@ class PasswordEditWidget(BaseEditWidget):
 				<label class="label" for="{{id}}">
 					{{txt}}
 				</label>
-				<flr-input id="{{id}}" [name]="verify" type="password">
+				<flare-input id="{{id}}" [name]="verify" type="password">
 			""",
 			vars={"txt": translate("reenter password"), "id": "flr-%s-reenter" % self.bone.boneName })
 

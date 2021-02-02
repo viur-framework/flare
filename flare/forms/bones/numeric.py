@@ -49,7 +49,7 @@ class NumericEditWidget( BaseEditWidget ):
 		tpl = html5.Template()
 		#language=html
 		tpl.appendChild( '''
-			<flr-input [name]="widget" type="{{inputType}}" class="input-group-item flr-input" />
+			<flare-input [name]="widget" type="{{inputType}}" class="input-group-item flr-input" />
 		''',
 			inputType= "text" if self.currency else "number",
 			bindTo=self)

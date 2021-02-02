@@ -51,7 +51,7 @@ class ButtonBarSearch(html5.Div):
 		# language=HTML
 		self.appendChild('''
 			<input [name]="widget" type="text" class="input input--small">
-			<button class="btn btn--small" :callback="applyFilter">filtern</button>
+			<flare-button class="btn btn--small" :callback="applyFilter">filtern</flare-button>
 		''')
 
 		self.state = StateHandler((),self)

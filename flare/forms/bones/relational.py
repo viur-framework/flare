@@ -34,9 +34,9 @@ class RelationalEditWidget(BaseEditWidget):
 		tpl = html5.Template()
 		widgetList = self.fromHTML(
 			"""
-				<flr-input [name]="destWidget" class="input-group-item" readonly>
-				<button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="icon-check"></button>
-				<button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="icon-cross"></button>
+				<flare-input [name]="destWidget" class="input-group-item" readonly>
+				<flare-button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="icon-check"></flare-button>
+				<flare-button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="icon-cross"></flare-button>
 			""")
 		tpl.appendChild(widgetList,bindTo=self)
 		return tpl
@@ -324,13 +324,13 @@ class FileEditDirectWidget(RelationalEditWidget):
 			"""
 				<div class="flr-bone-widgets">
 					<div class="flr-widgets-item input-group" [name]='filerow'>
-						<flr-input [name]="destWidget" readonly>
-						<button [name]="selectBtn" class="btn--select input-group-item--last" text="Select" icon="icon-select"></button>
-						<button hidden [name]="deleteBtn" class="btn--delete" text="Delete" icon="icon-delete"></button>
+						<flare-input [name]="destWidget" readonly>
+						<flare-button [name]="selectBtn" class="btn--select input-group-item--last" text="Select" icon="icon-select"></flare-button>
+						<flare-button hidden [name]="deleteBtn" class="btn--delete" text="Delete" icon="icon-delete"></flare-button>
 					</div>
 					<div class="flr-widgets-item">
 						<div [name]="dropArea" class="supports-upload">
-							<svgicon value='icon-upload-file' title='Upload'> </svgicon>
+							<flare-svg-icon value='icon-upload-file' title='Upload'> </flare-svg-icon>
 							<label for="inplace-upload" class="flr-inplace-upload-label"><strong>Datei auswählen</strong><span [name]="dropText"> oder hierhin ziehen</span>.</label>
 							<input id="inplace-upload" class="flr-inplace-upload" type="file" [name]="files" files selected"/>
 						</div>

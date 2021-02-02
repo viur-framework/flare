@@ -10,8 +10,8 @@ class SpatialEditWidget( BaseEditWidget ):
 		#language=HTML
 		tpl.appendChild( self.fromHTML(
 			"""
-			<flr-input [name]="latitude" type="number" placeholder="latitude" step="any">
-			<flr-input [name]="longitude" type="number" placeholer="longitute" step="any">
+			<flare-input [name]="latitude" type="number" placeholder="latitude" step="any">
+			<flare-input [name]="longitude" type="number" placeholer="longitute" step="any">
 			"""
 		))
 		return tpl

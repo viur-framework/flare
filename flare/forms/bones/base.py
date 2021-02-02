@@ -100,9 +100,9 @@ class BaseMultiEditWidgetEntry( html5.Div ):
 
 		#language=HTML
 		self.appendChild(
-			"""<div [name]="dragArea" class="flr-bone-dragger"><svgicon value="icon-drag-handle" ></svgicon></div>""",
+			"""<div [name]="dragArea" class="flr-bone-dragger"><flare-svg-icon value="icon-drag-handle" ></flare-svg-icon></div>""",
 			self.widget,
-			"""<button [name]="removeBtn" class="btn--delete" text="Delete" icon="icon-cross" />"""
+			"""<flare-button [name]="removeBtn" class="btn--delete" text="Delete" icon="icon-cross" />"""
 		)
 
 		if widget.bone.boneStructure[ "readonly" ]:
@@ -197,7 +197,7 @@ class BaseMultiEditWidget( html5.Div ):
 		#language=HTML
 		super().__init__( """
 			<div [name]="actions" class="flr-bone-actions input-group">
-				<button [name]="addBtn" class="btn--add" text="Add" icon="icon-add"></button>
+				<flare-button [name]="addBtn" class="btn--add" text="Add" icon="icon-add"></flare-button>
 			</div>
 			<div [name]="widgets" class="flr-bone-multiple-wrapper"></div>
 

@@ -21,8 +21,8 @@ class DateEditWidget( BaseEditWidget ):
 		# language=HTML
 		tpl.appendChild( """
 					<div class='flr-wrapper'>
-						<flr-input type="date" v-if="{{hasDate}}" class="input-group-item" [name]="dateInput">
-						<flr-input type="time" step="1" v-if="{{hasTime}}" class="input-group-item" [name]="timeInput">
+						<flare-input type="date" v-if="{{hasDate}}" class="input-group-item" [name]="dateInput">
+						<flare-input type="time" step="1" v-if="{{hasTime}}" class="input-group-item" [name]="timeInput">
 					</div>
 				""",
 					hasDate = self.hasDate,
