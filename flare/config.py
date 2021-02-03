@@ -3,6 +3,7 @@ Flare configuration.
 """
 from .html5 import core
 from .safeeval import SafeEval
+from .cache import Cache
 
 from typing import Dict
 
@@ -18,6 +19,7 @@ def updateConf(other: Dict):
 
 # Main config
 conf = {
+	"cache": Cache(),
 	"basePathSvgs": "/static/svgs",
 	"currentLanguage": "de",
 }

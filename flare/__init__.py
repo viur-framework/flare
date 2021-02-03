@@ -22,7 +22,7 @@ from . import popout
 from . import popup
 from . import utils
 from .cache import Cache
-from .config import updateConf
+from .config import conf, updateConf
 
 # Monkey patch some html5.Widget-functions for better ignite-integration
 # Reason for this can be found in issue #2.
