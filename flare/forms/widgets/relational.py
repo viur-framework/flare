@@ -9,8 +9,11 @@ class InternalEdit(html5.Div):
 	def __init__( self, skelStructure, values = None, errorInformation = None, readOnly = False,
 				  context = None, defaultCat = "", module = None, boneparams = None, errorQueue = None, prefix = None ):
 		super().__init__()
+
 		self.form = viurForm( moduleName=module, skel=values, structure=skelStructure )
+		self.form.errors = errorInformation
 		self.form.buildInternalForm()
+
 		self.appendChild( self.form )
 
 	def unserialize( self, data = None ):

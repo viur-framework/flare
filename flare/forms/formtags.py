@@ -168,19 +168,22 @@ class viurForm(html5.Form):
 
 		else:
 			#form rejected
-			self.errors = resp["errors"]
+			self.errors = resp[ "errors" ]
+			self.handleErrors()
 
-			for error in self.errors:
-				if error[ "fieldPath" ] in self.bones:
-					boneField = self.bones[ error[ "fieldPath" ] ]  # todo dependency errors
-					if (error["severity"]%2 == 0 and boneField["required"]) or\
-						(error["severity"]%2 == 1): #invalid
+	def handleErrors( self ):
+		for error in self.errors:
+			if error[ "fieldPath" ] in self.bones:
+				boneField = self.bones[ error[ "fieldPath" ] ]  # todo dependency errors
+				if (error[ "severity" ] % 2 == 0 and boneField[ "required" ]) or \
+					(error[ "severity" ] % 2 == 1):  # invalid
 
-						boneField.setInvalid()
-					else:
-						boneField.setValid()
+					boneField.setInvalid()
+				else:
+					boneField.setValid()
 
-			self.createFormErrorMessage()
+		self.createFormErrorMessage()
+
 
 	def createFormSuccessMessage( self ):
 		try:
@@ -264,21 +267,16 @@ class boneField(html5.Div):
 			self.moduleName = self.form.moduleName
 
 			formparam = {"formName":self.form.formName}
+
 			try:
 				boneFactory = boneSelector.select( self.moduleName, self.boneName, self.structure, **formparam )( self.moduleName, self.boneName, self.structure,self.form.errors )
-				self.bonewidget = boneFactory.editWidget()
+				containerDiv, descrLbl, self.bonewidget, hasError = boneFactory.boneWidget(self.label)
+
 			except Exception as e:
 				logging.exception(e)
 				self.bonewidget = html5.Div("Bone not Found: %s"%self.boneName)
 				self.appendChild( self.bonewidget )
 				return 0
-
-			bonestructure = self.structure.get(self.boneName,{})
-			#label and bone wrapper
-			self.addClass(["input-group",
-						   "flr-bone",
-						   "flr-bone--%s"%bonestructure.get("type").replace( ".", "-" ),
-						   "flr-bone--%s"%self.boneName.replace( "_", "-" )])
 
 			if self.boneName in self.form.hide or self.hidden:
 				self._setHidden(True)
@@ -287,14 +285,8 @@ class boneField(html5.Div):
 
 			self.form.registerField(self.boneName,self)
 
-			if self.label: #label optional
-				self.appendChild(self.labelTemplate(),
-								 descr = bonestructure.get("descr", self.boneName),
-								 type = bonestructure.get("type"),
-								 boneName = self.boneName)
-
 			self.sinkEvent("onChange")
-			self.appendChild(self.bonewidget)
+			self.appendChild(containerDiv)
 
 			if self.defaultvalue:
 				self.skel[self.boneName] = self.defaultvalue # warning overrides server default

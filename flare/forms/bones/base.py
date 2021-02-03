@@ -435,14 +435,13 @@ class BaseBone( object ):
 	def errorWidget( self ):
 		if not self.boneErrors:
 			return False
-
 		return ToolTipError(longText=", ".join(self.boneErrors))
 
 
 
 
 
-	def boneWidget( self ):
+	def boneWidget( self, label=True,tooltip=True ):
 		boneId = "%s___%s"%(self.boneName,str( time.time() ).replace( ".", "_" ))
 		boneFactory = boneSelector.select( self.moduleName, self.boneName, self.skelStructure )( self.moduleName, self.boneName, self.skelStructure, self.errors, errorQueue = self.errorQueue )
 
@@ -466,12 +465,14 @@ class BaseBone( object ):
 		if self.languages:
 			containerDiv.addClass("flr-bone-languages")
 
-		containerDiv.appendChild( label )
+		if label:
+			containerDiv.appendChild( label )
 
 		valueDiv = html5.Div()
 		valueDiv.addClass("flr-value-wrapper")
 		valueDiv.appendChild(widget)
-		valueDiv.appendChild(tooltip)
+		if tooltip:
+			valueDiv.appendChild(tooltip)
 
 		if error:
 			valueDiv.appendChild(error)

@@ -32,11 +32,13 @@ class RelationalEditWidget(BaseEditWidget):
 
 	def createWidget(self):
 		tpl = html5.Template()
+		#language=HTML
 		widgetList = self.fromHTML(
-			"""
+			"""<div class='flr-value--relational-wrapper'>
 				<flare-input [name]="destWidget" class="input-group-item" readonly>
 				<flare-button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="icon-check"></flare-button>
 				<flare-button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="icon-cross"></flare-button>
+				</div>
 			""")
 		tpl.appendChild(widgetList,bindTo=self)
 		return tpl
@@ -73,6 +75,7 @@ class RelationalEditWidget(BaseEditWidget):
 				errorQueue = self.bone.errorQueue,
 				prefix = "{}.rel".format( self.bone.boneName )
 			)
+			self.addClass("flr-bone--relational-using")
 			self.appendChild(self.dataWidget)
 		else:
 			self.dataWidget = None
