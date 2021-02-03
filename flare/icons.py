@@ -32,6 +32,9 @@ class SvgIcon(html5.svg.Svg):
 		self.value = value
 		self.getIcon()
 
+	def _setTitle(self, val):
+		self.title = val
+
 	def getIcon(self):
 		if self.value and self.value.endswith(".svg"):
 			url = self.value
@@ -54,10 +57,10 @@ class SvgIcon(html5.svg.Svg):
 		url = None
 		if self.fallbackIcon:
 			url = conf["basePathSvgs"] + "/%s.svg" % self.fallbackIcon
-		# elif self.title:
-		#	#language=HTML
-		#	self["viewbox"] = "0 -15 20 20"
-		#	self.appendChild('''<text>%s</text>'''%self.title[0].upper())
+		elif self.title:
+			#language=HTML
+			self["viewbox"] = "-10 -10 20 20"
+			self.appendChild('''<text style="text-anchor: middle" y="6.5">%s</text>'''%self.title[0].upper())
 		else:
 			url = conf["basePathSvgs"] + "/icon-error.svg"  # fallback
 
@@ -100,6 +103,9 @@ class Icon(html5.I):
 			else:
 				url = conf["basePathSvgs"] + "/%s.svg" % self.value
 			self.appendChild(SvgIcon(url, self.fallbackIcon, self.title))
+
+	def _setTitle(self, val):
+		self.title = val
 
 	def onError(self, event):
 		if self.fallbackIcon:
