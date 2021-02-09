@@ -53,7 +53,7 @@ class RecordViewWidget( BaseViewWidget ):
 		else:
 			txt = None
 
-		self.appendChild( html5.TextNode( txt or conf[ "emptyValue" ] ), replace = True )
+		self.replaceChild( html5.TextNode( txt or conf[ "emptyValue" ] ))
 
 
 class RecordBone( BaseBone ):

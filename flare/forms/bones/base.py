@@ -77,7 +77,7 @@ class BaseViewWidget( html5.Div ):
 
 	def unserialize( self, value = None ):
 		self.value = value
-		self.appendChild( html5.TextNode( value or conf[ "emptyValue" ] ), replace = True )
+		self.replaceChild( html5.TextNode( value or conf[ "emptyValue" ] ))
 
 	def serialize( self ):
 		return self.value

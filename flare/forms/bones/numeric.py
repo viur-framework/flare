@@ -167,7 +167,7 @@ class NumericViewWidget( BaseViewWidget ):
 
 		self.value = value
 
-		self.appendChild( html5.TextNode( self.value ), replace = True )
+		self.replaceChild( html5.TextNode( self.value ))
 
 
 class NumericBone( BaseBone ):

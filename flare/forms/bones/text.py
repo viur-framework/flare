@@ -51,7 +51,7 @@ class TextViewWidget( BaseViewWidget ):
 
 	def unserialize( self, value = None ):
 		self.value = value
-		self.appendChild( value or conf[ "emptyValue" ], replace = True )
+		self.replaceChild( value or conf[ "emptyValue" ] )
 
 
 class TextBone( BaseBone ):

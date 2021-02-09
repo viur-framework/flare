@@ -44,7 +44,7 @@ class StringEditWidget( BaseEditWidget ):
 		self.updateLength()
 
 	def updateLength( self ):
-		self.length.appendChild( len( self.widget[ "value" ] or "" ), replace = True )
+		self.length.replaceChild( len( self.widget[ "value" ] or "" ))
 
 	def unserialize( self, value = None ):
 		self.widget[ "value" ] = utils.unescape( str( value or "" ) )  # fixme: is utils.unescape() still required?
@@ -60,7 +60,7 @@ class StringViewWidget( BaseViewWidget ):
 
 	def unserialize( self, value = None ):
 		self.value = value
-		self.appendChild( html5.TextNode( utils.unescape( value or conf[ "emptyValue" ] ) ), replace = True )
+		self.replaceChild( html5.TextNode( utils.unescape( value or conf[ "emptyValue" ] ) ) )
 
 
 class StringBone( BaseBone ):

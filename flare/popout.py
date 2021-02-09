@@ -65,7 +65,7 @@ class Popout(html5.Div):
 		self._text = text
 
 		if self._text:
-			self.text.appendChild(str(self._text), replace=True)
+			self.text.replaceChild(str(self._text))
 			self.text.show()
 		else:
 			self.text.hide()

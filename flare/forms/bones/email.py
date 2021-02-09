@@ -19,13 +19,12 @@ class EmailViewWidget(BaseViewWidget):
 
 		if value:
 			#"""<a href="mailto:{{value}}">{{value}}</a>""", #fixme style parameter to activate mailTo link
-			self.appendChild(
+			self.replaceChild(
 				"""{{value}}""",
-				vars={"value": value},
-				replace=True
+				vars={"value": value}
 			)
 		else:
-			self.appendChild(conf["emptyValue"], replace=True)
+			self.replaceChild(conf["emptyValue"])
 
 class EmailBone(BaseBone):
 	editWidgetFactory = EmailEditWidget

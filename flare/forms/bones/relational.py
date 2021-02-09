@@ -200,7 +200,7 @@ class RelationalViewWidget(html5.Div):
 		else:
 			txt = None
 
-		self.appendChild(html5.TextNode(txt or conf["emptyValue"]), replace=True)
+		self.replaceChild(html5.TextNode(txt or conf["emptyValue"]))
 
 	def serialize(self):
 		return self.value  # fixme: The format here is invalid for POST!
@@ -447,7 +447,7 @@ class FileEditDirectWidget(RelationalEditWidget):
 class FileViewWidget(RelationalViewWidget):
 
 	def unserialize(self, value=None):
-		self.appendChild(FilePreviewImage(value["dest"] if value else None), replace=True)
+		self.replaceChild(FilePreviewImage(value["dest"] if value else None))
 
 class FileDirectBone(TreeItemBone):
 	editWidgetFactory = FileEditDirectWidget

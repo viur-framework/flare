@@ -28,7 +28,7 @@ class BooleanViewWidget( BaseViewWidget ):
 
 	def unserialize( self, value = None ):
 		self.value = value
-		self.appendChild( html5.TextNode( translate( str( bool( value ) ) ) ), replace = True )
+		self.replaceChild( html5.TextNode( translate( str( bool( value ) ) ) ) )
 
 
 class BooleanBone( BaseBone ):

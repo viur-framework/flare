@@ -127,7 +127,7 @@ class DateViewWidget( BaseViewWidget ):
 			except:
 				value = "Invalid Datetime Format"
 
-		self.appendChild( html5.TextNode( value or conf[ "emptyValue" ] ), replace = True )
+		self.replaceChild( html5.TextNode( value or conf[ "emptyValue" ] ))
 
 
 class DateBone( BaseBone ):

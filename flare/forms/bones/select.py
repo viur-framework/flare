@@ -109,9 +109,8 @@ class SelectViewWidget( BaseViewWidget ):
 
 	def unserialize( self, value = None ):
 		self.value = value
-		self.appendChild(
-			html5.TextNode( self.bone.valuesDict.get( value, value ) if value else conf[ "emptyValue" ] ),
-			replace = True
+		self.replaceChild(
+			html5.TextNode( self.bone.valuesDict.get( value, value ) if value else conf[ "emptyValue" ] )
 		)
 
 
