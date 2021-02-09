@@ -5,6 +5,7 @@ Generic icon handling, especially of embedded SVG images served from a pool of i
 from . import html5
 from .network import HTTPRequest
 from flare.config import conf
+import logging
 
 
 @html5.tag("flare-svg-icon")
@@ -36,6 +37,9 @@ class SvgIcon(html5.svg.Svg):
 		self.title = val
 
 	def getIcon(self):
+		if self.value =="icons/modules/users.svg":
+			logging.warning("Please use 'icon-users' or a project specific svg path")
+			self.value = "icon-users"
 		if self.value and self.value.endswith(".svg"):
 			url = self.value
 		else:
@@ -133,7 +137,7 @@ class BadgeIcon(Icon):
 		self.appendChild('<span class="badge" [name]="badgeobject">%s</span>' % self.badge)
 
 	def _setBadge(self, value):
-		self.badgeobject.appendChild(value, replace=True)
+		self.badgeobject.replaceChild(value)
 
 	def _getBadge(self):
 		return self.badge
