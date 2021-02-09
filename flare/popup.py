@@ -77,7 +77,8 @@ class Popup(html5.Div):
 			self.close()
 
 	def close(self, *args, **kwargs):
-		html5.Body().removeChild(self.popupOverlay)
+		if self.popupOverlay:
+			html5.Body().removeChild(self.popupOverlay)
 		self.popupOverlay = None
 
 
