@@ -290,7 +290,7 @@ class TreeItemBone(RelationalBone):
 
 	@staticmethod
 	def checkFor(moduleName, boneName, skelStructure, *args, **kwargs):
-		return skelStructure[boneName]["type"] == "relational.tree.node" or skelStructure[boneName]["type"].startswith("relational.tree.node.")
+		return skelStructure[boneName]["type"] == "relational.tree.leaf"
 
 boneSelector.insert(2, TreeItemBone.checkFor, TreeItemBone)
 
