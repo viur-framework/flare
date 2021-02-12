@@ -185,7 +185,7 @@ class Uploader(Progress):
 		Uploads a file to the server while providing visual feedback of the progress.
 	"""
 
-	def __init__(self, file, node, context=None, showResultMessage=True, *args, **kwargs):
+	def __init__(self, file, node, context=None, showResultMessage=True, module="file", *args, **kwargs):
 		"""
 			:param file: The file to upload
 			:type file: A javascript "File" Object
@@ -202,7 +202,7 @@ class Uploader(Progress):
 		self.showResultMessage = showResultMessage
 		self.context = context
 
-		r = NetworkService.request("file", "getUploadURL",
+		r = NetworkService.request(module, "getUploadURL",
 			params={"fileName":file.name,
 					"mimeType":file.type,
 					"size":file.size,

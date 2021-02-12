@@ -351,7 +351,7 @@ class FileEditDirectWidget(RelationalEditWidget):
 			for event in ["onDragEnter", "onDragOver", "onDragLeave", "onDrop"]:
 				setattr(self.dropArea, event, getattr(self, event))
 				self.dropArea.sinkEvent(event)
-				
+
 		self.sinkEvent("onChange")
 		return tpl
 
@@ -377,7 +377,7 @@ class FileEditDirectWidget(RelationalEditWidget):
 			self.startUpload(file)
 
 	def startUpload( self, file ):
-		uploader = Uploader( file, None, showResultMessage = False )
+		uploader = Uploader( file, None, showResultMessage = False, module=self.bone.module )
 		self.appendChild( uploader )
 		uploader.uploadSuccess.register( self )
 		uploader.uploadFailed.register( self )
