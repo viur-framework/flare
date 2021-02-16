@@ -18,7 +18,8 @@ class PasswordEditWidget(BaseEditWidget):
 				</label>
 				<flare-input id="{{id}}" [name]="verify" type="password">
 			""",
-			vars={"txt": translate("reenter password"), "id": "flr-%s-reenter" % self.bone.boneName })
+			txt = translate("reenter password"),
+			id = "flr-%s-reenter" % self.bone.boneName)
 
 			self.widget.element.autocomplete = "new-password"
 		return self.widget
