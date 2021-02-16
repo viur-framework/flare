@@ -479,7 +479,7 @@ class FileEditWidget(RelationalEditWidget):
 	def unserialize(self, value=None):
 		super().unserialize(value)
 
-		if self.value:
+		if self.value and self.value["dest"] and "downloadUrl" in self.value["dest"]:
 			self.previewImg.setFile(self.value["dest"])
 
 class FileBone(TreeItemBone):

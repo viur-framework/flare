@@ -12,8 +12,10 @@ from flare.forms.widgets.tree import TreeNodeWidget, TreeLeafWidget, TreeBrowser
 
 
 def getImagePreview(data, cropped = False, size = 150):
-	print(data["downloadUrl"])
-	return data["downloadUrl"] #fixme ViUR3
+	if "downloadUrl" not in data: #fixme is there a possibility show a preview?
+		return None
+
+	return data["downloadUrl"]
 
 
 class Search(html5.Div):
