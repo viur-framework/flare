@@ -1,3 +1,0 @@
-#: ../../index.rst:1
-msgid "Welcome to Read the Docs"
-msgstr "Willkommen zu Read the Docs"
