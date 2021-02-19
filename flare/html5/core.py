@@ -266,13 +266,6 @@ class _WidgetStyleWrapper(dict):
 
 # Widget ---------------------------------------------------------------------------------------------------------------
 
-def _wrapEventCallback(callback):
-	"""
-	This is used to wrap event callbacks that accept no parameters!
-	"""
-	return lambda _: callback()
-
-
 class Widget(object):
 	_namespace = None   # Namespace
 	_tagName = None     # Defines the DOM element name that is used for construction
@@ -345,14 +338,31 @@ class Widget(object):
 	def addEventListener(self, event, callback):
 		"""
 		Adds an event listener callback to an event on a Widget.
+
 		:param event: The event string, e.g. "click" or "mouseover"
-		:param callback: The callback function to be called on the given event.
+		:param callback: The callback function to be called on the given event. \
+			This callback function can either accept no parameters, \
+			receive the pure Event-object from JavaScript as one parameter, \
+			or receive both the pure Event-object from JavaScript and the Widget-instance \
+			where the event was triggered on.
 		"""
-		if len(inspect.signature(callback).parameters) == 0:
+		parameters = inspect.signature(callback).parameters
+
+		# Allow for callback without parameter
+		if len(parameters) == 0:
+			# `lambda callback: lambda _: callback()` doesn't work.
+			def _wrapEventCallback(callback):
+				return lambda _: callback()
+
 			callback = _wrapEventCallback(callback)
 
-		def call(e,*args,**kwargs):
-			callback(e,self)
+		# Allow for callback with two or more parameters, to catch the event's source
+		elif len(parameters) >= 2:
+			# `callback = lambda callback: lambda event: callback(event, self)` doesn't work.
+			def _wrapEventWidgetCallback(callback, widget):
+				return lambda event: callback(event, widget)
+
+			callback = _wrapEventWidgetCallback(callback, self)
 
 		self.element.addEventListener(event, callback)
 
