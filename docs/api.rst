@@ -5,6 +5,7 @@ API Documentation
 
 .. automodule:: flare
 	:members:
+	:private-members:
 	:undoc-members:
 	:show-inheritance:
 
