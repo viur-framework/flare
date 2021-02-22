@@ -18,7 +18,7 @@ This will import the following:
 Using the Pkg Class
 --------------------
 
-.. autoclass:: Pkg
+.. autoclass:: Widget
     :members:
 
 Pkg explanation goes here.
@@ -26,16 +26,4 @@ Pkg explanation goes here.
 Using Foo Function
 ------------------
 
-.. autofunction:: foo()
-
-Constants
----------
-
-.. _constants:
-
-Four unneeded constants have been defined as examples:
-
-- NORTH
-- EAST
-- SOUTH
-- WEST
+.. autofunction:: bindApp()
