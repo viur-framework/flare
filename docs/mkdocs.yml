@@ -1,4 +1,0 @@
-site_name: Flare
-nav:
-- 'test': 'sub/config.md'
-theme: readthedocs
