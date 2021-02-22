@@ -2979,7 +2979,7 @@ def fromHTML(html: [str, HtmlAst], appendTo: Widget=None, bindTo: Widget=None, d
 
 		# Internal function for replacing {{ values["from"][4]["string"] + 1 }}...
 		ret = ""
-
+		match = __reVarReplacer.search( txt )
 		while match:
 			ret += txt[:match.start()]
 			txt = txt[match.end():]
