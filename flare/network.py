@@ -136,8 +136,8 @@ def processSkelQueue():
 		else:
 			r.kickoff()
 			break
-
-handleSkeyRequests = html5.window.setInterval(processSkelQueue, 500)
+if html5.window:
+	handleSkeyRequests = html5.window.setInterval(processSkelQueue, 500)
 
 
 class NetworkService(object):
