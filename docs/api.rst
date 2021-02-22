@@ -3,7 +3,10 @@
 API Documentation
 =================
 
-.. module:: flare
+.. automodule:: flare
+	:members:
+	:undoc-members:
+	:show-inheritance:
 
 For normal use, all you have to do is import the package::
 
