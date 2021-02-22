@@ -2980,12 +2980,14 @@ def fromHTML(html: [str, HtmlAst], appendTo: Widget=None, bindTo: Widget=None, d
 		# Internal function for replacing {{ values["from"][4]["string"] + 1 }}...
 		ret = ""
 
-		while match := __reVarReplacer.search(txt):
+		while match:
 			ret += txt[:match.start()]
 			txt = txt[match.end():]
 
 			val = htmlExpressionEvaluator.execute(match.group(1), kwargs)
 			ret += str(val) if val is not None else ""
+
+			match = __reVarReplacer.search( txt )
 
 		return ret + txt
 
