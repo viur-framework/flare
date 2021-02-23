@@ -1,5 +1,5 @@
 """
-Generic icon handling, especially of embedded SVG images served from a pool of icons.
+Components for displaying icons
 """
 
 from . import html5
@@ -43,7 +43,7 @@ class SvgIcon(html5.svg.Svg):
 		if self.value and self.value.endswith(".svg"):
 			url = self.value
 		else:
-			url = conf["basePathSvgs"] + "/%s.svg" % self.value
+			url = conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.value
 
 		HTTPRequest("GET", url, callbackSuccess=self.replaceSVG, callbackFailure=self.requestFallBack)
 
@@ -60,13 +60,13 @@ class SvgIcon(html5.svg.Svg):
 	def requestFallBack(self, data, status):
 		url = None
 		if self.fallbackIcon:
-			url = conf["basePathSvgs"] + "/%s.svg" % self.fallbackIcon
+			url = conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.fallbackIcon
 		elif self.title:
 			#language=HTML
 			self["viewbox"] = "-10 -10 20 20"
 			self.appendChild('''<text style="text-anchor: middle" y="6.5">%s</text>'''%self.title[0].upper())
 		else:
-			url = conf["basePathSvgs"] + "/icon-error.svg"  # fallback
+			url = conf["flare.icon.svg.embedding.path"] + "/%s.svg" % conf["flare.icon.fallback.error"]  # fallback
 
 		if url:
 			HTTPRequest("GET", url, callbackSuccess=self.replaceSVG)
@@ -105,7 +105,7 @@ class Icon(html5.I):
 			if self.value and self.value.endswith(".svg"):
 				url = self.value
 			else:
-				url = conf["basePathSvgs"] + "/%s.svg" % self.value
+				url = conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.value
 			self.appendChild(SvgIcon(url, self.fallbackIcon, self.title))
 
 	def _setTitle(self, val):
@@ -114,13 +114,18 @@ class Icon(html5.I):
 	def onError(self, event):
 		if self.fallbackIcon:
 			self.removeChild(self.image)
-			self.appendChild(SvgIcon(conf["basePathSvgs"] + "/%s.svg" % self.fallbackIcon, title=self.title))
+			self.appendChild(SvgIcon(conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.fallbackIcon, title=self.title))
 		elif self.title:
 			self.removeChild(self.image)
 			self.appendChild(self.title[0].upper())
 		else:
 			self.removeChild(self.image)
-			self.appendChild(SvgIcon(conf["basePathSvgs"] + "/icon-error.svg", title=self.title))
+			self.appendChild(
+				SvgIcon(
+					conf["flare.icon.svg.embedding.path"] + "/%s.svg" % conf["flare.icon.fallback.error"],
+					title=self.title
+				)
+			)
 
 
 @html5.tag("flare-badge-icon")
@@ -130,14 +135,22 @@ class BadgeIcon(Icon):
 	e.g. a number of new messages or items in the cart or so.
 	"""
 
-	def __init__(self, title, value=None, fallbackIcon=None, badge=None):
+	def __init__(self, title="", value=None, fallbackIcon=None, badge=None):
 		super().__init__(title, value, fallbackIcon)
-		self.badge = badge
-		# language=HTML
-		self.appendChild('<span class="badge" [name]="badgeobject">%s</span>' % self.badge)
+		self._badge = None
 
-	def _setBadge(self, value):
-		self.badgeobject.replaceChild(value)
+		# language=HTML
+		self.appendChild('<span class="badge" [name]="badge"></span>')
+		self["badge"] = badge
+
+	def _setBadge(self, badge):
+		self._badge = badge
+
+		if badge is None:
+			self.badge.hide()
+		else:
+			self.badge.replaceChild(badge)
+			self.badge.show()
 
 	def _getBadge(self):
-		return self.badge
+		return self._badge

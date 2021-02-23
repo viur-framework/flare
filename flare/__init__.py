@@ -56,7 +56,6 @@ def loadProjectConf(aconf):
 
 def bindApp(app,injectdata):
 	injectdata["app"] = app
-	injectdata["cache"] = Cache()
 	conf = updateConf(injectdata)
 	return conf
 

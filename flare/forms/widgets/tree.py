@@ -286,7 +286,7 @@ class TreeItemWidget(html5.Li):
 
 			self.nodeHeadline.appendChild(
 				formatString(format, self.data, self.structure,
-				                   language=conf["currentLanguage"]))
+				                   language=conf["flare.language.current"]))
 
 			if self.data and "size" in self.data and self.data["size"]:
 				def convert_bytes(num):

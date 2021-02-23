@@ -7,7 +7,7 @@ conf = {}
 	"emptyValue": translate("-"),
 
 	# Language settings
-	"currentLanguage": "de",
+	"flare.language.current": "de",
 
 	# Global holder to main admin window
 	"mainWindow": None,

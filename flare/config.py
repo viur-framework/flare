@@ -19,9 +19,10 @@ def updateConf(other: Dict):
 
 # Main config
 conf = {
-	"cache": Cache(),
-	"basePathSvgs": "/static/svgs",
-	"currentLanguage": "de",
+	"flare.cache": Cache(),
+	"flare.icon.svg.embedding.path": "/static/svgs",
+	"flare.icon.fallback.error": "icon-error",
+	"flare.language.current": "de",
 }
 
 # Assign SafeEval as htmlExpressionEvaluator

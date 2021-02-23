@@ -26,7 +26,7 @@ class Avatar(Icon):
 
 		# request missing data
 		if isinstance(value, str):
-			conf["cache"].request({
+			conf["flare.cache"].request({
 				"module": "user",
 				"action": "view",
 				"params": value
@@ -80,7 +80,7 @@ class Username(html5.Div):
 			value = value["key"]
 
 		if isinstance(value, str):
-			conf["cache"].request({
+			conf["flare.cache"].request({
 				"module": "user",
 				"action": "view",
 				"params": value

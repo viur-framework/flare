@@ -77,7 +77,7 @@ class HtmlEditor(html5.Textarea):
 
 	def _attachSummernote(self, retry=0):
 		elem = self.summernoteContainer.element
-		lang = conf["currentLanguage"]
+		lang = conf["flare.language.current"]
 
 		try:
 			self.summernote = summernoteEditor(elem, lang)
