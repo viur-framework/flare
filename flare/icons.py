@@ -13,6 +13,7 @@ class SvgIcon(html5.svg.Svg):
 	"""
 	A raw, embedded SVG icon-component
 	"""
+	_leafTag = True
 
 	def __init__(self, value=None, fallbackIcon=None, title=""):
 		super().__init__()
@@ -77,6 +78,7 @@ class Icon(html5.I):
 	"""
 	Icon component with first-letter fallback, normally shown as embedded SVG.
 	"""
+	_leafTag = True
 
 	def __init__(self, value=None, fallbackIcon=None, title="", classes=[]):
 		super().__init__()

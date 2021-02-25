@@ -41,7 +41,7 @@ class Avatar(Icon):
 			super()._setValue(value["image"])
 		else:
 			# if not fallback use initials
-			if not self.fallback and isinstance(value, dict) and all(
+			if not self.fallbackIcon and isinstance(value, dict) and all(
 					[k in value for k in ["key", "firstname", "lastname"]]):
 				super()._setValue(" ".join([value["firstname"], value["lastname"]]))
 			# if a fallback is set use this instead
