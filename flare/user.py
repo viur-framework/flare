@@ -45,10 +45,10 @@ class Avatar(Icon):
 					[k in value for k in ["key", "firstname", "lastname"]]):
 				super()._setValue(" ".join([value["firstname"], value["lastname"]]))
 			# if a fallback is set use this instead
-			elif self.fallback:
+			elif self.fallbackIcon:
 				if self.fallbackClass:
 					self.addClass(self.fallbackClass)
-				super()._setValue(self.fallback)
+				super()._setValue(self.fallbackIcon)
 			# if no fallback und no first- and lastname available use hardcoded icon
 			else:
 				super()._setValue("icon-user")
