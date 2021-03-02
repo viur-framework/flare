@@ -124,15 +124,15 @@ class ListSelection(Popup):
 		#build Buttonbar
 		self.buttonbar = ButtonBar()
 		# language=HTML
-		self.buttonbar.addButton( "reloadbtn", '''<ButtonBarButton text="neuladen" [name]="reloadbtn"></ButtonBarButton>''')
+		self.buttonbar.addButton( "reloadbtn", '''<flare-buttonbar-button text="neuladen" [name]="reloadbtn"></flare-buttonbar-button>''')
 
 		#language=HTML
-		self.filterbtn = self.buttonbar.addButton("filterbtn",'''<ButtonBarSearch [name]="filterbtn"></ButtonBarSearch>''')
+		self.filterbtn = self.buttonbar.addButton("filterbtn",'''<flare-buttonbar-search [name]="filterbtn"></flare-buttonbar-search>''')
 		self.filterbtn.state.register("applyfilter",self)
 
 
 		# language=HTML
-		self.selectbtn = self.buttonbar.addButton( "selectbtn", '''<ButtonBarButton text="auswählen" [name]="selectbtn"></ButtonBarButton>''' )
+		self.selectbtn = self.buttonbar.addButton( "selectbtn", '''<flare-buttonbar-button text="auswählen" [name]="selectbtn"></flare-buttonbar-button>''' )
 
 		self.buttonbar.state.register( "activeButton", self )
 

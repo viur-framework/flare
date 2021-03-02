@@ -1,7 +1,11 @@
 from flare.i18n import translate
 
 # variables which needed by forms
-conf = {}
+conf = {
+	"modules": {},      # todo: must be fixed
+	"selectors": {}     # todo: must be fixed
+}
+
 '''
 	# A value displayed as "empty value"
 	"emptyValue": translate("-"),
