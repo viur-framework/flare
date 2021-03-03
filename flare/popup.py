@@ -35,7 +35,7 @@ class Popup(html5.Div):
 			self.addClass(className)
 
 		if closeable:
-			closeBtn = Button("&times;", self.close, className="item-action")
+			closeBtn = Button("<flare-svg-icon value='icon-cross'/>", self.close, className="item-action btn--transparent btn--icon")
 			closeBtn.removeClass("btn")
 			self.popupHeadItem.appendChild(closeBtn)
 
