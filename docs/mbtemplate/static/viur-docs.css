@@ -1,0 +1,23 @@
+em {
+    color: #000;
+}
+
+pre {
+  padding: 10px 15px;
+  font-size: .9em;
+  background: hsla(0,0%,83%,.5) !important;
+}
+
+code {
+  background: hsla(0,0%,83%,.5) !important;
+}
+
+@media only screen and (max-width: 1060px) {
+  .github-ribbon {
+      display: none;
+  }
+}
+
+/*.highlight .k, .highlight .bp, .highlight .ow, .highlight .mi {
+  color: #cc0000;
+}*/
