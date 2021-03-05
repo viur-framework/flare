@@ -45,20 +45,42 @@ def removeView(name,targetView=None):
 	#except:pass
 
 
-def registerViews(path):
+def registerViews(root,path):
 	'''
 		add all Views in a folder
 
 	'''
-	rootModule = path.replace(sitepackagespath,"").replace("/",".")[1:]
 
-	for viewFile in os.listdir(path):
+	rootpath = os.path.join( root, path )
+
+	if root[1:].split("/")[0].endswith(".zip"):
+		### we need some rework here
+		_paths = root[1:].split("/")
+		if len(_paths)>1:
+			apath = os.path.join(*_paths[1:],path)
+		else:
+			apath = path
+
+		import zipfile
+
+		aZipfile = zipfile.ZipFile(_paths[0])
+
+		viewList = zip_listdir(aZipfile,apath)
+
+		rootModule = rootpath[1:].replace( root[1:].split("/")[0], "" ).replace( "/", "." )[ 1: ]
+	else:
+		viewList =  os.listdir(rootpath)
+		rootModule = rootpath.replace( sitepackagespath, "" ).replace( "/", "." )[ 1: ]
+
+	for viewFile in viewList:
 		logging.debug("found  view_ %r", viewFile)
 
-		if viewFile == "__init__.py" or not viewFile.endswith( ".py" ):
+		if viewFile == "__init__.py" or not (viewFile.endswith( ".py" ) or viewFile.endswith( ".pyc" )):
 			continue
 
 		viewFile = viewFile[:-3]
+		if viewFile.endswith("."):
+			viewFile = viewFile[:-1]
 
 		if viewFile in conf["views_blacklist"]:
 			continue
@@ -79,6 +101,25 @@ def registerViews(path):
 			raise
 
 
+
+def zip_listdir(zip_file, target_dir):
+
+	file_names = zip_file.namelist()
+
+	if not target_dir.endswith("/"):
+		target_dir += "/"
+
+	if target_dir == "/":
+		target_dir = ""
+
+	result = [ file_name
+			   for file_name in file_names
+			   if file_name.startswith(target_dir) and
+				  not "/" in file_name[len(target_dir):]
+			   ]
+	result = [ x.split( "/" )[ -1 ] for x in result ]
+	result = filter( None, result )
+	return result
 
 
 
