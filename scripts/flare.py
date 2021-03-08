@@ -19,6 +19,17 @@ def copySourcePy(source,target):
 
 	os.system(f'find "." -name "*.py" -exec cp --parents \\{{\\}} "{absTarget}" \;')
 	os.chdir(cwd)
+	
+	cleanSources(target)
+	copyflareAssets(source,target)
+
+def cleanSources(target):
+	cwd = os.getcwd()
+	absTarget = os.path.join( cwd, target )
+
+	for folder in ["bin","docs","examples","scripts","test"]:
+		target = os.path.join(absTarget,"flare",folder)
+		os.system( f'rm -rf {target}' )
 
 def minifyPy(target):
 	'''
@@ -93,6 +104,11 @@ def copyAssets(source,target):
 
 	_ = [ shutil.copyfile(os.path.join(source,i),os.path.join(target,i)) for i in os.listdir( source ) if i.endswith(toplevelFiles) ]
 
+def copyflareAssets(source,target):
+	flarefolder = os.path.join( source, "flare" )
+	if os.path.exists( flarefolder ):
+		shutil.copy(os.path.join(flarefolder,"flare","files.json"), os.path.join(target,"flare","flare","files.json"))
+
 
 def clearTarget(target):
 	'''
@@ -124,9 +140,9 @@ def main(argv):
 			print('gulp.py -t taskname -s ./sources')
 			sys.exit()
 		elif opt in ("-s", "--source"):
-			source = arg
+			source = os.path.realpath(arg)
 		elif opt in ("-t", "--target"):
-			target = arg
+			target = os.path.realpath(arg)
 		elif opt in ("-m", "--minify"):
 			minify = False if arg=="false" else True
 		elif opt in ("-c", "--compile"):
