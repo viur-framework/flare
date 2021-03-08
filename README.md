@@ -1,3 +1,6 @@
+[![Documentation Status](https://readthedocs.org/projects/viur-flare/badge/?version=latest)](https://viur-flare.readthedocs.io/en/latest/?badge=latest)
+
+
 # flare
 Flare is an application development framework for writing software frontends in pure Python.
 
