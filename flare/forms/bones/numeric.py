@@ -98,7 +98,7 @@ class NumericEditWidget( BaseEditWidget ):
 
 			return self.value
 
-		if value is None or str( value ).strip() is "":
+		if value is None or not str(value).strip():
 			self.value = None
 			return ""
 

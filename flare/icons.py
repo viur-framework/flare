@@ -5,7 +5,7 @@ Components for displaying icons
 from . import html5
 from .network import HTTPRequest
 from flare.config import conf
-import logging
+import logging, string
 
 
 @html5.tag("flare-svg-icon")
@@ -82,9 +82,11 @@ class Icon(html5.I):
 
 	def __init__(self, value=None, fallbackIcon=None, title="", classes=[]):
 		super().__init__()
+		self.image = html5.Img()
+		self.image.addEventListener("error", self.onError)
+
 		self["class"] = ["i"] + classes
 		self.title = title
-		self["title"] = title
 		self.fallbackIcon = fallbackIcon
 		self.value = value
 		if value:
@@ -95,13 +97,14 @@ class Icon(html5.I):
 			self.value = value.get("dest", {}).get("downloadUrl")
 		else:
 			self.value = value
+
 		# sig= test is really ugly we need a better solution
 		if self.value and ("sig=" in self.value or any(
-				[self.value.endswith(ext) for ext in [".jpg", ".png", ".gif", ".bmp", ".webp", ".heic", ".jpeg"]])):
-			# language=HTML
-			self.appendChild('<img [name]="image">')
-			self.image.onError = lambda e: self.onError(e)
-			self.image.sinkEvent("onError")
+				[self.value.lower().endswith(ext) for ext in [
+					".jpg", ".png", ".gif", ".bmp", ".webp", ".heic", ".jpeg"
+				]])
+		):
+			self.appendChild(self.image)
 			self.image["src"] = self.value
 		else:
 			if self.value and self.value.endswith(".svg"):
@@ -112,16 +115,27 @@ class Icon(html5.I):
 
 	def _setTitle(self, val):
 		self.title = val
+		if not self.value:
+			self.onError()
 
-	def onError(self, event):
+	def _setFallback(self, val):
+		self.fallbackIcon = val
+		if not self.value:
+			self.onError()
+
+	def onError(self):
+		self.removeAllChildren()
+
 		if self.fallbackIcon:
-			self.removeChild(self.image)
-			self.appendChild(SvgIcon(conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.fallbackIcon, title=self.title))
+			self.appendChild(
+				SvgIcon(
+					conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.fallbackIcon, title=self.title)
+			)
 		elif self.title:
-			self.removeChild(self.image)
-			self.appendChild(self.title[0].upper())
+			initials = self.title.replace("-", " ")  # replace dashes by spaces
+			initials = initials.translate({ord(c): None for c in string.punctuation})  # remove all punctuations
+			self.appendChild("".join([tag[0] for tag in initials.split(maxsplit=1)]))  # Only allow first two words
 		else:
-			self.removeChild(self.image)
 			self.appendChild(
 				SvgIcon(
 					conf["flare.icon.svg.embedding.path"] + "/%s.svg" % conf["flare.icon.fallback.error"],

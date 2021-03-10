@@ -27,10 +27,10 @@ class Avatar(Icon):
 		# request missing data
 		if isinstance(value, str):
 			conf["flare.cache"].request({
-				"module": "user",
-				"action": "view",
-				"params": value
-			},
+					"module": "!user",
+					"action": "view",
+					"params": value
+				},
 				finishHandler=self._onUserAvailable
 			)
 		# try to set Image
@@ -43,7 +43,7 @@ class Avatar(Icon):
 			# if not fallback use initials
 			if not self.fallbackIcon and isinstance(value, dict) and all(
 					[k in value for k in ["key", "firstname", "lastname"]]):
-				super()._setValue(" ".join([value["firstname"], value["lastname"]]))
+				super()._setTitle(" ".join([value["firstname"], value["lastname"]]))
 			# if a fallback is set use this instead
 			elif self.fallbackIcon:
 				if self.fallbackClass:
@@ -54,7 +54,8 @@ class Avatar(Icon):
 				super()._setValue("icon-user")
 
 	def _onUserAvailable(self, res):
-		self["value"] = res["user"]
+		if res["user"]:
+			self["value"] = res["user"]
 
 	def _setFallbackclass(self, value):
 		self.fallbackClass = value
@@ -81,12 +82,11 @@ class Username(html5.Div):
 
 		if isinstance(value, str):
 			conf["flare.cache"].request({
-				"module": "user",
-				"action": "view",
-				"params": value
-			},
-				finishHandler=self._onUserAvailable,
-				failureHandler=lambda *args, **kwargs: self.appendChild("???")  # I cannot render this user
+					"module": "!user",
+					"action": "view",
+					"params": value
+				},
+				finishHandler=self._onUserAvailable
 			)
 
 		elif isinstance(value, dict) and "key" in value:

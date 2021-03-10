@@ -390,11 +390,12 @@ class Plan(object):
 				self.finish(req.cache)
 
 	def _onRequestFailure(self, req, code):
-		if len(req.params) == 1 and "key" in req.params:
-			params = "key=%s" % req.params["key"]
-		else:
-			params = str(req.params)
+		if not self.optional:
+			if len(req.params) == 1 and "key" in req.params:
+				params = "key=%s" % req.params["key"]
+			else:
+				params = str(req.params)
 
-		NiceError(req, code, params)
+			NiceError(req, code, params)
 
 		self.finish(req.cache)
