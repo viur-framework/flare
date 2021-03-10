@@ -13,6 +13,8 @@ class Avatar(Icon):
 
 	When the user is not, it is automatically fetched into the cache for further usage.
 	"""
+	nameBones = ["firstname", "lastname"]
+	imageBone = "image"
 
 	def __init__(self):
 		super().__init__()
@@ -24,12 +26,12 @@ class Avatar(Icon):
 		# print("Avatar:_setValue: new value = %r" % value)
 		if isinstance(value, dict) and "key" in value:
 			if "image" not in value:
-				if "firstname" in value:
-					self.user["firstname"] = value["firstname"]
-				if "lastname" in value:
-					self.user["lastname"] = value["lastname"]
+				for bone in self.nameBones:
+					if bone in value:
+						self.user[bone] = value[bone]
+
 				value = value["key"]
-				print("Avatar:_setValue: value = %r" % value)
+				#print("Avatar:_setValue: value = %r" % value)
 
 		self.myvalue = value
 
@@ -37,7 +39,7 @@ class Avatar(Icon):
 		if isinstance(value, str):
 			# print("Avatar:_setValue: requesting user/view for: %r" % value)
 			conf["flare.cache"].request({
-					"module": "!user",
+					"module": "!user",  # ! is for optional
 					"action": "view",
 					"params": value
 				},
@@ -45,12 +47,12 @@ class Avatar(Icon):
 				failureHandler=self._onUserFailed
 			)
 		# try to set Image
-		elif isinstance(value, dict) and all([k in value for k in ["key", "image"]]) and value["image"]:
+		elif isinstance(value, dict) and all([k in value for k in ["key", self.imageBone]]) and value[self.imageBone]:
 			# print("Avatar:_setValue: got user with image! ")
 			self.user = value
 			if self.fallbackClass:
 				self.removeClass(self.fallbackClass)
-			super()._setValue(value["image"])
+			super()._setValue(value[self.imageBone])
 		else:
 			self._tryFallbacks()
 
@@ -60,16 +62,11 @@ class Avatar(Icon):
 		# if not fallback use initials
 		if not self.fallbackIcon:
 			if isinstance(self.myvalue, dict) and \
-				"key" in self.myvalue and ("firstname" in self.myvalue or "lastname" in self.myvalue):
-				super()._setTitle(" ".join(
-					[self.myvalue["firstname"] if "firstname" in self.myvalue else "",
-						self.myvalue["lastname"] if "lastname" in self.myvalue else ""]))
+				"key" in self.myvalue and any([bone in self.myvalue for bone in self.nameBones]):
+				super()._setTitle(" ".join([(self.myvalue.get(bone) or "") for bone in self.nameBones]))
 				return
-			elif isinstance(self.user, dict) and \
-				("firstname" in self.user or "lastname" in self.user):
-				super()._setTitle(" ".join(
-					[self.user["firstname"] if "firstname" in self.user else "",
-						self.user["lastname"] if "lastname" in self.user else ""]))
+			elif isinstance(self.user, dict) and any([bone in self.user for bone in self.nameBones]):
+				super()._setTitle(" ".join([(self.user.get(bone) or "") for bone in self.nameBones]))
 				return
 		# if a fallback is set use this instead
 		if self.fallbackIcon:
@@ -105,6 +102,7 @@ class Username(html5.Div):
 	When the user is not, it is automatically fetched into the cache for further usage.
 	"""
 	_leafTag = True
+	viewBones = ["name", "firstname", "lastname"]
 
 	def __init__(self):
 		super().__init__()
@@ -113,7 +111,7 @@ class Username(html5.Div):
 	def _setValue(self, value):
 		self.removeAllChildren()
 
-		if isinstance(value, dict) and not all([k in value for k in ["key", "firstname", "lastname"]]):
+		if isinstance(value, dict) and not all([k in value for k in ["key"] + self.viewBones]):
 			value = value["key"]
 
 		if isinstance(value, str):
@@ -128,8 +126,8 @@ class Username(html5.Div):
 		elif isinstance(value, dict) and "key" in value:
 			self.user = value
 
-			if all([k in value for k in ["firstname", "lastname"]]):
-				self.appendChild(" ".join([value["firstname"], value["lastname"]]))
+			if all([k in value for k in self.viewBones]):
+				self.appendChild(" ".join([(value.get(bone) or "") for bone in self.viewBones]))
 			else:
 				self.appendChild(value["key"])
 
