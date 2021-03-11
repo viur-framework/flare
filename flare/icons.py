@@ -36,6 +36,7 @@ class SvgIcon(html5.svg.Svg):
 
 	def _setTitle(self, val):
 		self.title = val
+		self.element.title = val
 
 	def getIcon(self):
 		if self.value =="icons/modules/users.svg":
@@ -115,6 +116,8 @@ class Icon(html5.I):
 
 	def _setTitle(self, val):
 		self.title = val
+		self.element.title = val
+
 		if not self.value:
 			self.onError()
 

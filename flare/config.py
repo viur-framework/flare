@@ -4,6 +4,7 @@ Flare configuration.
 from .html5 import core
 from .safeeval import SafeEval
 from .cache import Cache
+from .i18n import translate
 
 from typing import Dict
 
@@ -26,7 +27,9 @@ conf = {
 }
 
 # Assign SafeEval as htmlExpressionEvaluator
-core.htmlExpressionEvaluator = SafeEval()
+core.htmlExpressionEvaluator = SafeEval({
+	"translate": translate
+})
 
 # Merge view_conf into main config
 from flare.views import conf as view_conf

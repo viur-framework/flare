@@ -2,15 +2,19 @@
 Pre-defined dialog widgets for user interaction.
 """
 
-from . import html5, utils, icons
+from . import html5, utils, icons, i18n
 from .button import Button
 
 
 class Popup(html5.Div):
 
-	def __init__(self, title=None, id=None, className=None, icon=None, enableShortcuts=True, closeable=True, *args, **kwargs):
+	def __init__(
+			self, title="", id=None, className=None, icon=None, enableShortcuts=True, closeable=True,
+			*args, **kwargs
+	):
 		# language=HTML
-		super().__init__("""
+		super().__init__(
+			"""
 			<div class="box" [name]="popupBox" style="height: 100%">
 				<div class="box-head" [name]="popupHead">
 					<div class="item" [name]="popupHeadItem">
@@ -18,36 +22,39 @@ class Popup(html5.Div):
 							<flare-icon class="i i--small" [name]="popupIcon"></flare-icon>
 						</div>
 						<div class="item-content">
-							<div class="item-headline" [name]="popupHeadline"></div>
+							<div class="item-headline" [name]="popupHeadline">
+								{{title}}
+							</div>
 						</div>
+
+						<flare-icon value="icon-cross" @click="close"
+							flare-if="closeable" title="{{ translate('flare.label.close') }}"
+							class="item-action btn--transparent btn--icon">
 					</div>
 				</div>
 				<div class="box-body box--content" [name]="popupBody" style="height: 100%"></div>
 				<div class="box-foot box--content bar" [name]="popupFoot"></div>
 			</div>
-		""")
+			""",
+			title=title,
+			closeable=closeable
+		)
 
 		self.appendChild = self.popupBody.appendChild
-		self.fromHTML = lambda *args, **kwargs: self.popupBody.fromHTML(*args, **kwargs) if kwargs.get("bindTo") else self.popupBody.fromHTML(bindTo=self, *args, **kwargs)
+		self.fromHTML = lambda *args, **kwargs: self.popupBody.fromHTML(*args, **kwargs) if kwargs.get(
+			"bindTo") else self.popupBody.fromHTML(bindTo=self, *args, **kwargs)
 
 		self["class"] = "popup popup--center is-active"
 		if className:
 			self.addClass(className)
 
-		if closeable:
-			closeBtn = Button("<flare-svg-icon value='icon-cross'/>", self.close, className="item-action btn--transparent btn--icon")
-			closeBtn.removeClass("btn")
-			self.popupHeadItem.appendChild(closeBtn)
-
-		if title:
-			self.popupHeadline.appendChild(title)
-
-		self.popupIcon["value"] = icon or title
+		self.popupIcon["value"] = icon
+		self.popupIcon["title"] = title
 
 		# id can be used to pass information to callbacks
 		self.id = id
 
-		#FIXME: Implement a global overlay! One popupOverlay next to a list of popups.
+		# FIXME: Implement a global overlay! One popupOverlay next to a list of popups.
 		self.popupOverlay = html5.Div()
 		self.popupOverlay["class"] = "popup-overlay is-active"
 
@@ -57,7 +64,7 @@ class Popup(html5.Div):
 		self.popupOverlay.appendChild(self)
 		html5.Body().appendChild(self.popupOverlay)
 
-		#FIXME: Close/Cancel every popup with click on popupCloseBtn without removing the global overlay.
+	# FIXME: Close/Cancel every popup with click on popupCloseBtn without removing the global overlay.
 
 	def onAttach(self):
 		super(Popup, self).onAttach()
@@ -76,20 +83,28 @@ class Popup(html5.Div):
 		if html5.isEscape(event):
 			self.close()
 
-	def close(self, *args, **kwargs):
+	def close(self):
 		if self.popupOverlay:
 			html5.Body().removeChild(self.popupOverlay)
 		self.popupOverlay = None
 
 
 class Prompt(Popup):
-	def __init__(self, text, value="", successHandler=None, abortHandler=None,
-				 	successLbl="OK", abortLbl="Cancel", placeholder="", *args, **kwargs):
-
+	def __init__(
+			self, text, value="", successHandler=None, abortHandler=None,
+			successLbl=None, abortLbl=None, placeholder="",
+			*args, **kwargs
+	):
 		super().__init__(*args, **kwargs)
 		self.addClass("popup--prompt")
 
 		self.sinkEvent("onKeyDown", "onKeyUp")
+
+		if successLbl is None:
+			successLbl = i18n.translate("flare.label.ok")
+
+		if abortLbl is None:
+			abortLbl = i18n.translate("flare.label.cancel")
 
 		self.successHandler = successHandler
 		self.abortHandler = abortHandler
@@ -154,12 +169,18 @@ class Alert(Popup):
 	Just displaying an alerting message box with OK-button.
 	"""
 
-	def __init__(self, msg, title=None, className=None, okCallback=None, okLabel="OK", icon="!", closeable=True, *args, **kwargs):
+	def __init__(
+			self, msg, title=None, className=None, okCallback=None, okLabel=None, icon="icon-info", closeable=True,
+			*args, **kwargs
+	):
 		super().__init__(title, className=None, icon=icon, closeable=closeable, *args, **kwargs)
 		self.addClass("popup--alert")
 
 		if className:
 			self.addClass(className)
+
+		if okLabel is None:
+			okLabel = i18n.translate("flare.label.ok")
 
 		self.okCallback = okCallback
 
@@ -199,11 +220,19 @@ class Alert(Popup):
 
 
 class Confirm(Popup):
-	def __init__(self, question, title=None, yesCallback=None, noCallback=None,
-	                yesLabel="Yes", noLabel="No", icon="?",
-	                    closeable=False, *args, **kwargs):
+	def __init__(
+			self, question, title=None, yesCallback=None, noCallback=None,
+			yesLabel=None, noLabel=None, icon="icon-question", closeable=True,
+			*args, **kwargs
+	):
 		super().__init__(title, closeable=closeable, icon=icon, *args, **kwargs)
 		self.addClass("popup--confirm")
+
+		if yesLabel is None:
+			yesLabel = i18n.translate("flare.label.yes")
+
+		if noLabel is None:
+			noLabel = i18n.translate("flare.label.no")
 
 		self.yesCallback = yesCallback
 		self.noCallback = noCallback
@@ -219,11 +248,10 @@ class Confirm(Popup):
 
 		if len(noLabel):
 			btnNo = Button(noLabel, className="btn--no", callback=self.onNoClicked)
-			#btnNo["class"].append("btn--no")
 			self.popupFoot.appendChild(btnNo)
 
 		btnYes = Button(yesLabel, callback=self.onYesClicked)
-		btnYes["class"].append("btn--yes")
+		btnYes.addClass("btn--yes", "btn--primary")
 		self.popupFoot.appendChild(btnYes)
 
 		self.sinkEvent("onKeyDown")
@@ -260,10 +288,18 @@ class Confirm(Popup):
 
 
 class TextareaDialog(Popup):
-	def __init__(self, text, value="", successHandler=None, abortHandler=None, successLbl="OK", abortLbl="Cancel",
-	             *args, **kwargs):
+	def __init__(
+			self, text, value="", successHandler=None, abortHandler=None, successLbl=None, abortLbl=None,
+			*args, **kwargs
+	):
 		super().__init__(*args, **kwargs)
 		self.addClass("popup--textareadialog")
+
+		if successLbl is None:
+			successLbl = i18n.translate("flare.label.ok")
+
+		if abortLbl is None:
+			abortLbl = i18n.translate("flare.label.cancel")
 
 		self.successHandler = successHandler
 		self.abortHandler = abortHandler

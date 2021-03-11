@@ -6,7 +6,7 @@ Wrapper to handle ViUR-related Ajax requests.
 import logging
 from flare.event import EventDispatcher
 import os, sys, json, string, random
-from . import html5
+from . import html5, i18n
 
 
 class DeferredCall(object):
@@ -98,22 +98,15 @@ def NiceError(req, code, params="", then=None):
 	Displays a descriptive error message using an Alert dialog to the user.
 	"""
 
-	reason = {
-		"401": "Nicht autorisierte Anfrage",
-		"403": "Verboten - Fehlendes Zugriffsrecht",
-		"404": "Datensatz nicht gefunden",
-		"500": "Interner Server Fehler",
-	}.get(str(code), "Unbekannter Fehler")
-
-	hint = {
-		"401": "\n\nBitte überprüfen Sie, ob Sie angemeldet sind,\n"
-		       "und starten Sie das Programm danach erneut!",
-	}.get(str(code), "")
+	reason = i18n.translate(f"flare.network.error.{code}", fallback=i18n.translate("flare.network.error"))
+	hint = i18n.translate(f"flare.network.hint.{code}", fallback="")
 
 	from . import popup
 	popup.Alert(
-		"<strong>%s</strong>%s\n\n<em>%s/%s/%s</em>" % (reason, hint, req.module, req.url, params),
-		title="Fehler %d" % code,
+		# language=HTML
+		f"<strong>{reason}</strong>{hint}\n\n<em>{req.module}/{req.url}/{req.params}</em>",
+		title=i18n.translate("flare.label.error") + " " + str(code),
+		icon="icon-error",
 		okCallback=then
 	)
 
