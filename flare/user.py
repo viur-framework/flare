@@ -4,6 +4,7 @@ ViUR-user-module-related tools and widgets.
 from . import html5
 from .icons import Icon
 from .config import conf
+from .forms.formatString import formatString
 
 
 @html5.tag("flare-avatar")
@@ -103,6 +104,7 @@ class Username(html5.Div):
 	"""
 	_leafTag = True
 	viewBones = ["name", "firstname", "lastname"]
+	format = "$(firstname) $(lastname) ($(name))"
 
 	def __init__(self):
 		super().__init__()
@@ -127,7 +129,7 @@ class Username(html5.Div):
 			self.user = value
 
 			if all([k in value for k in self.viewBones]):
-				self.appendChild(" ".join([(value.get(bone) or "") for bone in self.viewBones]))
+				self.appendChild(formatString(self.format, value))
 			else:
 				self.appendChild(value["key"])
 
