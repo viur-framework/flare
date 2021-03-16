@@ -34,6 +34,9 @@ class Timestamp(html5.Div):
 		if not self.timestamp:
 			return
 
+		self.appendChild(self.timestamp.strftime("am %d.%m.%Y um %H:%M"))
+
+		'''
 		now = datetime.datetime.now()
 		diff = now - self.timestamp
 
@@ -60,6 +63,7 @@ class Timestamp(html5.Div):
 
 		if self._updateInterval is None:
 			self._updateInterval = html5.window.setInterval(self._render, 10 * 1000)
+		'''
 
 	def onDetach(self):
 		if self._updateInterval:

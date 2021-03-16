@@ -27,7 +27,7 @@ class Popup(html5.Div):
 							</div>
 						</div>
 
-						<flare-icon value="icon-cross" @click="close"
+						<flare-icon value="icon-cross" @click="onClose"
 							flare-if="closeable" title="{{ translate('flare.label.close') }}"
 							class="item-action btn--transparent btn--icon">
 					</div>
@@ -87,6 +87,9 @@ class Popup(html5.Div):
 		if self.popupOverlay:
 			html5.Body().removeChild(self.popupOverlay)
 		self.popupOverlay = None
+
+	def onClose(self):
+		self.close()
 
 
 class Prompt(Popup):
@@ -196,6 +199,8 @@ class Alert(Popup):
 		self.sinkEvent("onKeyDown")
 
 		if closeable:
+			self.onClose = self.onOkBtnClick
+
 			okBtn = Button(okLabel, callback=self.onOkBtnClick)
 			okBtn.addClass("btn--okay btn--primary")
 			self.popupFoot.appendChild(okBtn)
@@ -206,7 +211,7 @@ class Alert(Popup):
 		self.okCallback = None
 		self.close()
 
-	def onOkBtnClick(self, sender=None):
+	def onOkBtnClick(self):
 		if self.okCallback:
 			self.okCallback(self)
 
