@@ -1123,7 +1123,7 @@ class Widget(object):
 		except IndexError:
 			return None
 
-	def sortChildren(self, key):
+	def sortChildren(self, key, reversed=False):
 		"""
 			Sorts our direct children. They are rearranged on DOM level.
 			Key must be a function accepting one widget as parameter and must return
@@ -1131,7 +1131,10 @@ class Widget(object):
 		"""
 		self._children.sort(key=key)
 		tmpl = self._children[:]
-		tmpl.reverse()
+
+		if not reversed:
+			tmpl.reverse()
+
 		for c in tmpl:
 			self.element.removeChild(c.element)
 			self.element.insertBefore(c.element, self.element.children.item(0))
