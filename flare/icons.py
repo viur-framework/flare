@@ -100,19 +100,23 @@ class Icon(html5.I):
 			self.value = value
 
 		# sig= test is really ugly we need a better solution
-		if self.value and ("sig=" in self.value or any(
+		if self.value:
+			if ("sig=" in self.value or any(
 				[self.value.lower().endswith(ext) for ext in [
 					".jpg", ".png", ".gif", ".bmp", ".webp", ".heic", ".jpeg"
 				]])
-		):
-			self.appendChild(self.image)
-			self.image["src"] = self.value
-		else:
-			if self.value and self.value.endswith(".svg"):
+			):
+				self.appendChild(self.image)
+				self.image["src"] = self.value
+				return
+			elif self.value.endswith(".svg"):
 				url = self.value
 			else:
 				url = conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.value
+
 			self.appendChild(SvgIcon(url, self.fallbackIcon, self.title))
+		else:
+			self.onError()
 
 	def _setTitle(self, val):
 		self.title = val

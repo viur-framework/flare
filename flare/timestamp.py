@@ -28,6 +28,9 @@ class Timestamp(html5.Div):
 		self.timestamp = timestamp
 		self._render()
 
+	def _getValue(self):
+		return self.timestamp
+
 	def _render(self):
 		self.removeAllChildren()
 
