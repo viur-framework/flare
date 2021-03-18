@@ -83,13 +83,16 @@ class Icon(html5.I):
 
 	def __init__(self, value=None, fallbackIcon=None, title="", classes=[]):
 		super().__init__()
-		self.image = html5.Img()
-		self.image.addEventListener("error", self.onError)
-
 		self["class"] = ["i"] + classes
 		self.title = title
 		self.fallbackIcon = fallbackIcon
 		self.value = value
+
+		# Widget reference variables
+		self.imgWidget = None
+		self.svgWidget = None
+		self.txtWidget = None
+
 		if value:
 			self["value"] = value
 
@@ -106,15 +109,19 @@ class Icon(html5.I):
 					".jpg", ".png", ".gif", ".bmp", ".webp", ".heic", ".jpeg"
 				]])
 			):
-				self.appendChild(self.image)
-				self.image["src"] = self.value
+				self.imgWidget = html5.Img()
+				self.imgWidget.addEventListener("error", self.onError)
+				self.imgWidget["src"] = self.value
+
+				self.appendChild(self.imgWidget)
 				return
 			elif self.value.endswith(".svg"):
 				url = self.value
 			else:
 				url = conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.value
 
-			self.appendChild(SvgIcon(url, self.fallbackIcon, self.title))
+			self.svgWidget = SvgIcon(url, self.fallbackIcon, self.title)
+			self.appendChild(self.svgWidget)
 		else:
 			self.onError()
 
@@ -131,24 +138,30 @@ class Icon(html5.I):
 			self.onError()
 
 	def onError(self):
-		self.removeAllChildren()
+		if self.imgWidget:
+			self.removeChild(self.imgWidget)
+		if self.svgWidget:
+			self.removeChild(self.svgWidget)
+		if self.txtWidget:
+			self.removeChlild(self.txtWidget)
 
 		if self.fallbackIcon:
-			self.appendChild(
-				SvgIcon(
-					conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.fallbackIcon, title=self.title)
-			)
+			self.svgWidget = SvgIcon(conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.fallbackIcon, title=self.title)
+			self.appendChild(self.svgWidget)
+
 		elif self.title:
 			initials = self.title.replace("-", " ")  # replace dashes by spaces
 			initials = initials.translate({ord(c): None for c in string.punctuation})  # remove all punctuations
-			self.appendChild("".join([tag[0] for tag in initials.split(maxsplit=1)]))  # Only allow first two words
+
+			self.txtWidget = html5.TextNode("".join([tag[0] for tag in initials.split(maxsplit=1)])) # Only allow first two words
+			self.appendChild(self.txtWidget)
 		else:
-			self.appendChild(
-				SvgIcon(
-					conf["flare.icon.svg.embedding.path"] + "/%s.svg" % conf["flare.icon.fallback.error"],
-					title=self.title
-				)
+			self.svgWidget = SvgIcon(
+				conf["flare.icon.svg.embedding.path"] + "/%s.svg" % conf["flare.icon.fallback.error"],
+				title=self.title
 			)
+
+			self.appendChild(self.svgWidget)
 
 
 @html5.tag("flare-badge-icon")
@@ -163,17 +176,23 @@ class BadgeIcon(Icon):
 		self._badge = None
 
 		# language=HTML
-		self.appendChild('<span class="badge" [name]="badge"></span>')
-		self["badge"] = badge
+		self.appendChild(
+			"""
+			<span class="badge" [name]="badgeWidget" hidden></span>
+			"""
+		)
+
+		if badge:
+			self["badge"] = badge
 
 	def _setBadge(self, badge):
 		self._badge = badge
 
 		if badge is None:
-			self.badge.hide()
+			self.badgeWidget.hide()
 		else:
-			self.badge.replaceChild(badge)
-			self.badge.show()
+			self.badgeWidget.replaceChild(badge)
+			self.badgeWidget.show()
 
 	def _getBadge(self):
 		return self._badge
