@@ -109,16 +109,21 @@ class Icon(html5.I):
 					".jpg", ".png", ".gif", ".bmp", ".webp", ".heic", ".jpeg"
 				]])
 			):
-				self.imgWidget = html5.Img()
-				self.imgWidget.addEventListener("error", self.onError)
-				self.imgWidget["src"] = self.value
+				if not self.imgWidget:
+					self.imgWidget = html5.Img()
+					self.imgWidget.addEventListener("error", self.onError)
 
+				self.imgWidget["src"] = self.value
 				self.appendChild(self.imgWidget)
 				return
 			elif self.value.endswith(".svg"):
 				url = self.value
 			else:
 				url = conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.value
+
+			if self.svgWidget:
+				self.removeChild(self.svgWidget)
+				self.svgWidget = None
 
 			self.svgWidget = SvgIcon(url, self.fallbackIcon, self.title)
 			self.appendChild(self.svgWidget)
@@ -142,8 +147,10 @@ class Icon(html5.I):
 			self.removeChild(self.imgWidget)
 		if self.svgWidget:
 			self.removeChild(self.svgWidget)
+			self.svgWidget = None
 		if self.txtWidget:
 			self.removeChlild(self.txtWidget)
+			self.txtWidget = None
 
 		if self.fallbackIcon:
 			self.svgWidget = SvgIcon(conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.fallbackIcon, title=self.title)
