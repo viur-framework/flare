@@ -149,7 +149,7 @@ class Icon(html5.I):
 			self.removeChild(self.svgWidget)
 			self.svgWidget = None
 		if self.txtWidget:
-			self.removeChlild(self.txtWidget)
+			self.removeChild(self.txtWidget)
 			self.txtWidget = None
 
 		if self.fallbackIcon:
