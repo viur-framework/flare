@@ -92,6 +92,31 @@ def domGetElementsByTagName(tag):
 	return [items.item(i) for i in range(0, int(items.length))] #pyodide interprets items.length as float, so convert to int
 
 
+__domParser = None
+
+def domConvertEncodedText(txt):
+	"""
+	Convert HTML-encoded text (containing HTML entities) into its decoded string representation.
+
+	The reason for this function is the handling of HTML entities, which is not properly supported by native JavaScript.
+
+	We use the browser's DOM parser to do this, according to
+	https://stackoverflow.com/questions/3700326/decode-amp-back-to-in-javascript
+
+	:param txt: The encoded text.
+	:return: The decoded text.
+	"""
+	global __domParser
+
+	if jseval is None:
+		return txt
+
+	if __domParser is None:
+		__domParser = jseval("new DOMParser")
+
+	dom = __domParser.parseFromString("<!doctype html><body>" + str(txt), "text/html")
+	return dom.body.textContent
+
 ########################################################################################################################
 # HTML Widgets
 ########################################################################################################################
@@ -109,11 +134,11 @@ class TextNode(object):
 		super().__init__()
 		self._parent = None
 		self._children = []
-		self.element = domCreateTextNode(txt or "")
+		self.element = domCreateTextNode(domConvertEncodedText(txt or ""))
 		self._isAttached = False
 
 	def _setText(self, txt):
-		self.element.data = txt
+		self.element.data = domConvertEncodedText(txt)
 
 	def _getText(self):
 		return self.element.data
@@ -2656,7 +2681,6 @@ def isShift(event):
 
 # Global variables required by HTML parser & renderer
 __tags = None
-__domParser = None
 __reVarReplacer = re.compile("{{(([^}]|}[^}])*)}}")
 
 def registerTag(tagName, widgetClass, override=True):
@@ -2762,30 +2786,6 @@ def parseHTML(html: str, debug: bool=False) -> HtmlAst:
 	the html5.tag-decorator.
 	"""
 
-	def convertEncodedText(txt):
-		"""
-		Convert HTML-encoded text into decoded string.
-
-		The reason for this function is the handling of HTML entities, which is not
-		properly supported by native JavaScript.
-
-		We use the browser's DOM parser to to this, according to
-		https://stackoverflow.com/questions/3700326/decode-amp-back-to-in-javascript
-
-		:param txt: The encoded text.
-		:return: The decoded text.
-		"""
-		global __domParser
-
-		if jseval is None:
-			return txt
-
-		if __domParser is None:
-			__domParser = jseval("new DOMParser")
-
-		dom = __domParser.parseFromString("<!doctype html><body>" + str(txt), "text/html")
-		return dom.body.textContent
-
 	def scanWhite(l):
 		"""
 		Scan and return whitespace.
@@ -2876,10 +2876,9 @@ def parseHTML(html: str, debug: bool=False) -> HtmlAst:
 				text += ch
 
 		# Append plain text (if not only whitespace)
-		if (text and ((len(text) == 1 and text in ["\t "])
-					  or not all([ch in " \t\r\n" for ch in text]))):
+		if text and (len(text) == 1 and text in ["\t "]) or not all([ch in " \t\r\n" for ch in text]):
 			# print("text", text)
-			parent.append(convertEncodedText(text))
+			parent.append(domConvertEncodedText(text))
 
 		# Create tag
 		if tag:
