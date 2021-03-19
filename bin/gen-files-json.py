@@ -18,4 +18,4 @@ for root, dirnames, filenames in walkObj:
 
 with open("files.json", "w") as f:
 	json.dump(sorted(files), f, indent=2)
-
+	print("", file=f)  # append line break

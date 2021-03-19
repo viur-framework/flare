@@ -59,3 +59,5 @@ def bindApp(app,injectdata):
 	conf = updateConf(injectdata)
 	return conf
 
+
+i18n.buildTranslations("flare")
