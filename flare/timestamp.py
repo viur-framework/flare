@@ -3,6 +3,7 @@ Widget for representing a timestamp with 'time-changing' behavior.
 """
 
 import datetime
+import pytz
 from . import html5
 from . import utils
 
@@ -28,12 +29,19 @@ class Timestamp(html5.Div):
 		self.timestamp = timestamp
 		self._render()
 
+	def _getValue(self):
+		return self.timestamp
+
 	def _render(self):
 		self.removeAllChildren()
 
 		if not self.timestamp:
 			return
 
+		# Render in local timezone
+		self.appendChild(self.timestamp.astimezone().strftime("am %d.%m.%Y um %H:%M"))
+
+		'''
 		now = datetime.datetime.now()
 		diff = now - self.timestamp
 
@@ -60,6 +68,7 @@ class Timestamp(html5.Div):
 
 		if self._updateInterval is None:
 			self._updateInterval = html5.window.setInterval(self._render, 10 * 1000)
+		'''
 
 	def onDetach(self):
 		if self._updateInterval:
