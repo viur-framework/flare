@@ -3,6 +3,7 @@ Utility functions
 """
 
 import datetime
+import pytz
 from . import html5
 
 
@@ -113,9 +114,9 @@ def parseFloat(s, ret=0.0):
 
 def viurDateTimeToDateTime(value):
 	"""
-	Converts ViUR's datetime format into a Python datetime object.
+	Converts ViUR's datetime String format into a Python datetime object in UTC timezone.
 	"""
 	try:
-		return datetime.datetime.strptime(value, "%d.%m.%Y %H:%M:%S")
+		return pytz.utc.localize(datetime.datetime.strptime(value, "%d.%m.%Y %H:%M:%S"))
 	except:
 		return None
