@@ -29,7 +29,9 @@ for file in [
 	"pyodide.js",
 	"renderedhtml.css",
 	"setuptools.data",
-	"setuptools.js"
+	"setuptools.js",
+	"pytz.data",
+	"pytz.js"
 ]:
 	url = URL.format(file=file, CDN=CDN, VERSION=VERSION)
 	file = os.path.join(DIR, file)
