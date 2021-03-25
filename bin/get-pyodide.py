@@ -1,22 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import os, sys, json, requests
 
 VERSION = "0.16.1"
 CDN = "https://pyodide-cdn2.iodide.io"
 URL = "{CDN}/v{VERSION}/full/{file}"
 DIR = "pyodide"
-
-if not os.path.isdir(DIR):
-	sys.stdout.write(f"Creating {DIR}/...")
-	sys.stdout.flush()
-
-	os.mkdir(DIR)
-	print("Done")
-
-print(f"Installing Pyodide v{VERSION}:")
-
-for file in [
+DISTFILES = [
 	"console.html",
 	"distlib.data",
 	"distlib.js",
@@ -30,7 +19,25 @@ for file in [
 	"renderedhtml.css",
 	"setuptools.data",
 	"setuptools.js"
-]:
+]
+
+# Allow to install additional Pyodide pre-built packages by command-line arguments
+for additional in sys.argv[1:]:
+	DISTFILES.extend([
+		f"{additional}.data",
+		f"{additional}.js",
+	])
+
+if not os.path.isdir(DIR):
+	sys.stdout.write(f"Creating {DIR}/...")
+	sys.stdout.flush()
+
+	os.mkdir(DIR)
+	print("Done")
+
+print(f"Installing Pyodide v{VERSION}:")
+
+for file in DISTFILES:
 	url = URL.format(file=file, CDN=CDN, VERSION=VERSION)
 	file = os.path.join(DIR, file)
 
@@ -98,11 +105,3 @@ with open(file, "w") as f:
 	}))
 
 print("Done")
-
-print("Please active the following in your app.yaml, if not already done:")
-print("""
-  handlers:
-  - url: /pyodide/(.*\.wasm)$
-    static_files: pyodide/\1
-    upload: pyodide/.*\.wasm$
-    mime_type: application/wasm""")
