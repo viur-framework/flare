@@ -2,7 +2,6 @@
 Utility functions
 """
 
-import datetime
 from . import html5
 
 
@@ -109,13 +108,3 @@ def parseFloat(s, ret=0.0):
 			return float(s)
 
 	return ret
-
-
-def viurDateTimeToDateTime(value):
-	"""
-	Converts ViUR's datetime format into a Python datetime object.
-	"""
-	try:
-		return datetime.datetime.strptime(value, "%d.%m.%Y %H:%M:%S")
-	except:
-		return None
