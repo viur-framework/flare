@@ -152,7 +152,11 @@ class RelationalEditWidget(BaseEditWidget):
 
 			conf["selectors"][self.bone.destModule] = selector
 
-		# todo: set context
+		# Set a context if configured so
+		context = self.bone.boneStructure["params"].get("context")
+		if context:
+			selector.setContext(context)
+
 		# Start widget with selector callback
 		selector.setSelector(
 			lambda selector, selection: self.unserialize({
@@ -229,7 +233,10 @@ class RelationalMultiEditWidget(BaseMultiEditWidget):
 
 			conf["selectors"][self.bone.destModule] = selector
 
-		# todo: set context
+		# Set a context if configured so
+		context = self.bone.boneStructure["params"].get("context")
+		if context:
+			selector.setContext(context)
 
 		# Start widget with selector callback
 		selector.setSelector(
