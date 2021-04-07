@@ -16,13 +16,15 @@ class DateEditWidget( BaseEditWidget ):
 		self.hasDate = self.bone.boneStructure.get( "date", True )
 		self.hasTime = self.bone.boneStructure.get( "time", True )
 
+		self.dateInput = None
+		self.timeInput = None
 
 		tpl = html5.Template()
 		# language=HTML
 		tpl.appendChild( """
 					<div class='flr-wrapper'>
-						<flare-input type="date" v-if="{{hasDate}}" class="input-group-item" [name]="dateInput">
-						<flare-input type="time" step="1" v-if="{{hasTime}}" class="input-group-item" [name]="timeInput">
+						<flare-input type="date" flare-if="{{hasDate}}" class="input-group-item" [name]="dateInput">
+						<flare-input type="time" step="1" flare-if="{{hasTime}}" class="input-group-item" [name]="timeInput">
 					</div>
 				""",
 					hasDate = self.hasDate,
@@ -56,11 +58,17 @@ class DateEditWidget( BaseEditWidget ):
 
 	def unserialize( self, value = None ):
 		if value:
+
+			#core sends iso date since PR240
+			#https://github.com/viur-framework/viur-core/pull/240
 			try:
-				value = datetime.datetime.strptime( value, " ".join( self.serverToClient ) )
-			except Exception as e:
-				logging.exception( e )
-				value = None
+				value = datetime.datetime.fromisoformat(value)
+			except:
+				try:
+					value = datetime.datetime.strptime( value, " ".join( self.serverToClient ) )
+				except Exception as e:
+					logging.exception( e )
+					value = None
 
 			if value:
 				if self.dateInput:
