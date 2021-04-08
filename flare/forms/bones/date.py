@@ -129,8 +129,14 @@ class DateViewWidget( BaseViewWidget ):
 			if self.bone.boneStructure.get( "time", True ):
 				serverToClient.append( "%H:%M:%S" )
 
+
+
 			try:
-				self.value = datetime.datetime.strptime( value or "", " ".join( serverToClient ) )
+				try:
+					self.value = datetime.datetime.fromisoformat(value)
+				except:
+					self.value = datetime.datetime.strptime( value or "", " ".join( serverToClient ) )
+
 				value = self.value.strftime( translate( "vi.bone.date.at" ).join( serverToClient ) )  # fixme: hmm...
 			except:
 				value = "Invalid Datetime Format"
