@@ -13,7 +13,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='watch a flare application and update py files on change')
 	parser.add_argument('source', help='source path relativ to projectpath')
 	parser.add_argument('target', help='target path relativ to projectpath')
-	parser.add_argument("-n", "--name", help='application name', default="vi")
+	parser.add_argument("-n", "--name", help='application name', default="app")
 	args = parser.parse_args()
 
 	sourcePath = args.source.strip("/") #'sources/viur-vi/vi'
