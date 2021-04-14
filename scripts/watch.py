@@ -39,12 +39,15 @@ if __name__ == '__main__':
 			continue
 
 		if changes[0][0] in [Change.added, Change.deleted]:
-			print("please update files.json")
+			print("remember to update files.json")
 		else:
 			print(f"update {changes[0][1]}")
 
 		filepath = changes[0][1].replace(str(os.path.join(PROJECT_WORKSPACE,sourcePath)+"/"),"")
 
-		#copy changed file
-		shutil.copy(changes[0][1], os.path.join(PROJECT_WORKSPACE,targetPath,filepath))
+		if changes[0][0] == Change.deleted:
+			os.remove(os.path.join(PROJECT_WORKSPACE,targetPath,filepath))
+		else:
+			#copy changed or added file
+			shutil.copy(changes[0][1], os.path.join(PROJECT_WORKSPACE,targetPath,filepath))
 
