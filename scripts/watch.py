@@ -1,6 +1,11 @@
-import os, pathlib, shutil, argparse
-from watchgod import watch, PythonWatcher
-from watchgod.watcher import Change
+import os, sys, pathlib, shutil, argparse
+try:
+	from watchgod import watch, PythonWatcher
+	from watchgod.watcher import Change
+except:
+	print("To use this watcher, watchgod musst be installed. use E.g. pip install watchgod")
+	sys.exit()
+
 
 PATHBLACKLIST = ["/docs/","/examples/","/bin/","/scripts/","/test/", "/assets/"]
 
