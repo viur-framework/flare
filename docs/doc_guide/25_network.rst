@@ -82,25 +82,3 @@ Two hidden parameters can be specified during initialization and will not be pas
 		_delay=1000,
 		_callback=sayHelloWennFinishedFunction)
 
-
-getUrlHashAsString
-~~~~~~~~~~~~~~~~~~~~~~~~~
-This function takes the hash of the url and splits it into args and kwargs.
-The return value is a tuple of the args string and the kwargs string.
-In most cases you want to use getUrlHashAsObject instead.
-
-getUrlHashAsObject
-~~~~~~~~~~~~~~~~~~~~~~~
-Uses the return value of getUrlHashAsString and also creates a tuple consisting of args and kwargs.
-But now the first value is a list and the second is a dictionary.
-
-
-setUrlHash
-~~~~~~~~~~~~~~~
-This function takes the objects from getUrlHashAsObject and reassembles them into a valid hash and finally sets the new url.
-
-.. code-block:: Python
-
-	urlHash, urlParams = getUrlHashAsObject() #read hash
-	urlParams.update({"key":"newValue"}) #modify
-	setUrlHash(urlHash,urlParams) #write back

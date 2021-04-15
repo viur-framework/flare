@@ -2,4 +2,60 @@
 i18n
 ========================================
 
-soon...
+Flare provides the possibility to translate texts depending on the selected language.
+For each language a Python file with the language abbreviation is created in a folder called 'translations'.
+A dictionary with the following name format is then expected in the file:
+
+.. code-block::
+
+	lngDe
+	lngEn
+	lngNl
+	lngFr
+	...
+
+The dictionary itself contains a mapping between a keyword and the translation in the corresponding language.
+
+.. code-block:: Python
+
+	lngDe = {
+		"List": "Liste",
+		"Username": "Nutzername ist {name}"
+		...
+	}
+
+To use these dictionaries they have to be initialized when starting the application.
+
+.. code-block:: Python
+
+	from flare.i18n import buildTranslations,translate
+	buildTranslations("app") #the parameter is the name of the root folder
+
+	#now you can use the translate function to get the translated text
+
+	print(translate('List'))
+	# "Liste"
+
+translate
+~~~~~~~~~~~~~~
+The Translate function can additionally have a fallback and any other parameters, which then replace marked positions in a template string.
+
+.. code-block:: Python
+
+	print(translate('Username', {"name":"Alice"}))
+	# "Nutzername is Alice"
+
+
+addTranslation
+~~~~~~~~~~~~~~~~~~~~
+You can also update a translation at runtime. For this you have to specify the language, the keyword and the translation.
+
+.. code-block:: Python
+
+	addTranslation("de","user","Nutzer")
+
+
+more functions
+~~~~~~~~~~~~~~~~~~
+the functions getLanguage and setLanguage(lang) allow to change and request the current language.
+After changing the language, it must be ensured that templates are rebuilt.
