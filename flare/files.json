@@ -38,6 +38,7 @@
   "icons.py",
   "ignite.py",
   "input.py",
+  "intersectionObserver.py",
   "log.py",
   "network.py",
   "observable.py",

@@ -24,7 +24,8 @@ for root, dirnames, filenames in walkObj:
 				"docs" not in pathParts and  # dont want flare/docs in files
 				"examples" not in pathParts and  # dont want flare/examples in files
 				"scripts" not in pathParts and  # dont want flare/scripts in files
-				"test" not in pathParts  # dont want flare/test in files
+				"test" not in pathParts and # dont want flare/test in files
+				"bin" not in pathParts # dont want flare/bin in files
 		):
 			f = pathObject.as_posix().rstrip("./")
 			print(f)
