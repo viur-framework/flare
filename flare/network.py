@@ -121,17 +121,13 @@ def NiceErrorAndThen(function):
 
 skeyRequestQueue = []
 def processSkelQueue():
-	for r in skeyRequestQueue:
-		if r.status == "running":
-			break
-		elif r.status in ["succeeded","failed"]:
-			skeyRequestQueue.remove(r)
-		else:
-			r.kickoff()
-			break
+	if len(skeyRequestQueue)==0:
+		return 0
 
-handleSkeyRequests = html5.window.setInterval(processSkelQueue, 500)
-
+	if skeyRequestQueue[0].status not in ["running","succeeded","failed"]:
+		skeyRequestQueue[0].kickoff()
+	else:
+		DeferredCall(processSkelQueue,_delay=2000) #try later, to ensure that all requests are finished
 
 class NetworkService(object):
 	"""
@@ -279,7 +275,7 @@ class NetworkService(object):
 		return NetworkService.host + href
 
 	def __init__(self, module, url, params, successHandler, failureHandler, finishedHandler,
-	             modifies, secure, kickoff):
+	             modifies, secure, kickoff,group=None):
 		"""
 			Constructs a new NetworkService request.
 			Should not be called directly (use NetworkService.request instead).
@@ -291,6 +287,7 @@ class NetworkService(object):
 		self.waitingForSkey = False
 		self.module = module
 		self.url = url
+		self.group = group
 
 		if params and not isinstance(params, dict):
 			self.url += "/%s" % params
@@ -354,7 +351,7 @@ class NetworkService(object):
 		dataRequest = NetworkService(
 				module, url, params,
 				successHandler, failureHandler, finishedHandler,
-				modifies, secure, kickoff
+				modifies, secure, kickoff, group
 			)
 
 		if group:
@@ -363,7 +360,11 @@ class NetworkService(object):
 		if not group and secure:
 			# single secure requests will be queued to ensure a fresh skey
 			#a group is triggered externally and processed sequentially
-			skeyRequestQueue.append(dataRequest)
+			if len(skeyRequestQueue) == 0:
+				skeyRequestQueue.append(dataRequest)
+				processSkelQueue()
+			else:
+				skeyRequestQueue.append(dataRequest)
 
 		return dataRequest
 
@@ -487,7 +488,10 @@ class NetworkService(object):
 		self.params = None
 
 	def onFinished( self, success ):
-		pass
+		if not self.group and self.secure and skeyRequestQueue:
+			skeyRequestQueue.remove(self)
+			processSkelQueue()
+
 
 class requestGroup():
 
