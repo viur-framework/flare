@@ -81,14 +81,6 @@ def formatString(format, data, structure = None, prefix = None, language = None,
 	:rtype: str
 	"""
 
-	#if _rec == 0:
-	#	print("--- formatString ---")
-	#	print(format)
-	#	print(data)
-	#	print(structure)
-	#	print(prefix)
-	#	print(language)
-
 	if structure and isinstance(structure, list):
 		structure = {k:v for k, v in structure}
 
@@ -106,7 +98,5 @@ def formatString(format, data, structure = None, prefix = None, language = None,
 
 	for key in data.keys():
 		res = formatOneEntry(key, res, data, structure, prefix, language, context, _rec)
-
-	res = utils.unescape(res) #all strings will be unescaped
 
 	return res
