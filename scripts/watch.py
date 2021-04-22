@@ -16,8 +16,8 @@ if __name__ == '__main__':
 	parser.add_argument("-n", "--name", help='application name', default="app")
 	args = parser.parse_args()
 
-	sourcePath = args.source.strip("/") #'sources/viur-vi/vi'
-	targetPath = args.target.strip("/") #'deploy/vi'
+	sourcePath = args.source#.strip("/") #'sources/viur-vi/vi'
+	targetPath = args.target#.strip("/") #'deploy/vi'
 	applicationName = args.name
 
 
@@ -27,11 +27,11 @@ if __name__ == '__main__':
 	# build on start with assets
 	print("initial build... please wait")
 	flareFolder = str(pathlib.Path(__file__).absolute()).split("/scripts")[0]
-	os.system(f'python3 {flareFolder}/scripts/flare.py -t {PROJECT_WORKSPACE}/{targetPath} -s {PROJECT_WORKSPACE}/{sourcePath} -n {applicationName}')
+	os.system(f'python3 {flareFolder}/scripts/flare.py -t {targetPath} -s {sourcePath} -n {applicationName}')
 
 	# only watch py files
 	print(f"../watching")
-	for changes in watch(os.path.join(PROJECT_WORKSPACE,sourcePath), watcher_cls=PythonWatcher):
+	for changes in watch(sourcePath, watcher_cls=PythonWatcher):
 		changes = list(changes)
 
 		#dont copy py files from blacklisten folders
@@ -43,11 +43,11 @@ if __name__ == '__main__':
 		else:
 			print(f"update {changes[0][1]}")
 
-		filepath = changes[0][1].replace(str(os.path.join(PROJECT_WORKSPACE,sourcePath)+"/"),"")
+		filepath = changes[0][1].replace(str(sourcePath+"/"),"")
 
 		if changes[0][0] == Change.deleted:
-			os.remove(os.path.join(PROJECT_WORKSPACE,targetPath,filepath))
+			os.remove(os.path.join(targetPath,filepath))
 		else:
 			#copy changed or added file
-			shutil.copy(changes[0][1], os.path.join(PROJECT_WORKSPACE,targetPath,filepath))
+			shutil.copy(changes[0][1], os.path.join(targetPath,filepath))
 
