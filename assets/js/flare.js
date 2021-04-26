@@ -6,15 +6,25 @@ Please see docs/setup.md in the section "HTML skeleton" for further information 
 */
 const SITE_PACKAGES = "/lib/python3.8/site-packages";
 
-class init {
-
+class flare {
 	constructor(config) {
-		this.config = config
-		window.languagePluginLoader.then(() => {
+		let pyodide_config = {};
+		// Find path of pyodide.js and use its URL as indexURL
+		for (let script of window.document.querySelectorAll("script")) {
+			let offset;
+
+			if ((offset = script.src.indexOf("pyodide.js")) > 0) {
+				pyodide_config.indexURL = script.src.substr(0, offset);
+				break;
+			}
+		}
+
+		// Await loadPyodide, then run flare config
+		loadPyodide(pyodide_config).then(() => {
 			let kickoff = config.kickoff || "";
 
 			// Run prelude first
-			window.pyodide.runPythonAsync(config.prelude || "").then(() => {
+			pyodide.runPythonAsync(config.prelude || "").then(() => {
 
 				// Then fetch sources and import modules
 				this.fetchSources(config.fetch || {}).then(() => {
@@ -29,7 +39,7 @@ class init {
 					}
 
 					// Then, run kickoff code
-					window.pyodide.runPythonAsync(kickoff).then(
+					pyodide.runPythonAsync(kickoff).then(
 						() => this.initializingComplete());
 				});
 			});
@@ -71,13 +81,13 @@ class init {
 
 									lookup += (lookup ? "/" : "") + path[i];
 									if (parseInt(i) === path.length - 1) {
-										window.pyodide._module.FS.writeFile(lookup, code);
+										pyodide._module.FS.writeFile(lookup, code);
 										console.debug(`fetched ${lookup}`);
 									} else {
 										try {
-											window.pyodide._module.FS.lookupPath(lookup);
+											pyodide._module.FS.lookupPath(lookup);
 										} catch {
-											window.pyodide._module.FS.mkdir(lookup);
+											pyodide._module.FS.mkdir(lookup);
 											console.debug(`created ${lookup}`);
 										}
 									}
@@ -97,7 +107,7 @@ class init {
 
 	fetchSources(modules) {
 		let promises = [];
-		window.pyodide.zipfiles = [];
+		pyodide.zipfiles = [];
 
 		for( let module of Object.keys(modules) )
 		{
@@ -110,16 +120,16 @@ class init {
 				      return response.blob().then((blob) => {
                 let zipfile = "/" + module + ".zip";
 
-                //window.pyodide._module.FS.writeFile(zipfile, content);
-                //window.pyodide._module.FS.createPreloadedFile("/", module + ".zip", zipurl, true, false);
+                //pyodide._module.FS.writeFile(zipfile, content);
+                //pyodide._module.FS.createPreloadedFile("/", module + ".zip", zipurl, true, false);
                 blob.arrayBuffer().then(buffer => {
                   buffer = new Uint8Array(buffer);
 
-                  let stream = window.pyodide._module.FS.open(zipfile, "w+");
-                  window.pyodide._module.FS.write(stream, buffer, 0, buffer.length, 0);
-                  window.pyodide._module.FS.close(stream);
+                  let stream = pyodide._module.FS.open(zipfile, "w+");
+                  pyodide._module.FS.write(stream, buffer, 0, buffer.length, 0);
+                  pyodide._module.FS.close(stream);
 
-                  window.pyodide.zipfiles.push(zipfile);
+                  pyodide.zipfiles.push(zipfile);
                   console.debug(`fetched ${zipfile}`);
                   resolve();
                 });
@@ -171,10 +181,10 @@ class init {
 			}catch (e) {}
 
 			for( let module of Object.keys(modules) ) {
-			  window.pyodide.loadedPackages[module] = "default channel";
+			  pyodide.loadedPackages[module] = "default channel";
 			}
 
-			window.pyodide.runPython(
+			pyodide.runPython(
 			  // language=Python
 				`
 import sys

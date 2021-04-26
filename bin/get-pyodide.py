@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 import os, sys, json, requests
 
-VERSION = "0.16.1"
-CDN = "https://pyodide-cdn2.iodide.io"
+VERSION = "0.17.0"
+CDN = "https://cdn.jsdelivr.net/pyodide"
 URL = "{CDN}/v{VERSION}/full/{file}"
 DIR = "pyodide"
 DISTFILES = [
-	"console.html",
 	"distlib.data",
 	"distlib.js",
 	"micropip.data",
@@ -16,7 +15,6 @@ DISTFILES = [
 	"pyodide.asm.js",
 	"pyodide.asm.wasm",
 	"pyodide.js",
-	"renderedhtml.css",
 	"setuptools.data",
 	"setuptools.js"
 ]
@@ -63,24 +61,8 @@ with open(file, "r") as f:
 
 with open(file, "w") as f:
 	f.write(content.replace(
-		"""var baseURL = self.languagePluginUrl """,
-		"""var baseURL = "/pyodide/" """
-	))
-
-print("Done")
-
-# Patch console.html to use pyodide.js
-file = os.path.join(DIR, "console.html")
-sys.stdout.write(f"Patching {file}...")
-sys.stdout.flush()
-
-with open(file, "r") as f:
-	content = f.read()
-
-with open(file, "w") as f:
-	f.write(content.replace(
-		"""<script src="./pyodide_dev.js"></script>""",
-		"""<script src="./pyodide.js"></script>"""
+		"config.indexURL || \"./\"",
+		"config.indexURL || \"./pyodide/\""
 	))
 
 print("Done")
