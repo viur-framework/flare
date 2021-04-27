@@ -5,25 +5,20 @@ VERSION = "0.17.0"
 CDN = "https://cdn.jsdelivr.net/pyodide"
 URL = "{CDN}/v{VERSION}/full/{file}"
 DIR = "pyodide"
-DISTFILES = [
-	"distlib.data",
-	"distlib.js",
-	"micropip.data",
-	"micropip.js",
+FILES = [
 	"pyodide.asm.data",
 	"pyodide.asm.data.js",
 	"pyodide.asm.js",
 	"pyodide.asm.wasm",
-	"pyodide.js",
-	"setuptools.data",
-	"setuptools.js"
+	"pyodide.js"
 ]
 
 # Allow to install additional Pyodide pre-built packages by command-line arguments
-for additional in sys.argv[1:]:
-	DISTFILES.extend([
-		f"{additional}.data",
-		f"{additional}.js",
+PACKAGES = ["distlib", "micropip", "packaging", "pyparsing", "setuptools"] + sys.argv[1:]
+for package in PACKAGES:
+	FILES.extend([
+		f"{package}.data",
+		f"{package}.js",
 	])
 
 if not os.path.isdir(DIR):
@@ -35,7 +30,7 @@ if not os.path.isdir(DIR):
 
 print(f"Installing Pyodide v{VERSION}:")
 
-for file in DISTFILES:
+for file in FILES:
 	url = URL.format(file=file, CDN=CDN, VERSION=VERSION)
 	file = os.path.join(DIR, file)
 
@@ -43,13 +38,13 @@ for file in DISTFILES:
 	sys.stdout.flush()
 
 	r = requests.get(url, stream=True)
-	with open(file, 'wb') as f:
+	with open(file, "wb") as f:
 		for chunk in r.iter_content(2 * 1024):
 			f.write(chunk)
 
 	print("Done")
 
-print(f"Done installing Pyodide v{VERSION}!")
+print(f"Done installing Pyodide v{VERSION}")
 
 # Patch pyodide.js to only use "/pyodide/"
 file = os.path.join(DIR, "pyodide.js")
@@ -69,21 +64,17 @@ print("Done")
 
 # Write a minimal packages.json with micropip, setuptools and distlibs pre-installed.
 file = os.path.join(DIR, "packages.json")
-sys.stdout.write(f"Patching {file}...")
+sys.stdout.write(f"Rewriting {file}...")
 sys.stdout.flush()
 
+packages = requests.get(URL.format(file="packages.json", CDN=CDN, VERSION=VERSION)).json()
+
+for part in ["dependencies", "import_name_to_package_name", "versions"]:
+	for k in list(packages[part].keys()):
+		if k not in PACKAGES:
+			del packages[part][k]
+
 with open(file, "w") as f:
-	f.write(json.dumps({
-		"dependencies": {
-			"micropip": ["distlib"],
-			"distlib": [],
-			"setuptools": []
-		},
-		"import_name_to_package_name": {
-			"distlib": "distlib",
-			"setuptools":"setuptools",
-			"micropip": "micropip"
-		}
-	}))
+	f.write(json.dumps(packages))
 
 print("Done")
