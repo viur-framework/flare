@@ -46,8 +46,7 @@ class RecordViewWidget( BaseViewWidget ):
 				self.bone.boneStructure[ "format" ],
 				value,
 				self.bone.boneStructure[ "using" ],
-				language = self.language,
-				prefix = ['dest'] #use dest prefix! < rel and record use the same format dest.XXX
+				language = self.language
 			)
 
 		else:
