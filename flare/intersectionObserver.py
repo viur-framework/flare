@@ -17,7 +17,7 @@ class IntersectionObserver:
 			"threshold": threshold
 		}
 
-		self.jsObserver = js_intersectionObserver.new(callback, observerOptions)
+		self.jsObserver = js_intersectionObserver.new(callback, **observerOptions)
 
 	def observe(self, widget):
 		self.observableWidgets.append(widget)
