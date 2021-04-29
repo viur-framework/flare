@@ -6,10 +6,8 @@ A plain instance of SafeEval without allowedCallables argument will not accept a
 """
 
 import ast
-
-from typing import Any, Callable, Dict
-
 import typing
+from typing import Any, Callable, Dict
 
 
 class SafeEval:
@@ -29,27 +27,41 @@ class SafeEval:
 		self.nodes: Dict[ast.AST, Callable[[ast.AST, Dict[str, Any]], Any]] = {
 			ast.Call: self.callNode,
 			ast.Compare: self.compareNode,
-			ast.Name: lambda node, names: names.get(node.id),
-			ast.Constant: lambda node, _: node.n,
-			ast.NameConstant: lambda node, _: node.value,
-			ast.Num: lambda node, _: node.n,
-			ast.Str: lambda node, _: node.s,
-			ast.JoinedStr: lambda node, names: [self.execute(x, names) for x in node.values],
-			ast.Subscript: lambda node, names: self.execute(node.value, names)[
-				self.execute(node.slice, names)],
-			ast.Index: lambda node, names: self.execute(node.value, names),
-			ast.BoolOp: lambda node, names: (all if isinstance(node.op, ast.And) else any)(
-				[self.execute(x, names) for x in node.values]),
-			ast.UnaryOp: lambda node, names: self.unaryOpMap[type(node.op)](
-				self.execute(node.operand, names)),
-			ast.BinOp: lambda node, names: self.dualOpMap[type(node.op)](
-				self.execute(node.left, names),
-				self.execute(node.right, names)),
-			ast.IfExp: lambda node, names: self.execute(node.body, names) if self.execute(node.test, names) else \
-				self.execute(node.orelse, names),
+			ast.Name:
+				lambda node, names: names.get(node.id),
+			ast.Constant:
+				lambda node, _: node.n,
+			ast.NameConstant:
+				lambda node, _: node.value,
+			ast.Num:
+				lambda node, _: node.n,
+			ast.Str:
+				lambda node, _: node.s,
+			ast.JoinedStr:
+				lambda node, names: [self.execute(x, names) for x in node.values],
+			ast.Subscript:
+				lambda node, names: (self.execute(node.value, names) or {}).get(self.execute(node.slice, names)),
+			ast.Attribute:
+				lambda node, names: (self.execute(node.value, names) or {}).get(node.attr),
+			ast.Index:
+				lambda node, names: self.execute(node.value, names),
+			ast.BoolOp:
+				lambda node, names: (all if isinstance(node.op, ast.And) else any)([self.execute(x, names) for x in node.values]),
+			ast.UnaryOp:
+				lambda node, names: self.unaryOpMap[type(node.op)](self.execute(node.operand, names)),
+			ast.BinOp:
+				lambda node, names: self.dualOpMap[type(node.op)](
+					self.execute(node.left, names),
+					self.execute(node.right, names)
+				),
+			ast.IfExp:
+				lambda node, names:
+					self.execute(node.body, names)
+						if self.execute(node.test, names) else
+							self.execute(node.orelse, names),
 		}
 
-		self.unaryOpMap: Dict[ast.AST, Callable[[Any], Any]] = {
+		self.unaryOpMap: Dict[ast.AST: Callable[[Any], Any]] = {
 			ast.Not: lambda x: not x,
 			ast.USub: lambda x: -x,
 			ast.UAdd: lambda x: +x,
@@ -71,9 +83,12 @@ class SafeEval:
 		}
 
 	def callNode(self, node: ast.Call, names: Dict[str, Any]) -> Any:
-		"""Evaluates the call if present in allowed callables.
+		"""
+		Evaluates the call if present in allowed callables.
+
 		:param node: The call node to evaluate
 		:param names: a mapping of local objects which is used as 'locals' namespace
+
 		:return: If allowed to evaluate the node, its result will be returned
 		"""
 
@@ -86,8 +101,11 @@ class SafeEval:
 		return self.allowedCallables[node.func.id](*args)
 
 	def compareNode(self, node: ast.Compare, names: Dict[str, Any]) -> bool:
-		"""Evaluates an 'if' expression.
+		"""
+		Evaluates an 'if' expression.
+
 		These are a bit tricky as they can have more than two operands (eg. "if 1 < 2 < 3")
+
 		:param node: The compare node to evaluate
 		:param names: a mapping of local objects which is used as 'locals' namespace
 		"""
@@ -100,9 +118,12 @@ class SafeEval:
 		return True
 
 	def execute(self, node: [str, ast.AST], names: Dict[str, Any]) -> Any:
-		"""Evaluates the current node with optional data
+		"""
+		Evaluates the current node with optional data
+
 		:param node: The compare node to evaluate
 		:param names: a mapping of local objects which is used as 'locals' namespace
+
 		:return: whatever the expression wants to return
 		"""
 		if isinstance(node, str):
@@ -111,9 +132,12 @@ class SafeEval:
 		return self.nodes[type(node)](node, names)
 
 	def compile(self, expr: str) -> ast.AST:
-		"""Compiles a python expression string to an ast
+		"""
+		Compiles a python expression string to an ast
+
 		Afterwards you can use execute to run the compiled ast with optional data.
 		If you only want to run a 'oneshot' expression feel free to use our safeEval method.
+
 		:param expr: the expression to compile
 		:return: the ready to use ast node
 		"""
@@ -123,11 +147,15 @@ class SafeEval:
 		return ast.parse(expr).body[0].value
 
 	def safeEval(self, expr: str, names: Dict[str, Any]) -> Any:
-		"""Safely evaluate an expression.
+		"""
+		Safely evaluate an expression.
+
 		If you want to evaluate the expression multiple times with different variables use compile to generate
 		the AST once and call execute for each set of variables.
+
 		:param expr: the string to compile and evaluate
 		:param names: a mapping of local objects which is used as 'locals' namespace
+
 		:return: the result of evaluation of the expression with env provided by names
 		"""
 		return self.execute(self.compile(expr), names)
