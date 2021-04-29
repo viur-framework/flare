@@ -61,7 +61,7 @@ class SafeEval:
 							self.execute(node.orelse, names),
 		}
 
-		self.unaryOpMap: Dict[ast.AST: Callable[[Any], Any]] = {
+		self.unaryOpMap: Dict[ast.AST, Callable[[Any], Any]] = {
 			ast.Not: lambda x: not x,
 			ast.USub: lambda x: -x,
 			ast.UAdd: lambda x: +x,
