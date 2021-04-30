@@ -8,16 +8,27 @@ const SITE_PACKAGES = "/lib/python3.8/site-packages";
 
 class flare {
 	constructor(config) {
-		let pyodide_config = {};
-		// Find path of pyodide.js and use its URL as indexURL
-		for (let script of window.document.querySelectorAll("script")) {
-			let offset;
+		this.config = config;
 
-			if ((offset = script.src.indexOf("pyodide.js")) > 0) {
-				pyodide_config.indexURL = script.src.substr(0, offset);
-				break;
+		let indexUrl = "/pyodide"
+		fetch(indexUrl+"/pyodide.js").then((res)=>{
+			if (res.ok) {
+				console.debug(`Using local Pyodide...`);
+			}else{
+				indexUrl = "https://cdn.jsdelivr.net/pyodide/v0.17.0/full";
+				console.debug(`Using Pyodide fallback from ${indexUrl}...`);
 			}
-		}
+			var script = document.createElement("script");
+			script.setAttribute("src", indexUrl+"/pyodide.js");
+			document.getElementsByTagName("head")[0].appendChild(script);
+			script.addEventListener("load",(e)=>{
+				this.initPyodide(indexUrl,config);
+			})
+		})
+	}
+
+	initPyodide(indexUrl,config){
+		let pyodide_config = {"indexUrl":indexUrl};
 
 		// Await loadPyodide, then run flare config
 		loadPyodide(pyodide_config).then(() => {
