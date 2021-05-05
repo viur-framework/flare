@@ -176,7 +176,7 @@ class Alert(Popup):
 			self, msg, title=None, className=None, okCallback=None, okLabel=None, icon="icon-info", closeable=True,
 			*args, **kwargs
 	):
-		super().__init__(title, className=None, icon=icon, closeable=closeable, *args, **kwargs)
+		super().__init__(title, className=None, icon=icon, closeable=closeable, enableShortcuts=closeable, *args, **kwargs)
 		self.addClass("popup--alert")
 
 		if className:
