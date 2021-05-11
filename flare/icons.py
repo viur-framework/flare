@@ -104,6 +104,10 @@ class Icon(html5.I):
 
 		# sig= test is really ugly we need a better solution
 		if self.value:
+			if self.txtWidget:
+				self.removeChild(self.txtWidget)
+				self.txtWidget = None
+
 			if ("sig=" in self.value or any(
 				[self.value.lower().endswith(ext) for ext in [
 					".jpg", ".png", ".gif", ".bmp", ".webp", ".heic", ".jpeg"
@@ -145,9 +149,12 @@ class Icon(html5.I):
 	def onError(self):
 		if self.imgWidget:
 			self.removeChild(self.imgWidget)
+			self.imgWidget = None
+
 		if self.svgWidget:
 			self.removeChild(self.svgWidget)
 			self.svgWidget = None
+
 		if self.txtWidget:
 			self.removeChild(self.txtWidget)
 			self.txtWidget = None

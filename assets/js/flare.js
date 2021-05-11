@@ -9,7 +9,7 @@ const SITE_PACKAGES = "/lib/python3.8/site-packages";
 class flare {
 	constructor(config) {
 		let indexURL = "/pyodide/"
-		fetch(indexURL + "pyodide.js").then((res)=>{
+		fetch(indexURL + "pyodide.js").then((res) => {
 			if (res.ok) {
 				console.debug(`Using local Pyodide...`);
 			} else {
@@ -19,14 +19,12 @@ class flare {
 
 			var script = document.createElement("script");
 			script.setAttribute("src", indexURL + "pyodide.js");
-			script.addEventListener("load",(e)=>{
-				this.initPyodide(config, indexURL);
-			})
+			script.addEventListener("load", (e) => this.initPyodide(config, indexURL))
 			document.getElementsByTagName("head")[0].appendChild(script);
 		})
 	}
 
-	async initPyodide(config, indexURL){
+	async initPyodide(config, indexURL) {
 		let pyodide_config = {"indexURL": indexURL};
 
 		// Await loadPyodide, then run flare config
@@ -40,12 +38,10 @@ class flare {
 		// Then fetch sources and import modules
 		await this.fetchSources(config.fetch || {})
 
-		for(let module of Object.keys(config.fetch || {}))
-		{
-			if(config.fetch[module].optional === true)  {
+		for (let module of Object.keys(config.fetch || {})) {
+			if (config.fetch[module].optional === true) {
 				kickoff = `try:\n\timport ${module}\nexcept:\n\tpass\n` + kickoff
-			}
-			else {
+			} else {
 				kickoff = `import ${module}\n` + kickoff
 			}
 		}
@@ -60,11 +56,12 @@ class flare {
 		let promises = [];
 		let bar = null;
 		let info = null;
-		try{
+		try {
 			bar = document.getElementById("loadingbar")
 			info = document.getElementById("fileinfo")
 			bar.max += files.length
-		}catch (e) {}
+		} catch (e) {
+		}
 
 		for (let f in files) {
 
@@ -80,7 +77,7 @@ class flare {
 								let lookup = "";
 
 								if (bar) {
-									bar.value +=1
+									bar.value += 1
 									info.innerHTML = files[f]
 								}
 
@@ -119,102 +116,101 @@ class flare {
 		let promises = [];
 		pyodide.zipfiles = [];
 
-		for( let module of Object.keys(modules) )
-		{
+		for (let module of Object.keys(modules)) {
 			promises.push(
 				new Promise((resolve, reject) => {
-				  // First try to download zip-file
-				  let zipurl = `${modules[module]["path"]}/files.zip`;
-				  fetch(zipurl, {}).then((response) => {
-				    if (response.status === 200) {
-				      return response.blob().then((blob) => {
-                let zipfile = "/" + module + ".zip";
+					// First try to download zip-file
+					let zipurl = `${modules[module]["path"]}/files.zip`;
+					fetch(zipurl, {}).then((response) => {
+						if (response.status === 200) {
+							return response.blob().then((blob) => {
+								let zipfile = "/" + module + ".zip";
 
-                //pyodide._module.FS.writeFile(zipfile, content);
-                //pyodide._module.FS.createPreloadedFile("/", module + ".zip", zipurl, true, false);
-                blob.arrayBuffer().then(buffer => {
-                  buffer = new Uint8Array(buffer);
+								//pyodide._module.FS.writeFile(zipfile, content);
+								//pyodide._module.FS.createPreloadedFile("/", module + ".zip", zipurl, true, false);
+								blob.arrayBuffer().then(buffer => {
+									buffer = new Uint8Array(buffer);
 
-                  let stream = pyodide._module.FS.open(zipfile, "w+");
-                  pyodide._module.FS.write(stream, buffer, 0, buffer.length, 0);
-                  pyodide._module.FS.close(stream);
+									let stream = pyodide._module.FS.open(zipfile, "w+");
+									pyodide._module.FS.write(stream, buffer, 0, buffer.length, 0);
+									pyodide._module.FS.close(stream);
 
-                  pyodide.zipfiles.push(zipfile);
-                  console.debug(`fetched ${zipfile}`);
-                  resolve();
-                });
-              });
-            } else {
-              let mapfile = `${modules[module]["path"]}/files.json`;
-              fetch(mapfile, {}).then((response) => {
-                if (response.status === 200) {
-                  response.text().then((list) => {
-                    let files = [];
+									pyodide.zipfiles.push(zipfile);
+									console.debug(`fetched ${zipfile}`);
+									resolve();
+								});
+							});
+						} else {
+							let mapfile = `${modules[module]["path"]}/files.json`;
+							fetch(mapfile, {}).then((response) => {
+								if (response.status === 200) {
+									response.text().then((list) => {
+										let files = [];
 
-                    try {
-                      files = JSON.parse(list);
-                    }
-                    catch (e) {
-                      if( modules[module]["optional"] ) {
-                        console.info(`Optional module ${module} wasn't found`);
-                        return resolve();
-                      }
-                      else {
-                        console.error(`Unable to parse ${mapfile} properly, check for correct config of ${module}`);
-                        return reject();
-                      }
-                    }
+										try {
+											files = JSON.parse(list);
+										} catch (e) {
+											if (modules[module]["optional"]) {
+												console.info(`Optional module ${module} wasn't found`);
+												return resolve();
+											} else {
+												console.error(`Unable to parse ${mapfile} properly, check for correct config of ${module}`);
+												return reject();
+											}
+										}
 
-                    this.loadPythonFilesAsSitePackage(module, modules[module]["path"], files).then(() => {
-                      resolve();
-                    })
-                  })
-                } else {
-                  if( modules[module]["optional"] ) {
-                    console.info(`Optional module ${module} wasn't found`);
-                    return resolve();
-                  }
+										this.loadPythonFilesAsSitePackage(module, modules[module]["path"], files).then(() => {
+											resolve();
+										})
+									})
+								} else {
+									if (modules[module]["optional"]) {
+										console.info(`Optional module ${module} wasn't found`);
+										return resolve();
+									}
 
-                  reject();
-                }
-              });
-            }
-          });
+									reject();
+								}
+							});
+						}
+					});
 
 				}));
 		}
 
 		return Promise.all(promises).then(() => {
-			try{
+			try {
 				let bar = document.getElementById("loadingbar")
 				bar.max = bar.value
-			}catch (e) {}
+			} catch (e) {
+			}
 
-			for( let module of Object.keys(modules) ) {
-			  pyodide.loadedPackages[module] = "default channel";
+			for (let module of Object.keys(modules)) {
+				pyodide.loadedPackages[module] = "default channel";
 			}
 
 			pyodide.runPython(
-			  // language=Python
+				// language=Python
 				`
-import sys
-import importlib as _importlib
-from js import window
+					import sys
+					import importlib as _importlib
+					from js import window
 
-for zipfile in window.pyodide.zipfiles:
-    sys.path.insert(0, zipfile)
+					for zipfile in window.pyodide.zipfiles:
+						sys.path.insert(0, zipfile)
 
-_importlib.invalidate_caches()
-        `
+					_importlib.invalidate_caches()
+				`
 			);
 
 
-			try{
+			try {
 				//wrapper
 				let wrapper = document.getElementById("wrapper")
-				wrapper.style.display="none"
+				wrapper.style.display = "none"
 				document.body.classList.add("is-loading")
-			}catch (e) {}
+			} catch (e) {
+			}
 
 		});
 	}

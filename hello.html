@@ -1,45 +1,38 @@
 <!doctype html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="assets/css/style.css"/>
-
-    <!-- flip comments below to use local pyodide -->
-    <!-- Use Pyodide from CDN (default) -->
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.17.0/full/pyodide.js"></script>
-
-    <!-- Use Pyodide from local /pyodide/-folder (run flare/bin/get-pyodide.py for this) -->
-    <!-- <script src="pyodide/pyodide.js"></script> -->
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="assets/css/style.css"/>
 
 	<script src="assets/js/flare.js"></script>
 	<script>
 		window.addEventListener(
 				"load",
-				(event) => {
-                    new flare({
-                        // Prelude to be executed before fetching local modules
-                        // language=Python
-                        //prelude: `
+				() => {
+					new flare({
+						// Prelude to be executed before fetching local modules
+						// language=Python
+						//prelude: `
 //import setuptools, micropip
 //`,
 
-                        // Fetch location for locally available Python modules
-                        fetch: {
-                            "flare": {
-                                "path": "flare"
-                            }
-                        },
+						// Fetch location for locally available Python modules
+						fetch: {
+							"flare": {
+								"path": "flare"
+							}
+						},
 
-                        // Python code to be finally executed
-                        // language=Python
-                        kickoff: `
+						// Python code to be finally executed
+						// language=Python
+						kickoff: `
 from flare import *
 html5.Body().appendChild('<a href="https://www.viur.dev">Hello World</a>')
 flare.popup.Alert("Hello World")
 `
-                    });
-                });
-    </script>
+					});
+				});
+	</script>
 </head>
 <body class="is-loading">
 </body>
