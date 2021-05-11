@@ -8,53 +8,52 @@ const SITE_PACKAGES = "/lib/python3.8/site-packages";
 
 class flare {
 	constructor(config) {
-		this.config = config;
-
-		let indexUrl = "/pyodide"
-		fetch(indexUrl+"/pyodide.js").then((res)=>{
+		let indexURL = "/pyodide/"
+		fetch(indexURL + "pyodide.js").then((res)=>{
 			if (res.ok) {
 				console.debug(`Using local Pyodide...`);
-			}else{
-				indexUrl = "https://cdn.jsdelivr.net/pyodide/v0.17.0/full";
-				console.debug(`Using Pyodide fallback from ${indexUrl}...`);
+			} else {
+				indexURL = "https://cdn.jsdelivr.net/pyodide/v0.17.0/full/";
+				console.debug(`Using Pyodide fallback from ${indexURL}...`);
 			}
+
 			var script = document.createElement("script");
-			script.setAttribute("src", indexUrl+"/pyodide.js");
-			document.getElementsByTagName("head")[0].appendChild(script);
+			script.setAttribute("src", indexURL + "pyodide.js");
 			script.addEventListener("load",(e)=>{
-				this.initPyodide(indexUrl,config);
+				this.initPyodide(config, indexURL);
 			})
+			document.getElementsByTagName("head")[0].appendChild(script);
 		})
 	}
 
-	initPyodide(indexUrl,config){
-		let pyodide_config = {"indexUrl":indexUrl};
+	async initPyodide(config, indexURL){
+		let pyodide_config = {"indexURL": indexURL};
 
 		// Await loadPyodide, then run flare config
-		loadPyodide(pyodide_config).then(() => {
-			let kickoff = config.kickoff || "";
+		await loadPyodide(pyodide_config);
 
-			// Run prelude first
-			pyodide.runPythonAsync(config.prelude || "").then(() => {
+		let kickoff = config.kickoff || "";
 
-				// Then fetch sources and import modules
-				this.fetchSources(config.fetch || {}).then(() => {
-					for(let module of Object.keys(config.fetch || {}))
-					{
-						if(config.fetch[module].optional === true)  {
-							kickoff = `try:\n\timport ${module}\nexcept:\n\tpass\n` + kickoff
-						}
-						else {
-							kickoff = `import ${module}\n` + kickoff
-						}
-					}
+		// Run prelude first
+		await pyodide.runPythonAsync(config.prelude || "");
 
-					// Then, run kickoff code
-					pyodide.runPythonAsync(kickoff).then(
-						() => this.initializingComplete());
-				});
-			});
-		});
+		// Then fetch sources and import modules
+		await this.fetchSources(config.fetch || {})
+
+		for(let module of Object.keys(config.fetch || {}))
+		{
+			if(config.fetch[module].optional === true)  {
+				kickoff = `try:\n\timport ${module}\nexcept:\n\tpass\n` + kickoff
+			}
+			else {
+				kickoff = `import ${module}\n` + kickoff
+			}
+		}
+
+		// Then, run kickoff code
+		await pyodide.runPythonAsync(kickoff);
+
+		this.initializingComplete();
 	}
 
 	loadPythonFilesAsSitePackage(module, baseURL, files) {
