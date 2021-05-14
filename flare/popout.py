@@ -27,7 +27,7 @@ class Popout(html5.Div):
 	"""
 	Popout menu
 	"""
-	style = ["popout-opener", "popout-anchor", "popout--sw"]
+	style = ["popout-opener", "popout-anchor"]
 
 	def __init__(self, *args, **kwargs):
 		#language=HTML
@@ -37,7 +37,7 @@ class Popout(html5.Div):
 			"""
 				<flare-icon [name]="icon" hidden></flare-icon>
 				<span [name]="text" hidden></span>
-	
+
 				<div class="popout">
 					<div [name]="popoutItemList" class="list"></div>
 				</div>
@@ -52,10 +52,10 @@ class Popout(html5.Div):
 
 	def _setIcon(self, icon):
 		if icon:
-			self.icon["icon"] = icon
+			self.icon["value"] = icon
 			self.icon.show()
 		else:
-			self.icon["icon"] = None
+			self.icon["value"] = None
 			self.icon.hide()
 
 	def _getIcon(self):
