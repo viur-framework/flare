@@ -2985,7 +2985,7 @@ def fromHTML(html: [str, HtmlAst], appendTo: Widget=None, bindTo: Widget=None, d
 		logging.warning("Using fromHTML(vars=...) is deprecated. Please directly provide your variables as kwargs.")
 		kwargs.update(vars)
 
-	def replaceVars(txt):
+	def replaceVars(txt, vars):
 		if not htmlExpressionEvaluator:
 			return txt
 
@@ -2996,18 +2996,18 @@ def fromHTML(html: [str, HtmlAst], appendTo: Widget=None, bindTo: Widget=None, d
 			ret += txt[:match.start()]
 			txt = txt[match.end():]
 
-			val = htmlExpressionEvaluator.execute(match.group(1), kwargs)
+			val = htmlExpressionEvaluator.execute(match.group(1), vars)
 			ret += str(val) if val is not None else ""
 
 		return ret + txt
 
-	def interpret(parent, items):
+	def interpret(parent, items, vars):
 		ifResult = None
 		ret = []
 
 		for item in items:
 			if isinstance(item, str):
-				txt = TextNode(replaceVars(item))
+				txt = TextNode(replaceVars(item, vars))
 
 				if parent:
 					parent.appendChild(txt)
@@ -3030,7 +3030,7 @@ def fromHTML(html: [str, HtmlAst], appendTo: Widget=None, bindTo: Widget=None, d
 				#print(att, val, ifResult)
 
 				haveConditional = True
-				val = replaceVars(val)
+				val = replaceVars(val, vars)
 
 				if att in ("if", "elif"):
 					if att == "elif":
@@ -3039,7 +3039,7 @@ def fromHTML(html: [str, HtmlAst], appendTo: Widget=None, bindTo: Widget=None, d
 							item = None
 							break
 
-					if not htmlExpressionEvaluator.execute(val, kwargs):
+					if not htmlExpressionEvaluator.execute(val, vars):
 						item = None
 						ifResult = False
 					else:
@@ -3070,7 +3070,11 @@ def fromHTML(html: [str, HtmlAst], appendTo: Widget=None, bindTo: Widget=None, d
 				wdg = __tags[tag][0]()
 
 			for att, val in atts.items():
-				val = replaceVars(val)
+				# Ignore any flare-prefixed attributes here
+				if att.startswith("flare-"):
+					continue
+
+				val = replaceVars(val, vars)
 
 				# The [name] attribute binds the current widget to bindTo under the provided name!
 				if att == "[name]":
@@ -3164,7 +3168,29 @@ def fromHTML(html: [str, HtmlAst], appendTo: Widget=None, bindTo: Widget=None, d
 					except Exception as e:
 						logging.exception(e)
 
-			interpret(wdg, children)
+			# Repeat children within this element?
+			if htmlExpressionEvaluator and (val := atts.get("flare-for")):
+				val = htmlExpressionEvaluator.execute(val, vars)
+
+				if val:
+					lvars = vars.copy()
+
+					if isinstance(val, dict):
+						for k, v in val.items():
+							lvars["key"] = k
+							lvars["value"] = v
+							interpret(wdg, children, lvars)
+
+					elif isinstance(val, list):
+						for v in val:
+							lvars["value"] = v
+							interpret(wdg, children, lvars)
+
+					else:
+						lvars["value"] = val
+						interpret(wdg, children, lvars)
+			else:
+				interpret(wdg, children, vars)
 
 			if parent and not wdg.parent():
 				parent.appendChild(wdg)
@@ -3173,7 +3199,7 @@ def fromHTML(html: [str, HtmlAst], appendTo: Widget=None, bindTo: Widget=None, d
 
 		return ret
 
-	return interpret(appendTo, html)
+	return interpret(appendTo, html, kwargs)
 
 
 if __name__ == '__main__':
