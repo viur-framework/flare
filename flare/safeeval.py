@@ -29,7 +29,7 @@ class SafeEval:
 		self.nodes: Dict[ast.AST, Callable[[ast.AST, Dict[str, Any]], Any]] = {
 			ast.Call: self.callNode,
 			ast.Compare: self.compareNode,
-			ast.Name: lambda node, names: names[node.id],
+			ast.Name: lambda node, names: names.get(node.id),
 			ast.Constant: lambda node, _: node.n,
 			ast.NameConstant: lambda node, _: node.value,
 			ast.Num: lambda node, _: node.n,
