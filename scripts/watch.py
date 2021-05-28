@@ -4,16 +4,20 @@ try:
     from watchgod import watch, PythonWatcher
     from watchgod.watcher import Change
 except:
-    print("To use this watcher, watchgod musst be installed. use E.g. pip install watchgod")
+    print(
+        "To use this watcher, watchgod musst be installed. use E.g. pip install watchgod"
+    )
     sys.exit()
 
 PATHBLACKLIST = ["/docs/", "/examples/", "/bin/", "/scripts/", "/test/", "/assets/"]
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='watch a flare application and update py files on change')
-    parser.add_argument('source', help='source path relativ to projectpath')
-    parser.add_argument('target', help='target path relativ to projectpath')
-    parser.add_argument("-n", "--name", help='application name', default="app")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="watch a flare application and update py files on change"
+    )
+    parser.add_argument("source", help="source path relativ to projectpath")
+    parser.add_argument("target", help="target path relativ to projectpath")
+    parser.add_argument("-n", "--name", help="application name", default="app")
     args = parser.parse_args()
 
     sourcePath = args.source  # .strip("/") #'sources/viur-vi/vi'
@@ -26,7 +30,9 @@ if __name__ == '__main__':
     # build on start with assets
     print("initial build... please wait")
     flareFolder = str(pathlib.Path(__file__).absolute()).split("/scripts")[0]
-    os.system(f'python3 {flareFolder}/scripts/flare.py -t {targetPath} -s {sourcePath} -n {applicationName}')
+    os.system(
+        f"python3 {flareFolder}/scripts/flare.py -t {targetPath} -s {sourcePath} -n {applicationName}"
+    )
 
     # only watch py files
     print(f"../watching")

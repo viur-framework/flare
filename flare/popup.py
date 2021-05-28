@@ -1,5 +1,4 @@
-"""Pre-defined dialog widgets for user interaction.
-"""
+"""Pre-defined dialog widgets for user interaction."""
 
 from . import html5, utils, icons, i18n
 from .button import Button
@@ -189,9 +188,7 @@ class Prompt(Popup):
 
 
 class Alert(Popup):
-    """
-    Just displaying an alerting message box with OK-button.
-    """
+    """Just displaying an alerting message box with OK-button."""
 
     def __init__(
         self,

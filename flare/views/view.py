@@ -9,8 +9,7 @@ from flare.config import conf
 
 class View:
     def __init__(self, dictOfWidgets=None, name=None):
-        """
-        dictOfWidgets: {mainAppContainer:Widget}
+        """AictOfWidgets: {mainAppContainer:Widget}.
 
         mainAppConteiner musst be a widget which is on parent Widget available
         Widget musst inheriance from ViewWidget

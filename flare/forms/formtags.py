@@ -8,9 +8,7 @@ from flare.event import EventDispatcher
 
 @html5.tag("flare-form")
 class viurForm(html5.Form):
-    """
-    Handles an input form for a VIUR skeleton.
-    """
+    """Handles an input form for a VIUR skeleton."""
 
     def __init__(
         self,
@@ -356,9 +354,7 @@ class boneField(html5.Div):
         self.defaultvalue = val
 
     def labelTemplate(self):
-        """
-        Default label
-        """
+        """Default label."""
         # language=HTML
         return """<label [name]="bonelabel" class="input-group-item--first label flr-label flr-label--{{type}} flr-label--{{boneName}}">{{descr}}</label>"""
 

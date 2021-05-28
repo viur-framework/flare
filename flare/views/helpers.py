@@ -19,9 +19,7 @@ def generateView(view: View, moduleName, actionName, name=None, data=()):
 
 
 def addView(view: View, name=None):
-    """
-    add a View and make it available
-    """
+    """Add a View and make it available."""
     logging.debug("addView: %r, %r", view, name)
     instView = view()
 
@@ -48,11 +46,7 @@ def removeView(name, targetView=None):
 
 
 def registerViews(root, path):
-    """
-    add all Views in a folder
-
-    """
-
+    """Add all Views in a folder."""
     rootpath = os.path.join(root, path)
 
     if root[1:].split("/")[0].endswith(".zip"):

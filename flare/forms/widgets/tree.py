@@ -17,7 +17,8 @@ from flare.icons import SvgIcon, Icon
 
 class TreeItemWidget(html5.Li):
     def __init__(self, module, data, structure, widget, *args, **kwargs):
-        """
+        """Instantiate TreeItemWidget.
+
         :param module: Name of the module for which we'll display data
         :type module: str
         :param data: The data we're going to display
@@ -76,9 +77,7 @@ class TreeItemWidget(html5.Li):
         self.setStyle()
 
     def setStyle(self):
-        """
-        is used to define the appearance of the element
-        """
+        """Is used to define the appearance of the element."""
         self["class"].append("hierarchy-item")
         self.additionalDropAreas()
         self.buildDescription()
@@ -87,9 +86,7 @@ class TreeItemWidget(html5.Li):
     # self.EntryIcon()
 
     def additionalDropAreas(self):
-        """
-        Drag and Drop areas
-        """
+        """Drag and Drop areas."""
         self.afterDiv = html5.Div()
         self.afterDiv["class"] = ["after-element"]
         self.afterDiv.hide()
@@ -105,9 +102,7 @@ class TreeItemWidget(html5.Li):
         self.nodeWrapper.prependChild(self.beforeDiv)
 
     def markDraggedElement(self):
-        """
-        mark the current dragged Element
-        """
+        """Mark the current dragged Element."""
         self["style"]["opacity"] = "0.5"
 
     def unmarkDraggedElement(self):
@@ -127,8 +122,9 @@ class TreeItemWidget(html5.Li):
             self.disableDragMarkers()
 
     def onDragOver(self, event):
-        """
-        Test wherever the current drag would mean "make it a child of us", "insert before us" or
+        """Test wherever the current drag would mean.
+
+        "make it a child of us", "insert before us" or
         "insert after us" and apply the correct classes.
         """
         if self.isDragged:
@@ -167,9 +163,7 @@ class TreeItemWidget(html5.Li):
         event.stopPropagation()
 
     def onDragLeave(self, event):
-        """
-        Remove all drop indicating classes.
-        """
+        """Remove all drop indicating classes."""
         # Only leave if target not before or after
         if utils.doesEventHitWidgetOrChildren(event, self.nodeWrapper):
             self.leaveElement = False
@@ -198,8 +192,9 @@ class TreeItemWidget(html5.Li):
             w.setTimeout(self.disableDragMarkers, 5000)
 
     def onDrop(self, event):
-        """
-        We received a drop. Test wherever its means "make it a child of us", "insert before us" or
+        """We received a drop.
+
+        Test wherever its means "make it a child of us", "insert before us" or
         "insert after us" and initiate the corresponding NetworkService requests.
         """
         event.stopPropagation()
@@ -284,9 +279,7 @@ class TreeItemWidget(html5.Li):
         )
 
     def buildDescription(self):
-        """
-        Creates the visual representation of our entry
-        """
+        """Creates the visual representation of our entry."""
         # Find any bones in the structure having "frontend_default_visible" set.
         hasDescr = False
 
@@ -355,10 +348,7 @@ class TreeItemWidget(html5.Li):
         event.stopPropagation()
 
     def toggleExpand(self):
-        """
-        Toggle a Node and request if needed child elements
-        """
-
+        """Toggle a Node and request if needed child elements."""
         if self.isExpanded:
             self.ol.addClass("is-hidden")
             self.nodeGrouper.removeClass("is-expanded")
@@ -383,23 +373,17 @@ class TreeLeafWidget(TreeItemWidget):
     skelType = "leaf"
 
     def setStyle(self):
-        """
-        Leaf have a different color
-        """
+        """Leaf have a different color."""
         super(TreeLeafWidget, self).setStyle()
         self["style"]["background-color"] = "#f7edd2"
 
     def toggleArrow(self):
-        """
-        Leafes cant be toggled
-        """
+        """Leafes cant be toggled."""
         if self.skelType == "leaf":
             self.nodeToggle["style"]["width"] = "27px"
 
     def EntryIcon(self):
-        """
-        Leafs have a different Icon
-        """
+        """Leafs have a different Icon."""
         self.nodeImage.removeClass("is-hidden")
         self.nodeImage.appendChild(Icon("icon-file"))
 
@@ -409,15 +393,14 @@ class TreeNodeWidget(TreeItemWidget):
 
 
 class TreeWidget(html5.Div):
-    """
-    Base Widget that renders a tree.
-    """
+    """Base Widget that renders a tree."""
 
     nodeWidget = TreeNodeWidget
     leafWidget = TreeLeafWidget
 
     def __init__(self, module, rootNode=None, node=None, context=None, *args, **kwargs):
-        """
+        """Instantiate TreeWidget.
+
         :param module: Name of the module we shall handle. Must be a hierarchy application!
         :type module: str
         :param rootNode: The repository we shall display. If none, we try to select one.
@@ -426,9 +409,7 @@ class TreeWidget(html5.Div):
         super(TreeWidget, self).__init__()
 
     def setSelector(self, callback, multi=True, allow=None):
-        """
-        Configures the widget as selector for a relationalBone and shows it.
-        """
+        """Configures the widget as selector for a relationalBone and shows it."""
         self.selectionCallback = callback
         self.selectionAllow = allow or TreeItemWidget
         self.selectionMulti = multi

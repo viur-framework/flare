@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 
 from js import console
@@ -15,9 +14,7 @@ from .base import BaseBone, BaseEditWidget, BaseMultiEditWidget
 
 
 def _getDefaultValues(structure):
-    """
-    Gets defaultValues from a structure.
-    """
+    """Gets defaultValues from a structure."""
     defaultValues = {}
     for k, v in {k: v for k, v in structure}.items():
         if (

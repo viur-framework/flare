@@ -3,7 +3,9 @@ from js import IntersectionObserver as js_intersectionObserver
 
 
 class IntersectionObserver:
-    """Usage:
+    """Python wrapper for IntersectionObserver.
+
+    Usage:
     myObserver = IntersectionObserver(myChangeFunction)
     myObserver.observe(aWidget)
     """

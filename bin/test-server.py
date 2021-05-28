@@ -5,11 +5,12 @@ from http.server import SimpleHTTPRequestHandler
 
 
 class pyodideHttpServer(SimpleHTTPRequestHandler):
-
     def __init__(self, request, client_address, server):
-        self.extensions_map.update({
-            '.wasm': 'application/wasm',
-        })
+        self.extensions_map.update(
+            {
+                ".wasm": "application/wasm",
+            }
+        )
 
         super().__init__(request, client_address, server)
 

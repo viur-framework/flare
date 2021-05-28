@@ -1,4 +1,4 @@
-"""HTML5 Widget abstraction library
+"""HTML5 Widget abstraction library.
 
 - Provides a Widget-abstraction for each HTML-element
 - Routing of attribute getter/setter and Jquery-style helpers
@@ -34,9 +34,9 @@ except:
 
 
 def domCreateAttribute(tag, ns=None):
-    """
-    Creates a new HTML/SVG/... attribute
-     :param ns: the namespace. Default: HTML. Possible values: HTML, SVG, XBL, XUL
+    """Creates a new HTML/SVG/... attribute.
+
+    :param ns: the namespace. Default: HTML. Possible values: HTML, SVG, XBL, XUL
     """
     uri = None
 
@@ -54,9 +54,9 @@ def domCreateAttribute(tag, ns=None):
 
 
 def domCreateElement(tag, ns=None):
-    """
-    Creates a new HTML/SVG/... tag
-      :param ns: the namespace. Default: HTML. Possible values: HTML, SVG, XBL, XUL
+    """Creates a new HTML/SVG/... tag.
+
+    :param ns: the namespace. Default: HTML. Possible values: HTML, SVG, XBL, XUL
     """
     uri = None
 
@@ -96,8 +96,7 @@ __domParser = None
 
 
 def domConvertEncodedText(txt):
-    """
-    Convert HTML-encoded text (containing HTML entities) into its decoded string representation.
+    """Convert HTML-encoded text (containing HTML entities) into its decoded string representation.
 
     The reason for this function is the handling of HTML entities, which is not properly supported by native JavaScript.
 
@@ -127,8 +126,8 @@ def domConvertEncodedText(txt):
 
 
 class TextNode(object):
-    """
-    Represents a piece of text inside the DOM.
+    """Represents a piece of text inside the DOM.
+
     This is the *only* object not deriving from "Widget", as it does
     not support any of its properties.
     """
@@ -374,8 +373,7 @@ class Widget(object):
             self.removeEventListener(event, eventFn)
 
     def addEventListener(self, event, callback):
-        """
-        Adds an event listener callback to an event on a Widget.
+        """Adds an event listener callback to an event on a Widget.
 
         :param event: The event string, e.g. "click" or "mouseover"
         :param callback: The callback function to be called on the given event. \
@@ -405,9 +403,9 @@ class Widget(object):
         self.element.addEventListener(event, callback)
 
     def removeEventListener(self, event, callback):
-        """
-        Removes an event listener callback from a Widget. The event listener must be previously added by
-        Widget.addEventListener().
+        """Removes an event listener callback from a Widget.
+
+        The event listener must be previously added by Widget.addEventListener().
 
         :param event: The event string, e.g. "click" or "mouseover"
         :param callback: The callback function to be removed
@@ -415,8 +413,7 @@ class Widget(object):
         self.element.removeEventListener(event, callback)
 
     def disable(self):
-        """
-        Disables an element, in case it is not already disabled.
+        """Disables an element, in case it is not already disabled.
 
         On disabled elements, events are not triggered anymore.
         """
@@ -424,9 +421,7 @@ class Widget(object):
             self["disabled"] = True
 
     def enable(self):
-        """
-        Enables an element, in case it is not already enabled.
-        """
+        """Enables an element, in case it is not already enabled."""
         if self["disabled"]:
             self["disabled"] = False
 
@@ -459,93 +454,93 @@ class Widget(object):
         return self._children.__iter__()
 
     def _getData(self):
-        """
-        Custom data attributes are intended to store custom data private to the page or application, for which there are no more appropriate attributes or elements.
+        """Custom data attributes are intended to store custom data private to the page or application, for which there are no more appropriate attributes or elements.
+
         :param name:
         :returns:
         """
         return _WidgetDataWrapper(self)
 
     def _getTranslate(self):
-        """
-        Specifies whether an elements attribute values and contents of its children are to be translated when the page is localized, or whether to leave them unchanged.
+        """Specifies whether an elements attribute values and contents of its children are to be translated when the page is localized, or whether to leave them unchanged.
+
         :returns: True | False
         """
         return True if self.element.translate == "yes" else False
 
     def _setTranslate(self, val):
-        """
-        Specifies whether an elements attribute values and contents of its children are to be translated when the page is localized, or whether to leave them unchanged.
+        """Specifies whether an elements attribute values and contents of its children are to be translated when the page is localized, or whether to leave them unchanged.
+
         :param val: True | False
         """
         self.element.translate = "yes" if val == True else "no"
 
     def _getTitle(self):
-        """
-        Advisory information associated with the element.
+        """Advisory information associated with the element.
+
         :returns: str
         """
         return self.element.title
 
     def _setTitle(self, val):
-        """
-        Advisory information associated with the element.
+        """Advisory information associated with the element.
+
         :param val: str
         """
         self.element.title = val
 
     def _getTabindex(self):
-        """
-        Specifies whether the element represents an element that is is focusable (that is, an element which is part of the sequence of focusable elements in the document), and the relative order of the element in the sequence of focusable elements in the document.
+        """Specifies whether the element represents an element that is is focusable (that is, an element which is part of the sequence of focusable elements in the document), and the relative order of the element in the sequence of focusable elements in the document.
+
         :returns: number
         """
         return self.element.getAttribute("tabindex")
 
     def _setTabindex(self, val):
-        """
-        Specifies whether the element represents an element that is is focusable (that is, an element which is part of the sequence of focusable elements in the document), and the relative order of the element in the sequence of focusable elements in the document.
+        """Specifies whether the element represents an element that is is focusable (that is, an element which is part of the sequence of focusable elements in the document), and the relative order of the element in the sequence of focusable elements in the document.
+
         :param val:  number
         """
         self.element.setAttribute("tabindex", val)
 
     def _getSpellcheck(self):
-        """
-        Specifies whether the element represents an element whose contents are subject to spell checking and grammar checking.
+        """Specifies whether the element represents an element whose contents are subject to spell checking and grammar checking.
+
         :returns: True | False
         """
         return True if self.element.spellcheck == "true" else False
 
     def _setSpellcheck(self, val):
-        """
-        Specifies whether the element represents an element whose contents are subject to spell checking and grammar checking.
+        """Specifies whether the element represents an element whose contents are subject to spell checking and grammar checking.
+
         :param val: True | False
         """
         self.element.spellcheck = str(val).lower()
 
     def _getLang(self):
-        """
-        Specifies the primary language for the contents of the element and for any of the elements attributes that contain text.
+        """Specifies the primary language for the contents of the element and for any of the elements attributes that contain text.
+
         :returns: language tag e.g. de|en|fr|es|it|ru|
         """
         return self.element.lang
 
     def _setLang(self, val):
-        """
-        Specifies the primary language for the contents of the element and for any of the elements attributes that contain text.
+        """Specifies the primary language for the contents of the element and for any of the elements attributes that contain text.
+
         :param val: language tag
         """
         self.element.lang = val
 
     def _getHidden(self):
-        """
-        Specifies that the element represents an element that is not yet, or is no longer, relevant.
+        """Specifies that the element represents an element that is not yet, or is no longer, relevant.
+
         :returns: True | False
         """
         return True if self.element.hasAttribute("hidden") else False
 
     def _setHidden(self, val):
-        """
-        Specifies that the element represents an element that is not yet, or is no longer, relevant.
+        """Specifies that the element represents an element that is not yet, or is no longer, relevant.
+
         :param val: True | False
         """
         if val:
@@ -573,22 +568,22 @@ class Widget(object):
             self._disabledState -= 1
 
     def _getDropzone(self):
-        """
-        Specifies what types of content can be dropped on the element, and instructs the UA about which actions to take with content when it is dropped on the element.
+        """Specifies what types of content can be dropped on the element, and instructs the UA about which actions to take with content when it is dropped on the element.
+
         :returns: "copy" | "move" | "link"
         """
         return self.element.dropzone
 
     def _setDropzone(self, val):
-        """
-        Specifies what types of content can be dropped on the element, and instructs the UA about which actions to take with content when it is dropped on the element.
+        """Specifies what types of content can be dropped on the element, and instructs the UA about which actions to take with content when it is dropped on the element.
+
         :param val: "copy" | "move" | "link"
         """
         self.element.dropzone = val
 
     def _getDraggable(self):
-        """
-        Specifies whether the element is draggable.
+        """Specifies whether the element is draggable.
+
         :returns: True | False | "auto"
         """
         return (
@@ -598,90 +593,90 @@ class Widget(object):
         )
 
     def _setDraggable(self, val):
-        """
-        Specifies whether the element is draggable.
+        """Specifies whether the element is draggable.
+
         :param val: True | False | "auto"
         """
         self.element.draggable = str(val).lower()
 
     def _getDir(self):
-        """
-        Specifies the elements text directionality.
+        """Specifies the elements text directionality.
+
         :returns: ltr | rtl | auto
         """
         return self.element.dir
 
     def _setDir(self, val):
-        """
-        Specifies the elements text directionality.
+        """Specifies the elements text directionality.
+
         :param val: ltr | rtl | auto
         """
         self.element.dir = val
 
     def _getContextmenu(self):
-        """
-        The value of the id attribute on the menu with which to associate the element as a context menu.
+        """The value of the id attribute on the menu with which to associate the element as a context menu.
+
         :returns:
         """
         return self.element.contextmenu
 
     def _setContextmenu(self, val):
-        """
-        The value of the id attribute on the menu with which to associate the element as a context menu.
+        """The value of the id attribute on the menu with which to associate the element as a context menu.
+
         :param val:
         """
         self.element.contextmenu = val
 
     def _getContenteditable(self):
-        """
-        Specifies whether the contents of the element are editable.
+        """Specifies whether the contents of the element are editable.
+
         :returns: True | False
         """
         v = self.element.getAttribute("contenteditable")
         return str(v).lower() == "true"
 
     def _setContenteditable(self, val):
-        """
-        Specifies whether the contents of the element are editable.
+        """Specifies whether the contents of the element are editable.
+
         :param val: True | False
         """
         self.element.setAttribute("contenteditable", str(val).lower())
 
     def _getAccesskey(self):
-        """
-        A key label or list of key labels with which to associate the element; each key label represents a keyboard shortcut which UAs can use to activate the element or give focus to the element.
+        """A key label or list of key labels with which to associate the element; each key label represents a keyboard shortcut which UAs can use to activate the element or give focus to the element.
+
         :param self:
         :returns:
         """
         return self.element.accesskey
 
     def _setAccesskey(self, val):
-        """
-        A key label or list of key labels with which to associate the element; each key label represents a keyboard shortcut which UAs can use to activate the element or give focus to the element.
+        """A key label or list of key labels with which to associate the element; each key label represents a keyboard shortcut which UAs can use to activate the element or give focus to the element.
+
         :param self:
         :param val:
         """
         self.element.accesskey = val
 
     def _getId(self):
-        """
-        Specifies a unique id for an element
+        """Specifies a unique id for an element.
+
         :param self:
         :returns:
         """
         return self.element.id
 
     def _setId(self, val):
-        """
-        Specifies a unique id for an element
+        """Specifies a unique id for an element.
+
         :param self:
         :param val:
         """
         self.element.id = val
 
     def _getClass(self):
-        """
-        The class attribute specifies one or more classnames for an element.
+        """The class attribute specifies one or more classnames for an element.
+
         :returns:
         """
         if self._widgetClassWrapper is None:
@@ -690,8 +685,8 @@ class Widget(object):
         return self._widgetClassWrapper
 
     def _setClass(self, value):
-        """
-        The class attribute specifies one or more classnames for an element.
+        """The class attribute specifies one or more classnames for an element.
+
         :param self:
         :param value:
         @raise ValueError:
@@ -699,62 +694,62 @@ class Widget(object):
         self._getClass().set(value)
 
     def _getStyle(self):
-        """
-        The style attribute specifies an inline style for an element.
+        """The style attribute specifies an inline style for an element.
+
         :param self:
         :returns:
         """
         return _WidgetStyleWrapper(self)
 
     def _getRole(self):
-        """
-        Specifies a role for an element
+        """Specifies a role for an element.
+
         @param self:
         @return:
         """
         return self.element.getAttribute("role")
 
     def _setRole(self, val):
-        """
-        Specifies a role for an element
+        """Specifies a role for an element.
+
         @param self:
         @param val:
         """
         self.element.setAttribute("role", val)
 
     def hide(self):
-        """
-        Hide element, if shown.
+        """Hide element, if shown.
+
         :return:
         """
         if not self["hidden"]:
             self["hidden"] = True
 
     def show(self):
-        """
-        Show element, if hidden.
+        """Show element, if hidden.
+
         :return:
         """
         if self["hidden"]:
             self["hidden"] = False
 
     def isHidden(self):
-        """
-        Checks if a widget is hidden.
+        """Checks if a widget is hidden.
+
         :return: True if hidden, False otherwise.
         """
         return self["hidden"]
 
     def isVisible(self):
-        """
-        Checks if a widget is visible.
+        """Checks if a widget is visible.
+
         :return: True if visible, False otherwise.
         """
         return not self.isHidden()
 
     def onBind(self, widget, name):
-        """
-        Event function that is called on the widget when it is bound to another widget with a name.
+        """Event function that is called on the widget when it is bound to another widget with a name.
+
         This is only done by the HTML parser, a manual binding by the user is not triggered.
         """
         return
@@ -771,8 +766,8 @@ class Widget(object):
             c.onDetach()
 
     def __collectChildren(self, *args, **kwargs):
-        """
-        Internal function for collecting children from args.
+        """Internal function for collecting children from args.
+
         This is used by appendChild(), prependChild(), insertChild() etc.
         """
         if kwargs.get("bindTo") is None:
@@ -897,21 +892,17 @@ class Widget(object):
         child._parent = None
 
     def removeAllChildren(self):
-        """
-        Removes all child widgets of the current widget.
-        """
+        """Removes all child widgets of the current widget."""
         for child in self._children[:]:
             self.removeChild(child)
 
     def isParentOf(self, widget):
-        """
-        Checks if an object is the parent of widget.
+        """Checks if an object is the parent of widget.
 
         :type widget: Widget
         :param widget: The widget to check for.
         :return: True, if widget is a child of the object, else False.
         """
-
         # You cannot be your own child!
         if self == widget:
             return False
@@ -926,14 +917,12 @@ class Widget(object):
         return False
 
     def isChildOf(self, widget):
-        """
-        Checks if an object is the child of widget.
+        """Checks if an object is the child of widget.
 
         :type widget: Widget
         :param widget: The widget to check for.
         :return: True, if object is a child of widget, else False.
         """
-
         # You cannot be your own parent!
         if self == widget:
             return False
@@ -948,27 +937,24 @@ class Widget(object):
         return False
 
     def hasClass(self, className):
-        """
-        Determine whether the current widget is assigned the given class
+        """Determine whether the current widget is assigned the given class.
 
         :param className: The class name to search for.
         :type className: str
         """
-
         if isinstance(className, str) or isinstance(className, unicode):
             return className in self["class"]
         else:
             raise TypeError()
 
     def addClass(self, *args):
-        """
-        Adds a class or a list of classes to the current widget.
+        """Adds a class or a list of classes to the current widget.
+
         If the widget already has the class, it is ignored.
 
         :param args: A list of class names. This can also be a list.
         :type args: list of str | list of list of str
         """
-
         for item in args:
             if isinstance(item, list):
                 self.addClass(*item)
@@ -981,13 +967,11 @@ class Widget(object):
                 raise TypeError()
 
     def removeClass(self, *args):
-        """
-        Removes a class or a list of classes from the current widget.
+        """Removes a class or a list of classes from the current widget.
 
         :param args: A list of class names. This can also be a list.
         :type args: list of str | list of list of str
         """
-
         for item in args:
             if isinstance(item, list):
                 self.removeClass(item)
@@ -1000,8 +984,7 @@ class Widget(object):
                 raise TypeError()
 
     def toggleClass(self, on, off=None):
-        """
-        Toggles the class ``on``.
+        """Toggles the class ``on``.
 
         If the widget contains a class ``on``, it is toggled by ``off``.
         ``off`` can either be a class name that is substituted, or nothing.
@@ -1147,8 +1130,7 @@ class Widget(object):
         return self._parent
 
     def children(self, n=None):
-        """
-        Access children of widget.
+        """Access children of widget.
 
         If ``n`` is ommitted, it returns a list of all child-widgets;
         Else, it returns the N'th child, or None if its out of bounds.
@@ -1168,8 +1150,8 @@ class Widget(object):
             return None
 
     def sortChildren(self, key, reversed=False):
-        """
-        Sorts our direct children. They are rearranged on DOM level.
+        """Sorts our direct children. They are rearranged on DOM level.
+
         Key must be a function accepting one widget as parameter and must return
         the key used to sort these widgets.
         """
@@ -1186,8 +1168,7 @@ class Widget(object):
     def fromHTML(
         self, html, appendTo=None, bindTo=None, replace=False, vars=None, **kwargs
     ):
-        """
-        Parses html and constructs its elements as part of self.
+        """Parses html and constructs its elements as part of self.
 
         :param html: HTML code.
         :param appendTo: The entity where the HTML code is constructed below. This defaults to self in usual case.
@@ -1434,15 +1415,15 @@ class _attrFormhead(object):
 
 class _attrHref(object):
     def _getHref(self):
-        """
-        Url of a Page
+        """Url of a Page.
+
         :param self:
         """
         return self.element.href
 
     def _setHref(self, val):
-        """
-        Url of a Page
+        """Url of a Page.
+
         :param val: URL
         """
         self.element.href = val
@@ -1589,15 +1570,15 @@ class A(Widget, _attrHref, _attrTarget, _attrMedia, _attrRel, _attrName):
     _tagName = "a"
 
     def _getDownload(self):
-        """
-        The download attribute specifies the path to a download
+        """The download attribute specifies the path to a download.
+
         :returns: filename
         """
         return self.element.download
 
     def _setDownload(self, val):
-        """
-        The download attribute specifies the path to a download
+        """The download attribute specifies the path to a download.
+
         :param val: filename
         """
         self.element.download = val
@@ -2629,8 +2610,7 @@ class Template(Widget):
 
 
 def unescape(val, maxLength=0):
-    """
-    Unquotes several HTML-quoted characters in a string.
+    """Unquotes several HTML-quoted characters in a string.
 
     :param val: The value to be unescaped.
     :type val: str
@@ -2656,9 +2636,7 @@ def unescape(val, maxLength=0):
 
 
 def doesEventHitWidgetOrParents(event, widget):
-    """
-    Test if event 'event' hits widget 'widget' (or *any* of its parents)
-    """
+    """Test if event 'event' hits widget 'widget' (or *any* of its parents)."""
     while widget:
         if event.target == widget.element:
             return True
@@ -2669,9 +2647,7 @@ def doesEventHitWidgetOrParents(event, widget):
 
 
 def doesEventHitWidgetOrChildren(event, widget):
-    """
-    Test if event 'event' hits widget 'widget' (or *any* of its children)
-    """
+    """Test if event 'event' hits widget 'widget' (or *any* of its children)."""
     if event.target == widget.element:
         return True
 
@@ -2683,14 +2659,11 @@ def doesEventHitWidgetOrChildren(event, widget):
 
 
 def textToHtml(node, text):
-    """
-    Generates html nodes from text by splitting text into content and into
-    line breaks html5.Br.
+    """Generates html nodes from text by splitting text into content and into line breaks html5.Br.
 
     :param node: The node where the nodes are appended to.
     :param text: The text to be inserted.
     """
-
     for (i, part) in enumerate(text.split("\n")):
         if i > 0:
             node.appendChild(Br())
@@ -2699,9 +2672,7 @@ def textToHtml(node, text):
 
 
 def parseInt(s, ret=0):
-    """
-    Parses a value as int
-    """
+    """Parses a value as int."""
     if not isinstance(s, str):
         return int(s)
     elif s:
@@ -2717,9 +2688,7 @@ def parseInt(s, ret=0):
 
 
 def parseFloat(s, ret=0.0):
-    """
-    Parses a value as float.
-    """
+    """Parses a value as float."""
     if not isinstance(s, str):
         return float(s)
     elif s:
@@ -2740,8 +2709,7 @@ def parseFloat(s, ret=0.0):
 
 
 def getKey(event):
-    """
-    Returns the Key Identifier of the given event
+    """Returns the Key Identifier of the given event.
 
     Available Codes: https://www.w3.org/TR/2006/WD-DOM-Level-3-Events-20060413/keyset.html#KeySet-Set
     """
@@ -2818,10 +2786,10 @@ def registerTag(tagName, widgetClass, override=True):
 
 
 def tag(arg):
-    """
-    Decorator to register a sub-class of html5.Widget either under its class-name or an associated tag-name.
+    """Decorator to register a sub-class of html5.Widget either under its class-name or an associated tag-name.
 
-    Examples:
+    Examples
+    --------
     ```python
     # register class Foo as <foo>-Tag
     @html5.tag
@@ -2833,6 +2801,7 @@ def tag(arg):
     class Bar(html5.Div):
         pass
     ```
+
     """
     if isinstance(arg, str):
 
@@ -2859,10 +2828,7 @@ def tag(arg):
 
 
 def _buildTags(debug=False):
-    """
-    Generates a dictionary of all to the html5-library
-    known tags and their associated objects and attributes.
-    """
+    """Generates a dictionary of all to the html5-library known tags and their associated objects and attributes."""
     global __tags
 
     if __tags is not None:
@@ -2891,22 +2857,14 @@ def _buildTags(debug=False):
 
 
 class HtmlAst(list):
-    """
-    Abstract syntax tree element used by parseHTML()
-    """
+    """Abstract syntax tree element used by parseHTML()."""
 
 
 def parseHTML(html: str, debug: bool = False) -> HtmlAst:
-    """
-    Parses the provided HTML-code according to the tags registered by html5.registerTag() or components that used
-    the html5.tag-decorator.
-    """
+    """Parses the provided HTML-code according to the tags registered by html5.registerTag() or components that used the html5.tag-decorator."""
 
     def scanWhite(l):
-        """
-        Scan and return whitespace.
-        """
-
+        """Scan and return whitespace."""
         ret = ""
         while l and l[0] in " \t\r\n":
             ret += l.pop(0)
@@ -2914,10 +2872,7 @@ def parseHTML(html: str, debug: bool = False) -> HtmlAst:
         return ret
 
     def scanWord(l):
-        """
-        Scan and return a word.
-        """
-
+        """Scan and return a word."""
         ret = ""
         while l and l[0] not in " \t\r\n" + "<>=\"'":
             ret += l.pop(0)
@@ -3070,8 +3025,8 @@ def fromHTML(
     debug: bool = False,
     **kwargs,
 ) -> [Widget]:
-    """
-    Parses the provided HTML code according to the objects defined in the html5-library.
+    """Parses the provided HTML code according to the objects defined in the html5-library.
+
     html can also be pre-compiled by `parseHTML()` so that it executes faster.
 
     Constructs all objects as DOM nodes. The first level is chained into appendTo.
@@ -3095,7 +3050,6 @@ def fromHTML(
     div.myLink.appendChild("appended!")
     ```
     """
-
     # Handle defaults
     if bindTo is None:
         bindTo = appendTo

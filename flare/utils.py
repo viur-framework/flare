@@ -1,12 +1,10 @@
-"""Utility functions
-"""
+"""Utility functions."""
 
 from . import html5
 
 
 def unescape(val, maxLength=0):
-    """
-    Unquotes several HTML-quoted characters in a string.
+    """Unquotes several HTML-quoted characters in a string.
 
     :param val: The value to be unescaped.
     :type val: str
@@ -33,9 +31,7 @@ def unescape(val, maxLength=0):
 
 
 def doesEventHitWidgetOrParents(event, widget):
-    """
-    Test if event 'event' hits widget 'widget' (or *any* of its parents)
-    """
+    """Test if event 'event' hits widget 'widget' (or *any* of its parents)."""
     while widget:
         if event.target == widget.element:
             return widget
@@ -46,9 +42,7 @@ def doesEventHitWidgetOrParents(event, widget):
 
 
 def doesEventHitWidgetOrChildren(event, widget):
-    """
-    Test if event 'event' hits widget 'widget' (or *any* of its children)
-    """
+    """Test if event 'event' hits widget 'widget' (or *any* of its children)."""
     if event.target == widget.element:
         return widget
 
@@ -60,14 +54,11 @@ def doesEventHitWidgetOrChildren(event, widget):
 
 
 def textToHtml(node, text):
-    """
-    Generates html nodes from text by splitting text into content and into
-    line breaks html5.Br.
+    """Generates html nodes from text by splitting text into content and into line breaks html5.Br.
 
     :param node: The node where the nodes are appended to.
     :param text: The text to be inserted.
     """
-
     for (i, part) in enumerate(text.split("\n")):
         if i > 0:
             node.appendChild(html5.Br())
@@ -76,9 +67,7 @@ def textToHtml(node, text):
 
 
 def parseInt(s, ret=0):
-    """
-    Parses a value as int
-    """
+    """Parses a value as int."""
     if not isinstance(s, str):
         return int(s)
     elif s:
@@ -94,9 +83,7 @@ def parseInt(s, ret=0):
 
 
 def parseFloat(s, ret=0.0):
-    """
-    Parses a value as float.
-    """
+    """Parses a value as float."""
     if not isinstance(s, str):
         return float(s)
     elif s:

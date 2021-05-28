@@ -1,3 +1,5 @@
+"""Collection of Basebone related classes."""
+
 import json, time
 from enum import IntEnum
 from flare.button import Button
@@ -10,6 +12,8 @@ from flare.forms.formerrors import collectBoneErrors, checkErrors, ToolTipError
 
 
 class ReadFromClientErrorSeverity(IntEnum):
+    """Enum for Errors."""
+
     NotSet = 0
     InvalidatesOther = 1
     Empty = 2
@@ -20,14 +24,15 @@ class ReadFromClientErrorSeverity(IntEnum):
 
 
 class BaseEditWidget(html5.Div):
-    """
-    Base class for a bone-compliant edit widget implementation using an input field.
+    """Base class for a bone-compliant edit widget implementation using an input field.
+
     This widget defines the general interface of a bone edit control.
     """
 
     style = ["flr-value"]
 
     def __init__(self, bone, **kwargs):
+        """Instantiate the edit widget implementation of a basebone."""
         super().__init__()
         self.bone = bone
         self.widget = None
@@ -43,15 +48,11 @@ class BaseEditWidget(html5.Div):
             self.updateWidget()
 
     def createWidget(self):
-        """
-        Function for creating the Widget or multiple Widgets that represent the bone.
-        """
+        """Function for creating the Widget or multiple Widgets that represent the bone."""
         return Input()
 
     def updateWidget(self):
-        """
-        Function for updating the Widget or multiple Widgets that represent the bone.
-        """
+        """Function for updating the Widget or multiple Widgets that represent the bone."""
         # self.widget[ "required" ] = self.bone.required
         # self.widget[ "readonly" ] = self.bone.readonly
         pass
@@ -61,37 +62,39 @@ class BaseEditWidget(html5.Div):
             self.widget.enable()
 
     def unserialize(self, value=None):
+        """Unserialize the widget value."""
         self.widget["value"] = value or ""
 
     def serialize(self):
+        """Serialize the widget value."""
         return self.widget["value"]
 
 
 class BaseViewWidget(html5.Div):
-    """
-    Base class for a bone-compliant view widget implementation using a div.
-    """
+    """Base class for a bone-compliant view widget implementation using a div."""
 
     style = ["flr-value"]
 
     def __init__(self, bone, **kwargs):
+        """Instantiate the view widget implementation of a basebone."""
         super().__init__()
         self.bone = bone
         self.value = None
 
     def unserialize(self, value=None):
+        """Unserialize the widget value."""
         self.value = value
         self.replaceChild(html5.TextNode(value or conf["emptyValue"]))
 
     def serialize(self):
+        """Serialize the widget value."""
         return self.value
 
 
 class BaseMultiEditWidgetEntry(html5.Div):
+    """Base class for an entry in a MultiBone container."""
+
     style = ["flr-bone-widgets-item"]
-    """
-    Base class for an entry in a MultiBone container.
-    """
 
     def __init__(self, widget: html5.Widget, errorInformation=None):
         super().__init__()
@@ -196,9 +199,7 @@ class BaseMultiEditWidgetEntry(html5.Div):
 
 
 class BaseMultiEditWidget(html5.Div):
-    """
-    Class for encapsulating multiple bones inside a container
-    """
+    """Class for encapsulating multiple bones inside a container."""
 
     entryFactory = BaseMultiEditWidgetEntry
     style = ["flr-value-container"]
@@ -292,9 +293,7 @@ class BaseMultiViewWidget(html5.Ul):
 
 
 class BaseLanguageEditWidget(html5.Div):
-    """
-    Class for encapsulating a bone for each language inside a container
-    """
+    """Class for encapsulating a bone for each language inside a container."""
 
     def __init__(self, bone, widgetFactory: callable, **kwargs):
         # language=HTML
@@ -375,9 +374,7 @@ class BaseBone(object):
         BaseLanguageEditWidget  # use edit language widget also to view!
     )
 
-    """
-    Base "Catch-All" delegate for everything not handled separately.
-    """
+    """Base "Catch-All" delegate for everything not handled separately."""
 
     def __init__(
         self, moduleName, boneName, skelStructure, errors=None, errorQueue=None

@@ -31,7 +31,7 @@ def downloadPyodide():
         "pyodide.js",
         "renderedhtml.css",
         "setuptools.data",
-        "setuptools.js"
+        "setuptools.js",
     ]:
         url = URL.format(file=file, CDN=CDN, VERSION=VERSION)
         file = os.path.join(DIR, file)
@@ -40,7 +40,7 @@ def downloadPyodide():
         sys.stdout.flush()
 
         r = requests.get(url, stream=True)
-        with open(file, 'wb') as f:
+        with open(file, "wb") as f:
             for chunk in r.iter_content(2 * 1024):
                 f.write(chunk)
 
@@ -59,10 +59,12 @@ def patchPyodideJs():
         content = f.read()
 
     with open(file, "w") as f:
-        f.write(content.replace(
-            """var baseURL = self.languagePluginUrl """,
-            """var baseURL = "/pyodide/" """
-        ))
+        f.write(
+            content.replace(
+                """var baseURL = self.languagePluginUrl """,
+                """var baseURL = "/pyodide/" """,
+            )
+        )
 
     print("Done")
 
@@ -74,18 +76,22 @@ def minimalPackageJson():
     sys.stdout.flush()
 
     with open(file, "w") as f:
-        f.write(json.dumps({
-            "dependencies": {
-                "micropip": ["distlib"],
-                "distlib": [],
-                "setuptools": []
-            },
-            "import_name_to_package_name": {
-                "distlib": "distlib",
-                "setuptools": "setuptools",
-                "micropip": "micropip"
-            }
-        }))
+        f.write(
+            json.dumps(
+                {
+                    "dependencies": {
+                        "micropip": ["distlib"],
+                        "distlib": [],
+                        "setuptools": [],
+                    },
+                    "import_name_to_package_name": {
+                        "distlib": "distlib",
+                        "setuptools": "setuptools",
+                        "micropip": "micropip",
+                    },
+                }
+            )
+        )
 
     print("Done")
 
@@ -96,11 +102,11 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hv:t:", ["version=", "target="])
     except getopt.GetoptError:
-        print('get-pyodide.py -t /myfolder -v 0.16.1')
+        print("get-pyodide.py -t /myfolder -v 0.16.1")
         sys.exit(2)
     for opt, arg in opts:
-        if opt == '-h':
-            print('get-pyodide.py -t /myfolder -v 0.16.1')
+        if opt == "-h":
+            print("get-pyodide.py -t /myfolder -v 0.16.1")
             sys.exit()
         elif opt in ("-v", "--version"):
             VERSION = arg

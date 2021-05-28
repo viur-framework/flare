@@ -195,9 +195,7 @@ class FilePreviewImage(html5.Div):
 
 
 class Uploader(Progress):
-    """
-    Uploads a file to the server while providing visual feedback of the progress.
-    """
+    """Uploads a file to the server while providing visual feedback of the progress."""
 
     def __init__(
         self,
@@ -209,7 +207,8 @@ class Uploader(Progress):
         *args,
         **kwargs
     ):
-        """
+        """Instantiate uploader.
+
         :param file: The file to upload
         :type file: A javascript "File" Object
         :param node: Key of the desired node of our parents tree application or None for an anonymous upload.
@@ -247,10 +246,7 @@ class Uploader(Progress):
     # self.parent().addClass("is-uploading")
 
     def onUploadUrlAvailable(self, req):
-        """
-        Internal callback - the actual upload url (retrieved by calling /file/getUploadURL) is known.
-        """
-
+        """Internal callback - the actual upload url (retrieved by calling /file/getUploadURL) is known."""
         params = NetworkService.decode(req)["values"]
 
         formData = html5.jseval("new FormData();")
@@ -278,8 +274,8 @@ class Uploader(Progress):
         self.xhr.send(formData)
 
     def onSkeyAvailable(self, req):
-        """
-        Internal callback - the Security-Key is known.
+        """Internal callback - the Security-Key is known.
+
         # Only for core 2.x needed
         """
         formData = html5.jseval("new FormData();")
@@ -300,9 +296,7 @@ class Uploader(Progress):
         self.xhr.send(formData)
 
     def onLoad(self, *args, **kwargs):
-        """
-        Internal callback - The state of our upload changed.
-        """
+        """Internal callback - The state of our upload changed."""
         if self.xhr.status in [200, 204]:
             NetworkService.request(
                 "file",
@@ -319,18 +313,14 @@ class Uploader(Progress):
         DeferredCall(self.onSuccess, _delay=1000)
 
     def onProgress(self, event):
-        """
-        Internal callback - further bytes have been transmitted
-        """
+        """Internal callback - further bytes have been transmitted."""
         if event.lengthComputable:
             complete = int(event.loaded / event.total * 100)
             self["value"] = complete
             self["max"] = 100
 
     def onSuccess(self, *args, **kwargs):
-        """
-        Internal callback - The upload succeeded.
-        """
+        """Internal callback - The upload succeeded."""
         if isinstance(self.responseValue["values"], list):
             for v in self.responseValue["values"]:
                 self.uploadSuccess.fire(self, v)
@@ -427,9 +417,7 @@ class FileWidget(TreeBrowserWidget):
             self.loadNode(node=self.rootNode, overrideParams={"search": searchStr})
 
     def getChildKey(self, widget):
-        """
-        Derives a string used to sort the entries on each level
-        """
+        """Derives a string used to sort the entries on each level."""
         name = str(widget.data.get("name")).lower()
 
         if isinstance(widget, self.nodeWidget):

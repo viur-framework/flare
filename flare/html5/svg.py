@@ -1,5 +1,4 @@
-"""SVG abstraction layer integrations for HTML5.
-"""
+"""SVG abstraction layer integrations for HTML5."""
 
 from . import core as html5
 

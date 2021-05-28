@@ -76,19 +76,20 @@ def formatOneEntry(
 def formatString(
     format, data, structure=None, prefix=None, language=None, context=None, _rec=0
 ):
-    """
-    Parses a string given by format and substitutes placeholders using values specified by data.
+    """Parses a string given by format and substitutes placeholders using values specified by data.
 
     The syntax for the placeholders is $(%s).
     Its possible to traverse to sub-dictionarys by using a dot as seperator.
     If data is a list, the result each element from this list applied to the given string; joined by ", ".
 
     Example:
-
+    -------
         data = {"name": "Test","subdict": {"a":"1","b":"2"}}
         formatString = "Name: $(name), subdict.a: $(subdict.a)"
 
-    Result: "Name: Test, subdict.a: 1"
+    Result:
+    ------
+    "Name: Test, subdict.a: 1"
 
     :param format: String containing the format.
     :type format: str
@@ -101,8 +102,8 @@ def formatString(
 
     :return: The traversed string with the replaced values.
     :rtype: str
-    """
 
+    """
     if structure and isinstance(structure, list):
         structure = {k: v for k, v in structure}
 

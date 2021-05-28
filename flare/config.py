@@ -1,5 +1,4 @@
-"""Flare configuration.
-"""
+"""Flare configuration."""
 from .html5 import core
 from .safeeval import SafeEval
 from .cache import Cache
@@ -9,9 +8,7 @@ from typing import Dict
 
 
 def updateConf(other: Dict):
-    """Merges other into conf
-    """
-
+    """Merges other into conf."""
     global conf
     conf.update(other)
     return conf
@@ -26,9 +23,7 @@ conf = {
 }
 
 # Assign SafeEval as htmlExpressionEvaluator
-core.htmlExpressionEvaluator = SafeEval({
-    "translate": translate
-})
+core.htmlExpressionEvaluator = SafeEval({"translate": translate})
 
 # Merge view_conf into main config
 from flare.views import conf as view_conf

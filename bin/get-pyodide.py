@@ -10,16 +10,20 @@ FILES = [
     "pyodide.asm.data.js",
     "pyodide.asm.js",
     "pyodide.asm.wasm",
-    "pyodide.js"
+    "pyodide.js",
 ]
 
 # Allow to install additional Pyodide pre-built packages by command-line arguments
-PACKAGES = ["distlib", "micropip", "packaging", "pyparsing", "setuptools"] + sys.argv[1:]
+PACKAGES = ["distlib", "micropip", "packaging", "pyparsing", "setuptools"] + sys.argv[
+    1:
+]
 for package in PACKAGES:
-    FILES.extend([
-        f"{package}.data",
-        f"{package}.js",
-    ])
+    FILES.extend(
+        [
+            f"{package}.data",
+            f"{package}.js",
+        ]
+    )
 
 if not os.path.isdir(DIR):
     sys.stdout.write(f"Creating {DIR}/...")
@@ -55,10 +59,9 @@ with open(file, "r") as f:
     content = f.read()
 
 with open(file, "w") as f:
-    f.write(content.replace(
-        "config.indexURL || \"./\"",
-        "config.indexURL || \"./pyodide/\""
-    ))
+    f.write(
+        content.replace('config.indexURL || "./"', 'config.indexURL || "./pyodide/"')
+    )
 
 print("Done")
 
@@ -67,7 +70,9 @@ file = os.path.join(DIR, "packages.json")
 sys.stdout.write(f"Rewriting {file}...")
 sys.stdout.flush()
 
-packages = requests.get(URL.format(file="packages.json", CDN=CDN, VERSION=VERSION)).json()
+packages = requests.get(
+    URL.format(file="packages.json", CDN=CDN, VERSION=VERSION)
+).json()
 
 for part in ["dependencies", "import_name_to_package_name", "versions"]:
     for k in list(packages[part].keys()):

@@ -8,7 +8,6 @@ from .network import NetworkService, DeferredCall, NiceError
 
 
 class Cache(object):
-
     def __init__(self):
         super(Cache, self).__init__()
         self.cache = {}
@@ -57,7 +56,7 @@ class Cache(object):
         assert plan not in self.plans
         self.plans[plan] = {
             "finishHandler": finishHandler,
-            "failureHandler": failureHandler
+            "failureHandler": failureHandler,
         }
 
         plan.run(self)
@@ -150,8 +149,9 @@ class Cache(object):
 
 
 class Plan(object):
-
-    def __init__(self, module, action, params=None, follow=None, alias="current", local=True):
+    def __init__(
+        self, module, action, params=None, follow=None, alias="current", local=True
+    ):
         super(Plan, self).__init__()
 
         if module.startswith("!"):
@@ -179,8 +179,9 @@ class Plan(object):
             self.params = {"key": params}
 
         else:
-            assert isinstance(params or {},
-                              dict), "Either give me a string, a dict, a list of strings or a list of dict"
+            assert isinstance(
+                params or {}, dict
+            ), "Either give me a string, a dict, a list of strings or a list of dict"
             self.params = params or {}
 
         # print("Plan", self.module, self.action, self.params)
@@ -241,9 +242,13 @@ class Plan(object):
                     parent = parent.parent
 
                 if parent is None:
-                    raise KeyError("No previously handled module '%s' in current plan found" % mod)
+                    raise KeyError(
+                        "No previously handled module '%s' in current plan found" % mod
+                    )
                 if data is None:
-                    raise ValueError("The latest value of module '%s' could not be found" % mod)
+                    raise ValueError(
+                        "The latest value of module '%s' could not be found" % mod
+                    )
 
                 for part in field.split("."):
                     data = data[part]
@@ -253,8 +258,12 @@ class Plan(object):
                             self.finish(cache)
                             return True
 
-                        raise ValueError("Field '%s' cannot be retrieved for module '%s' "
-                                         "(make this module optional to avoid this problem!)" % field, self.module)
+                        raise ValueError(
+                            "Field '%s' cannot be retrieved for module '%s' "
+                            "(make this module optional to avoid this problem!)"
+                            % field,
+                            self.module,
+                        )
 
                 params[key] = data
 
@@ -267,13 +276,22 @@ class Plan(object):
 
         # Check for cached compound list results
         if self.action == "list":
-            compoundKey = "&".join([("%s=%s" % (str(key), str(params[key])))
-                                    for key in sorted(params.keys())
-                                    if key not in ["cursor", "amount"]])
+            compoundKey = "&".join(
+                [
+                    ("%s=%s" % (str(key), str(params[key])))
+                    for key in sorted(params.keys())
+                    if key not in ["cursor", "amount"]
+                ]
+            )
             print("compound check", self.module, compoundKey)
 
-            if self.module in cache.compound and compoundKey in cache.compound[self.module]:
-                if cache.compound[self.module][compoundKey] is None:  # Check if under construction?
+            if (
+                self.module in cache.compound
+                and compoundKey in cache.compound[self.module]
+            ):
+                if (
+                    cache.compound[self.module][compoundKey] is None
+                ):  # Check if under construction?
                     print("under construction", self.module, compoundKey)
                     DeferredCall(self.run, cache, _delay=125)
                     return
@@ -285,7 +303,9 @@ class Plan(object):
             if self.module not in cache.compound:
                 cache.compound[self.module] = {}
 
-            cache.compound[self.module][compoundKey] = None  # Mark for under construction!
+            cache.compound[self.module][
+                compoundKey
+            ] = None  # Mark for under construction!
 
             if "amount" not in params:
                 params["amount"] = 99
@@ -297,10 +317,14 @@ class Plan(object):
         # print(self.action)
         # print(params)
 
-        req = NetworkService.request(self.module, self.action, params=params,
-                                     successHandler=self._onRequestSuccess,
-                                     failureHandler=self._onRequestFailure,
-                                     kickoff=False)
+        req = NetworkService.request(
+            self.module,
+            self.action,
+            params=params,
+            successHandler=self._onRequestSuccess,
+            failureHandler=self._onRequestFailure,
+            kickoff=False,
+        )
         req.cache = cache
         req.params = params
 
@@ -330,7 +354,12 @@ class Plan(object):
             if self.action == "view":
 
                 assert "values" in answ
-                values = req.cache.update(self.module, answ["values"]["key"], answ["values"], answ["structure"])
+                values = req.cache.update(
+                    self.module,
+                    answ["values"]["key"],
+                    answ["values"],
+                    answ["structure"],
+                )
 
                 if isinstance(self.params, list):
                     if self.result is None:
@@ -351,7 +380,9 @@ class Plan(object):
 
                 if answ["skellist"]:
                     for skel in answ["skellist"]:
-                        req.cache.update(self.module, skel["key"], skel, answ["structure"])
+                        req.cache.update(
+                            self.module, skel["key"], skel, answ["structure"]
+                        )
 
                         if self.alias and skel is answ["skellist"][-1]:
                             req.cache.update(self.module, self.alias, skel)
@@ -361,14 +392,21 @@ class Plan(object):
                     else:
                         self.result.extend(answ["skellist"])
 
-                    if "search" not in req.params and answ["cursor"] \
-                            and len(answ["skellist"]) == req.params.get("amount", len(answ["skellist"])):
+                    if (
+                        "search" not in req.params
+                        and answ["cursor"]
+                        and len(answ["skellist"])
+                        == req.params.get("amount", len(answ["skellist"]))
+                    ):
                         req.params["cursor"] = answ["cursor"]
-                        nreq = NetworkService.request(self.module, self.action,
-                                                      params=req.params,
-                                                      successHandler=self._onRequestSuccess,
-                                                      failureHandler=self._onRequestFailure,
-                                                      kickoff=False)
+                        nreq = NetworkService.request(
+                            self.module,
+                            self.action,
+                            params=req.params,
+                            successHandler=self._onRequestSuccess,
+                            failureHandler=self._onRequestFailure,
+                            kickoff=False,
+                        )
                         nreq.cache = req.cache
                         nreq.params = req.params
                         nreq.kickoff()
@@ -378,9 +416,13 @@ class Plan(object):
                     self.result = []
 
                 # Cache compound resultsets
-                compoundKey = "&".join([("%s=%s" % (str(key), str(req.params[key])))
-                                        for key in sorted(req.params.keys())
-                                        if key not in ["cursor", "amount"]])
+                compoundKey = "&".join(
+                    [
+                        ("%s=%s" % (str(key), str(req.params[key])))
+                        for key in sorted(req.params.keys())
+                        if key not in ["cursor", "amount"]
+                    ]
+                )
 
                 print("compound create", self.module, compoundKey, len(self.result))
 

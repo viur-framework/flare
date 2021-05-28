@@ -17,14 +17,16 @@ for root, dirnames, filenames in walkObj:
     for f in filenames:
         pathObject = Path(root).joinpath(f)
         pathParts = pathObject.parts
-        if (f.endswith(".py") and
-                "(" not in f and
-                not any([f.startswith(i) for i in ["get-", "gen-", "test-"]]) and
-                "docs" not in pathParts and  # dont want flare/docs in files
-                "examples" not in pathParts and  # dont want flare/examples in files
-                "scripts" not in pathParts and  # dont want flare/scripts in files
-                "test" not in pathParts and  # dont want flare/test in files
-                "bin" not in pathParts  # dont want flare/bin in files
+        if (
+            f.endswith(".py")
+            and "(" not in f
+            and not any([f.startswith(i) for i in ["get-", "gen-", "test-"]])
+            and "docs" not in pathParts
+            and "examples" not in pathParts  # dont want flare/docs in files
+            and "scripts" not in pathParts  # dont want flare/examples in files
+            and "test" not in pathParts  # dont want flare/scripts in files
+            and "bin"  # dont want flare/test in files
+            not in pathParts  # dont want flare/bin in files
         ):
             f = pathObject.as_posix().rstrip("./")
             print(f)

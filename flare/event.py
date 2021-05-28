@@ -21,7 +21,9 @@ class EventDispatcher(object):
         :param cb: the object to register
         :type cb: object
         """
-        assert self._genTargetFuncName() in dir(cb), "cb must provide a %s method" % self._genTargetFuncName()
+        assert self._genTargetFuncName() in dir(cb), (
+            "cb must provide a %s method" % self._genTargetFuncName()
+        )
 
         if reset:
             self.queue = []

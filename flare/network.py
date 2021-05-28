@@ -1,6 +1,4 @@
-"""
-Wrapper to handle ViUR-related Ajax requests.
-"""
+"""Wrapper to handle ViUR-related Ajax requests."""
 
 import logging
 from flare.event import EventDispatcher
@@ -10,13 +8,15 @@ from . import html5, i18n
 
 class DeferredCall(object):
     """Calls the given function with a fixed delay.
+
     This allows assuming that calls to NetworkService are always
     asynchronous, so its guaranteed that any initialization code can run
     before the Network-Call yields results.
     """
 
     def __init__(self, func, *args, **kwargs):
-        """
+        """Instantiate DeferredCall.
+
         :param func: Callback function
         :type func: Callable
         """
@@ -38,18 +38,14 @@ class DeferredCall(object):
         html5.window.setTimeout(self.run, delay)
 
     def run(self):
-        """
-        Internal callback that executes the callback function
-        """
+        """Internal callback that executes the callback function."""
         self._tFunc(*self._tArgs, **self._tKwArgs)
         if self._callback:
             self._callback(self)
 
 
 class HTTPRequest(object):
-    """
-    Wrapper around XMLHttpRequest
-    """
+    """Wrapper around XMLHttpRequest."""
 
     def __init__(
         self,
@@ -77,9 +73,7 @@ class HTTPRequest(object):
         self.req.open(method, url, True)
 
     def onReadyStateChange(self, *args, **kwargs):
-        """
-        Internal callback.
-        """
+        """Internal callback."""
         if self.req.readyState == 1 and not self.hasBeenSent:
             self.hasBeenSent = True  # Internet Explorer calls this function twice!
 
@@ -100,10 +94,7 @@ class HTTPRequest(object):
 
 
 def NiceError(req, code, params="", then=None):
-    """
-    Displays a descriptive error message using an Alert dialog to the user.
-    """
-
+    """Displays a descriptive error message using an Alert dialog to the user."""
     reason = i18n.translate(
         f"flare.network.error.{code}", fallback=i18n.translate("flare.network.error")
     )
@@ -121,9 +112,7 @@ def NiceError(req, code, params="", then=None):
 
 
 def NiceErrorAndThen(function):
-    """
-    Returns a callback which first displays a descriptive error message to the user and then calls another function.
-    """
+    """Returns a callback which first displays a descriptive error message to the user and then calls another function."""
     assert callable(function)
     return lambda *args, **kwargs: NiceError(
         *args, **kwargs, then=lambda *args, **kwargs: function()
@@ -146,8 +135,8 @@ def processSkelQueue():
 
 
 class NetworkService(object):
-    """
-    Generic wrapper around ajax requests.
+    """Generic wrapper around ajax requests.
+
     Handles caching and multiplexing multiple concurrent requests to
     the same resource. It also acts as the central proxy to notify
     currently active widgets of changes made to data on the server.
@@ -167,9 +156,7 @@ class NetworkService(object):
 
     @staticmethod
     def notifyChange(module, **kwargs):
-        """
-        Broadcasts a change made to data of module 'module' to all currently
-        registered changeListeners.
+        """Broadcasts a change made to data of module 'module' to all currently registered changeListeners.
 
         :param module: Name of the module where the change occured
         :type module: str
@@ -179,8 +166,8 @@ class NetworkService(object):
 
     @staticmethod
     def registerChangeListener(listener):
-        """
-        Registers object 'listener' for change notifications.
+        """Registers object 'listener' for change notifications.
+
         'listener' must provide an 'onDataChanged' function accepting
         one parameter: the name of the module. Does nothing if that object
         has already registered.
@@ -194,8 +181,8 @@ class NetworkService(object):
 
     @staticmethod
     def removeChangeListener(listener):
-        """
-        Unregisters the object 'listener' from change notifications.
+        """Unregisters the object 'listener' from change notifications.
+
         :param listener: The object to unregister. It must be currently registered.
         :type listener: object
         """
@@ -271,8 +258,8 @@ class NetworkService(object):
 
     @staticmethod
     def decode(req):
-        """
-        Decodes a response received from the server (ie parsing the json)
+        """Decodes a response received from the server (ie parsing the json).
+
         :type req: Instance of NetworkService response
         :returns: object
         """
@@ -285,8 +272,8 @@ class NetworkService(object):
 
     @staticmethod
     def urlForArgs(module, path):
-        """
-        Constructs the final url for that request.
+        """Constructs the final url for that request.
+
         If module is given, it prepends "/prefix"
         If module is None, path is returned unchanged.
         :param module: Name of the target module or None
@@ -318,8 +305,8 @@ class NetworkService(object):
         kickoff,
         group=None,
     ):
-        """
-        Constructs a new NetworkService request.
+        """Constructs a new NetworkService request.
+
         Should not be called directly (use NetworkService.request instead).
         """
         super(NetworkService, self).__init__()
@@ -377,8 +364,7 @@ class NetworkService(object):
         kickoff=True,
         group=None,
     ):
-        """
-        Performs an AJAX request. Handles caching and security-keys.
+        """Performs an AJAX request. Handles caching and security-keys.
 
         Calls made to this function are guaranteed to be async.
 
@@ -434,10 +420,7 @@ class NetworkService(object):
         return dataRequest
 
     def doFetch(self, url, params, skey):
-        """
-        Internal function performing the actual AJAX request.
-        """
-
+        """Internal function performing the actual AJAX request."""
         if params:
             if skey:
                 params["skey"] = skey
@@ -474,9 +457,7 @@ class NetworkService(object):
             HTTPRequest("GET", url, self.onCompletion, self.onError)
 
     def onCompletion(self, text):
-        """
-        Internal hook for the AJAX call.
-        """
+        """Internal hook for the AJAX call."""
         if self.waitingForSkey:
             self.waitingForSkey = False
             self.doFetch(
@@ -517,9 +498,7 @@ class NetworkService(object):
             self.clear()
 
     def onError(self, text, code):
-        """
-        Internal hook for the AJAX call.
-        """
+        """Internal hook for the AJAX call."""
         self.status = "failed"
         self.result = text
 
@@ -559,9 +538,7 @@ class NetworkService(object):
         self.requestFinishedEvent.fire(False)
 
     def onTimeout(self, text):
-        """
-        Internal hook for the AJAX call.
-        """
+        """Internal hook for the AJAX call."""
         self.onError(text, -1)
 
     def clear(self):

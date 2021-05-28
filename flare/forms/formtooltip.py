@@ -4,9 +4,7 @@ from flare.icons import SvgIcon
 
 
 class ToolTip(html5.Div):
-    """
-    Small utility class for providing tooltips
-    """
+    """Small utility class for providing tooltips."""
 
     def __init__(self, shortText="", longText="", *args, **kwargs):
         super(ToolTip, self).__init__(*args, **kwargs)

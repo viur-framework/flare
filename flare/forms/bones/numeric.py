@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re, logging
 from flare import utils
 from flare.ignite import *

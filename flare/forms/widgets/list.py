@@ -9,8 +9,8 @@ from flare.widgets.buttonbar import ButtonBar
 
 
 class ListWidget(html5.Div):
-    """
-    Provides the interface to list-applications.
+    """Provides the interface to list-applications.
+
     It acts as a data-provider for a DataTable and binds an action-bar
     to this table.
     """
@@ -35,9 +35,7 @@ class ListWidget(html5.Div):
         self.filter = filter
 
     def setSelector(self, callback, multi=True, allow=None):
-        """
-        Configures the widget as selector for a relationalBone and shows it.
-        """
+        """Configures the widget as selector for a relationalBone and shows it."""
         self.selectionCallback = callback
         self.selectionMulti = multi
         self.callback = callback

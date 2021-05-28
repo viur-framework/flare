@@ -1,4 +1,4 @@
-"""Components for displaying icons"""
+"""Components for displaying icons."""
 
 from . import html5
 from .network import HTTPRequest
@@ -8,9 +8,7 @@ import logging, string
 
 @html5.tag("flare-svg-icon")
 class SvgIcon(html5.svg.Svg):
-    """
-    A raw, embedded SVG icon-component
-    """
+    """A raw, embedded SVG icon-component."""
 
     _leafTag = True
 
@@ -86,9 +84,7 @@ class SvgIcon(html5.svg.Svg):
 
 @html5.tag("flare-icon")
 class Icon(html5.I):
-    """
-    Icon component with first-letter fallback, normally shown as embedded SVG.
-    """
+    """Icon component with first-letter fallback, normally shown as embedded SVG."""
 
     _leafTag = True
 
@@ -208,10 +204,7 @@ class Icon(html5.I):
 
 @html5.tag("flare-badge-icon")
 class BadgeIcon(Icon):
-    """
-    A badge icon is an icon-component with a little badge,
-    e.g. a number of new messages or items in the cart or so.
-    """
+    """A badge icon is an icon-component with a little badge, e.g. a number of new messages or items in the cart or so."""
 
     def __init__(self, title="", value=None, fallbackIcon=None, badge=None):
         super().__init__(title, value, fallbackIcon)

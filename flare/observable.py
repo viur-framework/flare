@@ -1,5 +1,4 @@
-"""Observed values firing events when changed.
-"""
+"""Observed values firing events when changed."""
 
 from . import html5
 from .event import EventDispatcher

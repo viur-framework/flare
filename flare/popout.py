@@ -1,6 +1,7 @@
 """Popout menu that is expanded when hovering.
 
 Example:
+-------
 ```html
 <popout icon="icon-arrowhead-down">
 	<popout-item @click="onEdit">edit</popout-item>
@@ -8,6 +9,7 @@ Example:
 	<popout-item @click="onDelete">delete</popout-item>
 </popout>
 ```
+
 """
 
 from . import html5, icons  # icons import is required here for <flare-icon>
@@ -15,18 +17,14 @@ from . import html5, icons  # icons import is required here for <flare-icon>
 
 @html5.tag("flare-popout-item")
 class PopoutItem(html5.Div):
-    """
-    This is an item in a popout menu
-    """
+    """It's an item in a popout menu."""
 
     style = ["item", "has-hover"]
 
 
 @html5.tag("flare-popout")
 class Popout(html5.Div):
-    """
-    Popout menu
-    """
+    """Popout menu."""
 
     style = ["popout-opener", "popout-anchor"]
 

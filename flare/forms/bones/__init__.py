@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Expose all bones."""
 from . import base
 from . import boolean
 from . import color

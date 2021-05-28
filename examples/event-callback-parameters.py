@@ -7,7 +7,9 @@ class Test(html5.Ul):
     def __init__(self):
         super().__init__()
         for i in range(5):
-            self.appendChild("<li @click='click{{ i if i <=2 else 2 }}'>Entry {{ i + 1 }}</li>", i=i)
+            self.appendChild(
+                "<li @click='click{{ i if i <=2 else 2 }}'>Entry {{ i + 1 }}</li>", i=i
+            )
 
     def click0(self):
         html5.Body().appendChild("Click0<br>")

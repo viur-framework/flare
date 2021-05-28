@@ -1,5 +1,4 @@
-"""Generalized Python logging for Pyodide.
-"""
+"""Generalized Python logging for Pyodide."""
 
 import os, sys, threading, time, logging
 from functools import partial
@@ -11,8 +10,7 @@ loggers = []
 
 
 class FlareLogRecord(logging.LogRecord):
-    """
-    A LogRecord instance represents an event being logged.
+    """A LogRecord instance represents an event being logged.
 
     LogRecord instances are created every time something is logged. They
     contain all the information pertinent to the event being logged. The
@@ -44,9 +42,7 @@ class FlareLogRecord(logging.LogRecord):
         mergeArgs=False,
         **kwargs
     ):
-        """
-        Initialize a logging record with interesting information.
-        """
+        """Initialize a logging record with interesting information."""
         ct = time.time()
         self.name = name
         self.msg = msg
@@ -113,8 +109,8 @@ class FlareLogRecord(logging.LogRecord):
             self.process = None
 
     def getMessage(self) -> str:
-        """
-        Optionally merge args into message driven by mergeArgs flag in ctor, otherwise this will happen later in js console as objects
+        """Optionally merge args into message driven by mergeArgs flag in ctor, otherwise this will happen later in js console as objects.
+
         :return:
         """
         if self.mergeArgs:
@@ -123,7 +119,7 @@ class FlareLogRecord(logging.LogRecord):
 
 
 class JSConsoleHandler(logging.StreamHandler):
-    """Brings our awesome log messages onto the js console"""
+    """Brings our awesome log messages onto the js console."""
 
     def emit(self, record: logging.LogRecord) -> None:
         msg = self.format(record)
@@ -148,13 +144,12 @@ class JSConsoleHandler(logging.StreamHandler):
 
 
 def prepareLogger(level: str, mergeArgs: bool = False) -> None:
-    """Call this before first usage of logging or getLogger()
+    """Call this before first usage of logging or getLogger().
 
     :param level Log level as str as of all, info, debug, warning, error or critical
     :param mergeArgs: If True we're merging args into resulting message resulting in
     possible duplicated output or get the 'raw' message output if False.
     """
-
     if loggers:
         return
 
@@ -194,5 +189,4 @@ def getLogger(name: str) -> Any:
     :param name:
     :return:
     """
-
     return loggers[0].getChild(name)

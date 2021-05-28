@@ -42,8 +42,8 @@ def buildTranslations(pathToFolder):
 
 
 def translate(key, fallback=None, **kwargs):
-    """
-    Tries to translate the given string in the currently selected language.
+    """Tries to translate the given string in the currently selected language.
+
     Supports replacing markers (using {markerName} syntax).
 
     :param key: The string to translate
@@ -75,9 +75,7 @@ def translate(key, fallback=None, **kwargs):
 
 
 def addTranslation(lang, a, b=None):
-    """
-    Adds or updates new translations.
-    """
+    """Adds or updates new translations."""
     if not lang in _runtimeTranslations.keys():
         _runtimeTranslations[lang] = {}
     if isinstance(a, str) and b is not None:
@@ -90,16 +88,12 @@ def addTranslation(lang, a, b=None):
 
 
 def setLanguage(lang):
-    """
-    Sets the current language to lang
-    """
+    """Sets the current language to lang."""
     global _currentLanguage
     _currentLanguage = lang
 
 
 def getLanguage():
-    """
-    Returns the current language
-    """
+    """Returns the current language."""
     global _currentLanguage
     return _currentLanguage

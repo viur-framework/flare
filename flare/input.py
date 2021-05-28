@@ -15,7 +15,7 @@ class Input(html5.Input):
         *args,
         **kwargs
     ):
-        """
+        """Instantiate new Input.
 
         :param type: Input type. Default: "text
         :param placeholder: Placeholder text. Default: None

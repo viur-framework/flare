@@ -7,7 +7,8 @@ from flare import html5
 
 
 def collectBoneErrors(errorList, currentKey, boneStructure):
-    """
+    """Collect Errors from given errorList.
+
     severity:
         NotSet = 0
         InvalidatesOther = 1
@@ -36,9 +37,7 @@ def collectBoneErrors(errorList, currentKey, boneStructure):
 
 
 class ToolTipError(html5.Div):
-    """
-    Small utility class for providing tooltips
-    """
+    """Small utility class for providing tooltips."""
 
     def __init__(self, shortText="", longText="", *args, **kwargs):
         super(ToolTipError, self).__init__(*args, **kwargs)
@@ -89,10 +88,10 @@ def buildBoneErrors(errorList):
 
 
 def checkErrors(bone) -> Tuple[bool, List[str]]:
-    """
+    """Check for errors and invalidate fields.
+
     first return value is a shortcut to test if bone is valid or not
     second returns a list of fields which are invalid through this bone
-
     """
     errors = bone["errors"]
 
