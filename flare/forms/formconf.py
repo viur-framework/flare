@@ -1,12 +1,9 @@
 from flare.i18n import translate
 
 # variables which needed by forms
-conf = {
-	"modules": {},      # todo: must be fixed
-	"selectors": {}     # todo: must be fixed
-}
+conf = {"modules": {}, "selectors": {}}  # todo: must be fixed  # todo: must be fixed
 
-'''
+"""
 	# A value displayed as "empty value"
 	"emptyValue": translate("-"),
 
@@ -24,4 +21,4 @@ conf = {
 
 	# Cached selector widgets on relationalBones for re-use
 	"selectors": {},
-'''
+"""

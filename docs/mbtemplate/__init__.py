@@ -14,6 +14,7 @@ def get_path():
 def update_context(app, pagename, templatename, context, doctree):
     context['alabaster_version'] = version.__version__
 
+
 def setup(app):
     app.connect('html-page-context', update_context)
     return {'version': version.__version__,

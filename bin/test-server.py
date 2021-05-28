@@ -3,6 +3,7 @@ import os
 import socketserver
 from http.server import SimpleHTTPRequestHandler
 
+
 class pyodideHttpServer(SimpleHTTPRequestHandler):
 
     def __init__(self, request, client_address, server):
@@ -13,8 +14,9 @@ class pyodideHttpServer(SimpleHTTPRequestHandler):
         super().__init__(request, client_address, server)
 
     def end_headers(self):
-        #self.send_header("Access-Control-Allow-Origin", "*")
+        # self.send_header("Access-Control-Allow-Origin", "*")
         super().end_headers()
+
 
 port = 8080
 Handler = pyodideHttpServer

@@ -1,5 +1,4 @@
-"""
-Popout menu that is expanded when hovering.
+"""Popout menu that is expanded when hovering.
 
 Example:
 ```html
@@ -16,59 +15,65 @@ from . import html5, icons  # icons import is required here for <flare-icon>
 
 @html5.tag("flare-popout-item")
 class PopoutItem(html5.Div):
-	"""
-	This is an item in a popout menu
-	"""
-	style = ["item", "has-hover"]
+    """
+    This is an item in a popout menu
+    """
+
+    style = ["item", "has-hover"]
 
 
 @html5.tag("flare-popout")
 class Popout(html5.Div):
-	"""
-	Popout menu
-	"""
-	style = ["popout-opener", "popout-anchor"]
+    """
+    Popout menu
+    """
 
-	def __init__(self, *args, **kwargs):
-		#language=HTML
-		super().__init__(*args, **kwargs)
+    style = ["popout-opener", "popout-anchor"]
 
-		self.appendChild(
-			"""
-				<flare-icon [name]="icon" hidden></flare-icon>
-				<span [name]="text" hidden></span>
+    def __init__(self, *args, **kwargs):
+        # language=HTML
+        super().__init__(*args, **kwargs)
 
-				<div class="popout">
-					<div [name]="popoutItemList" class="list"></div>
-				</div>
-			"""
-		)
+        self.appendChild(
+            """
+                <flare-icon [name]="icon" hidden></flare-icon>
+                <span [name]="text" hidden></span>
 
-		self._text = ""
+                <div class="popout">
+                    <div [name]="popoutItemList" class="list"></div>
+                </div>
+            """
+        )
 
-		# Overriding appendChild and fromHTML to insert
-		self.appendChild = self.popoutItemList.appendChild
-		self.fromHTML = lambda *args, **kwargs: self.popoutItemList.fromHTML(*args, **kwargs) if kwargs.get("bindTo") else self.popoutItemList.fromHTML(bindTo=self, *args, **kwargs)
+        self._text = ""
 
-	def _setIcon(self, icon):
-		if icon:
-			self.icon["value"] = icon
-			self.icon.show()
-		else:
-			self.icon["value"] = None
-			self.icon.hide()
+        # Overriding appendChild and fromHTML to insert
+        self.appendChild = self.popoutItemList.appendChild
+        self.fromHTML = (
+            lambda *args, **kwargs: self.popoutItemList.fromHTML(*args, **kwargs)
+            if kwargs.get("bindTo")
+            else self.popoutItemList.fromHTML(bindTo=self, *args, **kwargs)
+        )
 
-	def _getIcon(self):
-		return self.icon["icon"]
+    def _setIcon(self, icon):
+        if icon:
+            self.icon["value"] = icon
+            self.icon.show()
+        else:
+            self.icon["value"] = None
+            self.icon.hide()
 
-	def _setText(self, text):
-		self._text = text
+    def _getIcon(self):
+        return self.icon["icon"]
 
-		if self._text:
-			self.text.replaceChild(str(self._text))
-			self.text.show()
-		else:
-			self.text.hide()
+    def _setText(self, text):
+        self._text = text
 
-	def _getText(self):
-		return self._text
+        if self._text:
+            self.text.replaceChild(str(self._text))
+            self.text.show()
+        else:
+            self.text.hide()
+
+    def _getText(self):
+        return self._text

@@ -14,8 +14,8 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
 
+sys.path.insert(0, os.path.abspath('..'))
 
 # -- General configuration ------------------------------------------------
 
@@ -29,7 +29,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'autoapi.extension'
 ]
-#autodoc_mock_imports = ["js"]
+# autodoc_mock_imports = ["js"]
 autoapi_dirs = ['../flare']
 
 # Add any paths that contain templates here, relative to this directory.
@@ -85,14 +85,13 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#html_theme = 'default'
-#html_theme = 'mbtemplate'
-#html_theme = 'rtdtemplate'
+# html_theme = 'default'
+# html_theme = 'mbtemplate'
+# html_theme = 'rtdtemplate'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -102,7 +101,7 @@ todo_include_todos = False
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
-#html_theme_path = ["."]
+# html_theme_path = ["."]
 
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.

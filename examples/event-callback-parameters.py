@@ -2,6 +2,7 @@ from flare import *
 
 html5.Head().appendChild("<style>.highlight { font-weight: bold; color: red; }</style>")
 
+
 class Test(html5.Ul):
     def __init__(self):
         super().__init__()
