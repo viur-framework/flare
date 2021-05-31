@@ -338,8 +338,22 @@ class NetworkService(object):
             self.kickoff()
 
     def kickoff(self):
-        self.status = "running"
-        self.kickoffs += 1
+        if not self.status and self.secure:
+            # if the request not started and is secure add it to queue
+            self.status = "running"
+            self.kickoffs += 1
+
+            if len(skeyRequestQueue) == 0:
+                skeyRequestQueue.append(self)
+                processSkelQueue()
+            else:
+                skeyRequestQueue.append(self)
+
+            return 0
+
+        else:
+            self.status = "running"
+            self.kickoffs += 1
 
         if self.secure:
             self.waitingForSkey = True
@@ -388,8 +402,8 @@ class NetworkService(object):
             "NetworkService.request module=%r, url=%r, params=%r", module, url, params
         )
 
-        if group or secure:
-            # secure and grouped requests will be handled later
+        if group:
+            # grouped requests will always be handled later
             kickoff = False
 
         dataRequest = NetworkService(
@@ -407,15 +421,6 @@ class NetworkService(object):
 
         if group:
             group.addRequest(dataRequest)
-
-        if not group and secure:
-            # single secure requests will be queued to ensure a fresh skey
-            # a group is triggered externally and processed sequentially
-            if len(skeyRequestQueue) == 0:
-                skeyRequestQueue.append(dataRequest)
-                processSkelQueue()
-            else:
-                skeyRequestQueue.append(dataRequest)
 
         return dataRequest
 
