@@ -127,6 +127,7 @@ def processSkelQueue():
         return 0
 
     if skeyRequestQueue[0].status not in ["running", "succeeded", "failed"]:
+        skeyRequestQueue[0].status = "start"
         skeyRequestQueue[0].kickoff()
     else:
         DeferredCall(
@@ -340,9 +341,6 @@ class NetworkService(object):
     def kickoff(self):
         if not self.status and self.secure:
             # if the request not started and is secure add it to queue
-            self.status = "running"
-            self.kickoffs += 1
-
             if len(skeyRequestQueue) == 0:
                 skeyRequestQueue.append(self)
                 processSkelQueue()
