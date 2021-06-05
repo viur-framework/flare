@@ -17,6 +17,9 @@ def updateConf(other: Dict):
 # Main config
 conf = {
     "flare.cache": Cache(),
+    "showBoneNames": True,
+    "emptyValue": None,
+    "defaultLanguage": "de",
     "flare.icon.svg.embedding.path": "/static/svgs",
     "flare.icon.fallback.error": "icon-error",
     "flare.language.current": "de",
