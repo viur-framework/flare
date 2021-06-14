@@ -30,7 +30,7 @@ class flare {
 		// Await loadPyodide, then run flare config
 		await loadPyodide(pyodide_config);
 
-		let kickoff = config.kickoff || "";
+		let kickoff = (config.kickoff || "");
 
 		// Run prelude first
 		await pyodide.runPythonAsync(config.prelude || "");
@@ -40,9 +40,9 @@ class flare {
 
 		for (let module of Object.keys(config.fetch || {})) {
 			if (config.fetch[module].optional === true) {
-				kickoff = `try:\n\timport ${module}\nexcept:\n\tpass\n` + kickoff
+				kickoff = `if _importlib.util.find_spec("${module}") is not None: import ${module}\n` + kickoff;
 			} else {
-				kickoff = `import ${module}\n` + kickoff
+				kickoff = `import ${module}\n` + kickoff;
 			}
 		}
 
