@@ -12,16 +12,19 @@ class viurForm(html5.Form):
 
     def __init__(
         self,
-        formName=None,
-        moduleName=None,
-        actionName="add",
+        formName: str=None,
+        moduleName: str=None,
+        actionName: str="add",
         skel=None,
         structure=None,
         visible=(),
         ignore=(),
         hide=(),
         defaultValues=(),
+        *args,
+        **kwargs
     ):
+        logging.debug("viurForm: %r, %r, %r, %r, %r, %r, %r, %r, %r, %r, %r", formName, moduleName, actionName, skel, structure, visible, ignore, hide, defaultValues, args, kwargs)
         super().__init__()
         self.formName = formName
         self.moduleName = moduleName
@@ -33,6 +36,8 @@ class viurForm(html5.Form):
         self.ignore = ignore
         self.hide = hide
         self.defaultValues = defaultValues
+        self["method"] = "POST"
+        self["action"] = f"{self.moduleName}/{self.actionName}"
 
         if structure:
             self.structure = {k: v for k, v in structure}
@@ -121,9 +126,9 @@ class viurForm(html5.Form):
         res = self.collectCurrentFormValues()
 
         NetworkService.request(
-            self.moduleName,
-            self.actionName,
-            res,
+            module=self.moduleName,
+            url=self.actionName,
+            params=res,
             secure=True,  # always with fresh skey
             successHandler=self.actionSuccess,
             failureHandler=self.actionFailed,
@@ -238,12 +243,13 @@ class viurForm(html5.Form):
 
 @html5.tag("flare-form-field")
 class boneField(html5.Div):
-    def __init__(self, boneName=None, form=None, defaultvalue=None):
+    def __init__(self, boneName=None, form=None, defaultvalue=None, hidden=False):
+        logging.debug("boneField: %r, %r, %r", boneName, form, defaultvalue)
         super().__init__()
         self.boneName = boneName
         self.form = form
         self.label = True
-        self.hidden = False
+        self.hidden = hidden
         self.placeholder = False
         self.defaultvalue = defaultvalue
 

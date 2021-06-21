@@ -383,7 +383,7 @@ class NetworkService(object):
         :param module: Target module on the server. Set to None if you want to call anything else
         :type module: str or None
         :param url: The path (relative to module) or a full url if module is None
-        :type url: None
+        :type url: str or None
         :param successHandler: function beeing called if the request succeeds. Must take one argument (the request).
         :type successHandler: callable
         :param failureHandler: function beeing called if the request failes. Must take two arguments (the request and an error-code).
