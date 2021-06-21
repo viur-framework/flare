@@ -74,6 +74,10 @@ class flare {
 						if (response.status === 200)
 							return response.text().then((code) => {
 								let path = (SITE_PACKAGES + "/" + module + "/" + file).split("/");
+								if (module === "packages"){
+									path = (SITE_PACKAGES + "/" + file).split("/");
+								}
+
 								let lookup = "";
 
 								if (bar) {

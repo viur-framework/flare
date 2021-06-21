@@ -15,11 +15,12 @@ def copySourcePy(source, target):
     os.chdir(os.path.join(cwd, source))
     absTarget = os.path.join(cwd, target)
 
-    os.system(f'find "." -name "*.py" -exec cp --parents \\{{\\}} "{absTarget}" \;')
+    os.system(f'find "." -name "*.py" -exec rsync -Rq \\{{\\}} "{absTarget}" \;')
     os.chdir(cwd)
 
     cleanSources(target)
     copyflareAssets(source, target)
+    copypackageAssets(source, target)
 
 
 def cleanSources(target):
@@ -58,6 +59,15 @@ def movingFlareBeforeZip(target, packagename):
         shutil.rmtree(flareFolder + "_")
 
 
+def movingPackagesBeforeZip(target, packagename):
+    """If we deliver this app as zip and all files of the packages foldermusst be moved to the root directory."""
+    cwd = os.getcwd()
+    packagesFolder = os.path.join(cwd, packagename, "packages")
+    if os.path.exists(packagesFolder):
+        shutil.copytree(packagesFolder, cwd, dirs_exist_ok=True)
+        shutil.rmtree(packagesFolder)
+
+
 def zipPy(target, packagename):
     """Zips all files in target folder."""
     cwd = os.getcwd()
@@ -68,12 +78,13 @@ def zipPy(target, packagename):
         os.makedirs(packagepath)
 
     os.system(
-        f"find {targetpath} -maxdepth 1 -not -name {packagename} -exec mv -t {packagepath} {{}} +"
+        f'find {targetpath} -maxdepth 1 -not -name {packagename} -exec mv \\{{\\}} "{packagepath}" \;'
     )
 
     os.chdir(targetpath)  # switch to root folder
 
     movingFlareBeforeZip(target, packagename)
+    movingPackagesBeforeZip(target, packagename)
 
     os.system("rm -f files.zip")  # remove old zip if exists
     os.system(f"zip files.zip -r ./*")  # zip this folder
@@ -118,6 +129,15 @@ def copyflareAssets(source, target):
         shutil.copy(
             os.path.join(flarefolder, "flare", "files.json"),
             os.path.join(target, "flare", "flare", "files.json"),
+        )
+
+
+def copypackageAssets(source, target):
+    packagesFolder = os.path.join(source, "packages")
+    if os.path.exists(packagesFolder):
+        shutil.copy(
+            os.path.join(packagesFolder, "files.json"),
+            os.path.join(target, "packages", "files.json"),
         )
 
 
