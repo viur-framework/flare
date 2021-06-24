@@ -92,20 +92,10 @@ class RelationalEditWidget(BaseEditWidget):
 
         txt = formatString(
             self.bone.formatString,
-            self.value["dest"],
-            self.bone.destStructure,
-            prefix=["dest"],
+            self.value,
+            self.bone.boneStructure,
             language=self.language,
         )
-
-        if self.dataWidget:
-            txt = formatString(
-                txt,
-                self.dataWidget.serializeForDocument(),
-                self.bone.dataStructure,
-                prefix=["rel"],
-                language=self.language,
-            )
 
         self.destWidget["value"] = txt
 
@@ -189,20 +179,10 @@ class RelationalViewWidget(html5.Div):
         if value:
             txt = formatString(
                 self.bone.formatString,
-                value["dest"],
-                self.bone.destStructure,
-                prefix=["dest"],
+                value,
+                self.bone.boneStructure,
                 language=self.language,
             )
-
-            if self.bone.dataStructure and value["rel"]:
-                txt = formatString(
-                    txt,
-                    value["rel"],
-                    self.bone.dataStructure,
-                    prefix=["rel"],
-                    language=self.language,
-                )
 
         else:
             txt = None
