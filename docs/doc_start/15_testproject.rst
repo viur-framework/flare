@@ -13,6 +13,16 @@ Below is a shortened version of the code from *hello.html* delivered
 together with the *flare* repo. Such a skeleton must be individually
 created for an app written with *flare*.
 
+**Caution**: Depending on where you put the html files, you need to change the
+source paths:
+
+- <link rel="stylesheet" href="{path-to-flare-directory}/assets/css/style.css"/>
+
+- <script src="{path-to-flare-directory}/assets/js/flare.js"></script>
+
+- "path": "{path-to-flare-directory}/flare"
+
+
 .. code:: html
 
    <!doctype html>
@@ -36,7 +46,7 @@ created for an app written with *flare*.
                            prelude:                    // (3)
    `
    print("I'm before any fetch")
-   `
+   `,
                            fetch: {                    // (4)
                                "flare": {
                                    "path": "flare"
