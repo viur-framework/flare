@@ -19,20 +19,20 @@ created for an app written with *flare*.
    <html>
    <head>
        <meta charset="UTF-8">
-       <link rel="stylesheet" href="assets/css/style.min.css"/>
+       <link rel="stylesheet" href="assets/css/style.css"/>
 
        <!-- (1) -->
        <script src="https://pyodide-cdn2.iodide.io/v0.16.1/full/pyodide.js"></script>
        <!-- <script src="pyodide/pyodide.js"></script> -->
 
        <!-- (2) -->
-       <script src="assets/js/init.js"></script>
+       <script src="assets/js/flare.js"></script>
 
        <script>
            window.addEventListener(
                    "load",
                    (event) => {
-                       window.init = new init({
+                       window.init = new flare({
                            prelude:                    // (3)
    `
    print("I'm before any fetch")
@@ -125,12 +125,12 @@ We only describe the files in ``/myapp``:
    <head>
        <meta charset="UTF-8">
        <script src="https://pyodide-cdn2.iodide.io/v0.16.1/full/pyodide.js"></script>
-       <script src="/flare/assets/js/init.js"></script>
+       <script src="/flare/assets/js/flare.js"></script>
        <script>
            window.addEventListener(
                    "load",
                    (event) => {
-                       window.init = new init({
+                       window.init = new flare({
                            fetch: {
                                "flare": {
                                    "path": "/flare/flare"
