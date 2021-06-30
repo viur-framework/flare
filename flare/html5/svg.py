@@ -168,6 +168,26 @@ class _attrSvgXlink(object):
         self.element.setAttribute("xlink:href", val)
 
 
+class _attrSvgPattern(object):
+    def _getPatternContentUnits(self):
+        return self.element.getAttribute("patternContentUnits")
+
+    def _setPatternContentUnits(self, val):
+        self.element.setAttribute("patternContentUnits", val)
+
+    def _getPatternTransform(self):
+        return self.element.patternTransform
+
+    def _setPatternTransform(self, val):
+        self.element.setAttribute("patternTransform", val)
+
+    def _getPatternUnits(self):
+        return self.element.patternUnits
+
+    def _setPatternUnits(self, val):
+        self.element.setAttribute("patternUnits", val)
+
+
 class _attrSvgStyles(object):
 
     def __init__(self, *args, **kwargs):
@@ -435,11 +455,17 @@ class SvgText(SvgWidget, _attrSvgDimensions, _attrSvgTransform, _attrSvgStyles):
         return self.element.textContent
 
 
-""" later...
-
+@html5.tag
 class SvgDefs(SvgWidget):
     _tagName = "defs"
 
+
+@html5.tag
+class SvgPattern(SvgWidget, _attrSvgDimensions, _attrSvgXlink, _attrSvgPattern):
+    _tagName = "pattern"
+
+
+""" later...
 
 class SvgClipPath(SvgWidget):
     _tagName = "clippath"
