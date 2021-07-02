@@ -162,10 +162,10 @@ class _attrSvgTransform(object):
 
 class _attrSvgXlink(object):
     def _getXlinkhref(self):
-        return self.element.getAttribute("xlink:href")
+        return self.element.getAttribute("href")
 
     def _setXlinkhref(self, val):
-        self.element.setAttribute("xlink:href", val)
+        self.element.setAttribute("href", val)
 
 
 class _attrSvgPattern(object):
