@@ -21,7 +21,7 @@ htmlExpressionEvaluator = None
 try:
     # Pyodide
     from js import window, eval as jseval
-
+    import pyodide
     document = window.document
 
 except:
@@ -305,7 +305,7 @@ class Widget(object):
     # This will be checked by appendChild()
 
     style = []  # CSS-classes to directly assign to this Widget at construction.
-
+    listeners = {} # a Map of active eventListener {id:[event,proxy,pyfunc,created]}
     def __init__(self, *args, appendTo=None, style=None, **kwargs):
         if "_wrapElem" in kwargs.keys():
             self.element = kwargs["_wrapElem"]
@@ -315,6 +315,7 @@ class Widget(object):
             self.element = domCreateElement(self._tagName, ns=self._namespace)
 
         self._widgetClassWrapper = None
+        self.listeners = {}
 
         super().__init__()
 
@@ -399,8 +400,10 @@ class Widget(object):
                 return lambda event: callback(event, widget)
 
             callback = _wrapEventWidgetCallback(callback, self)
+        proxy_callback = pyodide.create_proxy(callback)
 
-        self.element.addEventListener(event, callback)
+        self.listeners.update({id(callback):[event,proxy_callback,callback,True]})
+        self.element.addEventListener(event, proxy_callback)
 
     def removeEventListener(self, event, callback):
         """Removes an event listener callback from a Widget.
@@ -410,7 +413,12 @@ class Widget(object):
         :param event: The event string, e.g. "click" or "mouseover"
         :param callback: The callback function to be removed
         """
-        self.element.removeEventListener(event, callback)
+        proxy_callback_obj = self.listeners.pop(id(callback), None)
+        self.element.removeEventListener(event, proxy_callback_obj[1])
+        if  proxy_callback_obj:
+            proxy_callback_obj[1].destroy()
+            proxy_callback_obj[3] = False #disabled
+
 
     def disable(self):
         """Disables an element, in case it is not already disabled.
@@ -760,10 +768,19 @@ class Widget(object):
         for c in self._children:
             c.onAttach()
 
+        for _id, proxy_obj in self.listeners.items():
+            if not proxy_obj[3]:#only add if removed.
+                 self.addEventListener(proxy_obj[0],proxy_obj[2]) #add eventlisteners
+
     def onDetach(self):
         self._isAttached = False
         for c in self._children:
             c.onDetach()
+
+        for _id, proxy_obj in self.listeners.items():
+            self.element.removeEventListener(proxy_obj[0], proxy_obj[1])
+            proxy_obj[1].destroy()
+            proxy_obj[3] = False  # disabled
 
     def __collectChildren(self, *args, **kwargs):
         """Internal function for collecting children from args.
