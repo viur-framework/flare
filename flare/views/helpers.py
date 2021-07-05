@@ -25,6 +25,8 @@ def addView(view: View, name=None):
 
     if not name:
         name = instView.name
+    else:
+        instView.name = name
 
     conf["views_registered"].update({name: instView})
 
