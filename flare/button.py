@@ -30,7 +30,7 @@ class Button(html5.Button):
             if funcName in dir(widget):
                 self.callback = getattr(widget, funcName)
 
-    def onClick(self, event):
+    def onClick(self, event, widget=None):
         event.stopPropagation()
         event.preventDefault()
 
