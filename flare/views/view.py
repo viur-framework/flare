@@ -27,6 +27,15 @@ class View:
 
     def onActiveViewChanged(self, viewName, *args, **kwargs):
         logging.debug("onActiveViewChanged: %r", viewName)
+
+        # requested view doesn't exist
+        if viewName not in flare.views.conf["views_registered"]:
+            if flare.views.conf["views_default"]:
+                flare.views.conf["views_state"].updateState("activeView", flare.views.conf["views_default"])
+            else:
+                print(f'{viewName} does not exist or is not registered!')
+            return 0
+
         if self.name == viewName:
             self.loadView()
 
