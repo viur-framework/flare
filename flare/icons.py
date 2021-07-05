@@ -57,7 +57,7 @@ class SvgIcon(html5.svg.Svg):
         for node in html5.fromHTML(icondata):
             if isinstance(node, html5.svg.Svg):
                 self["viewbox"] = node["viewbox"]
-                self["class"] = node["class"]
+                self.addClass(node["class"])
                 self.appendChild(node._children)
                 break
 
