@@ -6,15 +6,15 @@ from .button import Button
 
 class Popup(html5.Div):
     def __init__(
-        self,
-        title="",
-        id=None,
-        className=None,
-        icon=None,
-        enableShortcuts=True,
-        closeable=True,
-        *args,
-        **kwargs
+            self,
+            title="",
+            id=None,
+            className=None,
+            icon=None,
+            enableShortcuts=True,
+            closeable=True,
+            *args,
+            **kwargs
     ):
         # language=HTML
         super().__init__(
@@ -103,16 +103,16 @@ class Popup(html5.Div):
 
 class Prompt(Popup):
     def __init__(
-        self,
-        text,
-        value="",
-        successHandler=None,
-        abortHandler=None,
-        successLbl=None,
-        abortLbl=None,
-        placeholder="",
-        *args,
-        **kwargs
+            self,
+            text,
+            value="",
+            successHandler=None,
+            abortHandler=None,
+            successLbl=None,
+            abortLbl=None,
+            placeholder="",
+            *args,
+            **kwargs
     ):
         super().__init__(*args, **kwargs)
         self.addClass("popup--prompt")
@@ -191,16 +191,16 @@ class Alert(Popup):
     """Just displaying an alerting message box with OK-button."""
 
     def __init__(
-        self,
-        msg,
-        title=None,
-        className=None,
-        okCallback=None,
-        okLabel=None,
-        icon="icon-info",
-        closeable=True,
-        *args,
-        **kwargs
+            self,
+            msg,
+            title=None,
+            className=None,
+            okCallback=None,
+            okLabel=None,
+            icon="icon-info",
+            closeable=True,
+            *args,
+            **kwargs
     ):
         super().__init__(
             title,
@@ -260,17 +260,17 @@ class Alert(Popup):
 
 class Confirm(Popup):
     def __init__(
-        self,
-        question,
-        title=None,
-        yesCallback=None,
-        noCallback=None,
-        yesLabel=None,
-        noLabel=None,
-        icon="icon-question",
-        closeable=True,
-        *args,
-        **kwargs
+            self,
+            question,
+            title=None,
+            yesCallback=None,
+            noCallback=None,
+            yesLabel=None,
+            noLabel=None,
+            icon="icon-question",
+            closeable=True,
+            *args,
+            **kwargs
     ):
         super().__init__(title, closeable=closeable, icon=icon, *args, **kwargs)
         self.addClass("popup--confirm")
@@ -336,15 +336,15 @@ class Confirm(Popup):
 
 class TextareaDialog(Popup):
     def __init__(
-        self,
-        text,
-        value="",
-        successHandler=None,
-        abortHandler=None,
-        successLbl=None,
-        abortLbl=None,
-        *args,
-        **kwargs
+            self,
+            text,
+            value="",
+            successHandler=None,
+            abortHandler=None,
+            successLbl=None,
+            abortLbl=None,
+            *args,
+            **kwargs
     ):
         super().__init__(*args, **kwargs)
         self.addClass("popup--textareadialog")
@@ -392,4 +392,99 @@ class TextareaDialog(Popup):
     def onCancel(self, *args, **kwargs):
         if self.abortHandler:
             self.abortHandler(self, self.inputElem["value"])
+        self.close()
+
+
+class radioButtonDialog(Popup):
+    def __init__(
+            self,
+            title,
+            radioValues: list,
+            radioButtonGroupName="radioButtonGroup",
+            checkedValue=None,
+            icon="icon-question",
+            closeable=True,
+            successHandler=None,
+            abortHandler=None,
+            successLbl=None,
+            abortLbl=None,
+            *args,
+            **kwargs
+    ):
+        """
+        Creates a radioButton Popup
+
+        radioValues list should contain tuples with displayValue and value e.g.: ('Barzahlung', 'cash')
+        """
+
+        super().__init__(title=title, icon=icon, closeable=closeable, *args, **kwargs)
+        self.addClass("popup--radioButtonDialog")
+
+        if successLbl is None:
+            successLbl = i18n.translate("flare.label.ok")
+
+        if abortLbl is None:
+            abortLbl = i18n.translate("flare.label.cancel")
+
+        self.successHandler = successHandler
+        self.abortHandler = abortHandler
+
+        okayBtn = Button(successLbl, self.onOkay)
+        okayBtn["class"].append("btn--okay")
+        self.popupFoot.appendChild(okayBtn)
+
+        cancelBtn = Button(abortLbl, self.onCancel)
+        cancelBtn["class"].append("btn--cancel")
+        self.popupFoot.appendChild(cancelBtn)
+
+        # Create HTML Form
+        self.formElement = html5.Form()
+
+        # Create radio Input and Label for all items provided
+        if type(radioValues) is list:
+            for displayValue, value in radioValues:
+                # Generate element and add attributes
+                radioElement = html5.Input()
+                radioElement["type"] = "radio"
+                radioElement["name"] = radioButtonGroupName
+                radioElement["value"] = value
+
+                # Auto generate id using the first and last char of the 'value' string. An id is required to add a Label
+                radioElement["id"] = f"{value[0].lower() + value[-1].lower()}"
+
+                # check if checkedValue is set. Check the radio button with the same value if it exist
+                if value is checkedValue and type(checkedValue) is str:
+                    radioElement["checked"] = "true"
+
+                # styling
+                radioElement.addClass("check-input")
+
+                self.formElement.appendChild(radioElement)
+
+                label = html5.Label()
+                label.appendChild(displayValue)
+                label["for"] = f"{value[0].lower() + value[-1].lower()}"
+                label.addClass("check-label")
+                self.formElement.appendChild(label)
+        else:
+            assert TypeError(f"radioValues param ({radioValues}) is not a list")
+
+        # Append HTML Form to Popupbody
+        self.popupBody.appendChild(self.formElement)
+
+    # Fire events
+
+    def onOkay(self, *args, **kwargs):
+        if self.successHandler:
+
+            children = self.formElement.children()
+            for child in children:
+                if child["checked"] and type(child) == html5.Input:
+                    self.successHandler(self, child)  # return self and the checked child
+
+        self.close()
+
+    def onCancel(self, *args, **kwargs):
+        if self.abortHandler:
+            self.abortHandler(self, self.formElement.children())
         self.close()
