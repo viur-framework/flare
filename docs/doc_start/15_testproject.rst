@@ -13,30 +13,40 @@ Below is a shortened version of the code from *hello.html* delivered
 together with the *flare* repo. Such a skeleton must be individually
 created for an app written with *flare*.
 
+**Caution**: Depending on where you put the html files, you need to change the
+source paths:
+
+- <link rel="stylesheet" href="{path-to-flare-directory}/assets/css/style.css"/>
+
+- <script src="{path-to-flare-directory}/assets/js/flare.js"></script>
+
+- "path": "{path-to-flare-directory}/flare"
+
+
 .. code:: html
 
    <!doctype html>
    <html>
    <head>
        <meta charset="UTF-8">
-       <link rel="stylesheet" href="assets/css/style.min.css"/>
+       <link rel="stylesheet" href="assets/css/style.css"/>
 
        <!-- (1) -->
        <script src="https://pyodide-cdn2.iodide.io/v0.16.1/full/pyodide.js"></script>
        <!-- <script src="pyodide/pyodide.js"></script> -->
 
        <!-- (2) -->
-       <script src="assets/js/init.js"></script>
+       <script src="assets/js/flare.js"></script>
 
        <script>
            window.addEventListener(
                    "load",
                    (event) => {
-                       window.init = new init({
+                       window.init = new flare({
                            prelude:                    // (3)
    `
    print("I'm before any fetch")
-   `
+   `,
                            fetch: {                    // (4)
                                "flare": {
                                    "path": "flare"
@@ -125,12 +135,12 @@ We only describe the files in ``/myapp``:
    <head>
        <meta charset="UTF-8">
        <script src="https://pyodide-cdn2.iodide.io/v0.16.1/full/pyodide.js"></script>
-       <script src="/flare/assets/js/init.js"></script>
+       <script src="/flare/assets/js/flare.js"></script>
        <script>
            window.addEventListener(
                    "load",
                    (event) => {
-                       window.init = new init({
+                       window.init = new flare({
                            fetch: {
                                "flare": {
                                    "path": "/flare/flare"
