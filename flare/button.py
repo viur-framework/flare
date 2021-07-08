@@ -36,9 +36,14 @@ class Button(html5.Button):
 
         if self.callback is not None:
             try:
-                self.callback(self)
-            except:
-                self.callback()
+                self.callback(event,self)
+            except Exception as e:
+                print(e)
+                try:
+                    self.callback(self)
+                except Exception as e:
+                    print(e)
+                    self.callback()
 
     def resetIcon(self):
         self["icon"] = self.initIcon

@@ -105,6 +105,10 @@ class ListHandler(requestHandler):
 
     def reload(self):
         self.skellist = []
+        self.cursor = None
+        self.complete = False
+        if "cursor" in self.params:
+            del self.params["cursor"]
         self.requestData()
 
     def filter(self, filterparams):
@@ -120,20 +124,20 @@ class ListHandler(requestHandler):
             self.requestData()
 
     def requestSuccess(self, req):
-        self.state.updateState("listStatus", "success")
+
         resp = NetworkService.decode(req)
         self.resp = resp
 
         if "cursor" in resp and not resp["cursor"]:
             self.complete = True
-            self.cursor = resp["cursor"]
+
+        self.cursor = resp.get("cursor","")
 
         if not self.structure and "structure" in resp:
             self.structure = resp["structure"]
-        # self.skellist += resp["skellist"]
-        self.skellist = []
+
         for skel in resp["skellist"]:
             skel = self.buildSelectDescr(skel, self.structure)
             self.skellist.append(skel)
-
+        self.state.updateState("listStatus", "success")
         getattr(self, self.eventName).fire(self.skellist)
