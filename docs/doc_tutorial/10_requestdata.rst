@@ -32,9 +32,14 @@ In order to parse a JSON response in a success callback, simply use the default 
 .. code:: python
 
     def successCallback(result):
-      data = json.loads(result)
+        data = json.loads(result)
 
-This will simply turn the response into a ``dict`` whose fields can then be accessed in the normal way.
+This will simply turn the response into the appropriate native structure, based on what kind of JSON has been returned:
+
+* Objects will be turned into ``dict``
+* Arrays will be turned into ``list``
+* ``null`` will be turned into ``None``
+* atomar values will be turned into their respective python counterpart
 
 Example
 --------------------
@@ -44,40 +49,40 @@ it in a popup.
 
 .. code:: html
 
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Fetching data</title>
-    <link rel="stylesheet" href="flare/assets/css/style.css"/>
-    <script src="flare/assets/js/flare.js"></script>
-    <script>
-        window.addEventListener("load", () => {
-            new flare({
-                fetch: {
-                    "flare": {
-                        "path": "flare/flare"
-                    }
-                },
-                kickoff:
-`
+    <!doctype html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Fetching data</title>
+        <link rel="stylesheet" href="flare/assets/css/style.css"/>
+        <script src="flare/assets/js/flare.js"></script>
+        <script>
+            window.addEventListener("load", () => {
+                new flare({
+                    fetch: {
+                        "flare": {
+                            "path": "flare/flare"
+                        }
+                    },
+                    kickoff:
+    `
     import json
     import logging
     from flare import *
     from flare.network import HTTPRequest
 
     def _successCallback(result):
-      data = json.loads(result)
-      flare.popup.Alert(data["datetime"])
+        data = json.loads(result)
+        flare.popup.Alert(data["datetime"])
 
     def _failureCallback(responseText, status):
-      logging.error("Failure: %s %d", responseText, status)
+        logging.error("Failure: %s %d", responseText, status)
 
     HTTPRequest(
-      "GET",
-      "http://worldtimeapi.org/api/timezone/Europe/Berlin",
-      _successCallback,
-      _failureCallback
+        "GET",
+        "http://worldtimeapi.org/api/timezone/Europe/Berlin",
+        _successCallback,
+        _failureCallback
     )
     `
                 });
