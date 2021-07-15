@@ -24,7 +24,7 @@ Pyodide combines this WASM-compiled Python interpreter with well-known, natively
 In combination with *flare*, we use Pyodide to quickly build modern web-apps entirely in pure Python. 
 
 ## License
-Copyright (C) 2020 by Mausbrand Informationssysteme GmbH.
+Copyright (C) 2021 by Mausbrand Informationssysteme GmbH.
 
 Mausbrand and ViUR are registered trademarks of Mausbrand Informationssysteme GmbH.
 
