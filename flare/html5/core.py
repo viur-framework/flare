@@ -2390,6 +2390,29 @@ class Span(Widget):
     _tagName = "span"
 
 
+# Details --------------------------------------------------------------------------------------------------------------
+
+
+class Details(Widget):
+    _tagName = "details"
+
+    def _getOpen(self):
+        return True if self.element.hasAttribute("open") else False
+
+    def _setOpen(self, val):
+        if val:
+            self.element.setAttribute("open", "")
+        else:
+            self.element.removeAttribute("open")
+
+
+# Summary --------------------------------------------------------------------------------------------------------------
+
+
+class Summary(Widget):
+    _tagName = "summary"
+
+
 # Style ----------------------------------------------------------------------------------------------------------------
 
 
