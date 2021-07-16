@@ -1,11 +1,11 @@
-#!/bin/python3
+#!/usr/bin/env python3
 """
 flare application packager and build tool
 """
 
 import os, shutil, json, argparse, pathlib
 
-PATHBLACKLIST = ["docs", "examples", "bin", "scripts", "test", "assets"]
+PATHBLACKLIST = ["assets", "docs", "examples", "test", "tools"]
 
 
 def cleanString(str):

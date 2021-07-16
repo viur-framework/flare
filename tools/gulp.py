@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 """
 This helper script is used to simplify gulp build chains together with flare applications.
 """
