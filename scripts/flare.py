@@ -1,4 +1,9 @@
-import os, sys, json, getopt, shutil
+#!/bin/python3
+"""
+flare application packager and build tool
+"""
+
+import os, shutil, argparse, pathlib
 
 
 def cleanString(str):
@@ -148,58 +153,42 @@ def clearTarget(target):
     os.system(f"rm -rf {target}/*")
 
 
-def main(argv):
-    packagename = "app"
-    target = "/deploy/app"
-    source = "/sources/app"
-    minify = False
-    compile = False
-    zip = False
+def main():
+    # parse command-line arguments
+    ap = argparse.ArgumentParser(
+        description="Flare application packager and build tool"
+    )
 
-    projectWorkspace = cleanString(os.environ.get("PROJECT_WORKSPACE", "."))
-    os.chdir(projectWorkspace)
+    ap.add_argument("-s", "--source", required=True, type=pathlib.Path, help="Path to source folder of the flare application")
+    ap.add_argument("-t", "--target", required=True, type=pathlib.Path, help="Path to output folder of the packaged flare application")
 
-    try:
-        opts, args = getopt.getopt(
-            argv,
-            "ht:s:m:c:z:n:",
-            ["target=", "source=", "minify=", "compile=", "zip=", "name="],
-        )
-    except getopt.GetoptError:
-        print("gulp.py -t taskname -s ./sources")
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == "-h":
-            print("gulp.py -t taskname -s ./sources")
-            sys.exit()
-        elif opt in ("-s", "--source"):
-            source = os.path.realpath(arg)
-        elif opt in ("-t", "--target"):
-            target = os.path.realpath(arg)
-        elif opt in ("-m", "--minify"):
-            minify = False if arg == "false" else True
-        elif opt in ("-c", "--compile"):
-            compile = False if arg == "false" else True
-        elif opt in ("-z", "--zip"):
-            zip = False if arg == "false" else True
-        elif opt in ("-n", "--name"):
-            packagename = arg
+    ap.add_argument("-n", "--name", type=str, help="Name of the target package", default="app")
+    ap.add_argument("-m", "--minify", help="Minify source by removing docstrings", action="store_true", default=False)
+    ap.add_argument("-c", "--compile", help="Compile into pre-compiled .PYC-files", action="store_true", default=False)
+    ap.add_argument("-z", "--zip", help="Create zipped package to decreased number of download requests", action="store_true", default=False)
 
-    clearTarget(target)
+    args = ap.parse_args()
 
-    copySourcePy(source, target)
+    if args.source == args.target:
+        raise ValueError("You may not set source and target to the same directories")
 
-    if minify:
-        minifyPy(target)
+    os.chdir(cleanString(os.environ.get("PROJECT_WORKSPACE", ".")))
 
-    if compile:
-        compilePy(target)
+    clearTarget(args.target)
 
-    if zip:
-        zipPy(target, packagename)
+    copySourcePy(args.source, args.target)
 
-    copyAssets(source, target)
+    if args.minify:
+        minifyPy(args.target)
+
+    if args.compile:
+        compilePy(args.target)
+
+    if args.zip:
+        zipPy(args.target, args.name)
+
+    copyAssets(args.source, args.target)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()

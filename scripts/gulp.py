@@ -1,3 +1,9 @@
+#!/bin/python3
+"""
+This helper script is used to simplify gulp build chains together with flare applications.
+"""
+
+
 import os, sys, json, getopt
 
 

@@ -1,3 +1,8 @@
+#!/bin/python3
+"""
+Tool to watch for source file changes and updating the build.
+"""
+
 import os, sys, pathlib, shutil, argparse
 
 try:
