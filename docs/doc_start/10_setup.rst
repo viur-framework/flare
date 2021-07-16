@@ -1,5 +1,5 @@
 ========================================
-Setup and Installation
+Setup and installation
 ========================================
 
 Linux or WSL

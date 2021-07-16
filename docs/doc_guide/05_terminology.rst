@@ -24,7 +24,7 @@ views
 
 safeeval
 	Executes a string containing Python code. The possible operations are strongly limited for security reasons.
-	With safeeval v-if can show and hide content without the need of coding.
+	With safeeval `flare-if` can show and hide content without the need of coding, and `{{ expressions }}` can directly be interpreted inside of HTML-code.
 
 icons
 	The icon class can use any of the common image types.

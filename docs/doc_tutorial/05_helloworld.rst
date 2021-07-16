@@ -2,7 +2,7 @@
 Hello World
 ========================================
 
-In this tutorial, we will create a basic web project that makes use of flare to create a simple web site.
+In this tutorial, we will create a basic project that makes use of flare to create a simple web-app.
 
 Project setup
 --------------------

@@ -2,7 +2,7 @@
 Network
 ========================================
 
-Network contains some classes and functions that allow to communicate or work with other services.
+The `network`-module contains some classes and functions that allow to communicate or work with other services.
 
 Requesting data
 ------------------

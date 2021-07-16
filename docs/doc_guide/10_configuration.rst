@@ -8,7 +8,7 @@ In addition to a flare config, the forms and views components have their own con
 Flare config
 ------------------------
 
-Here are some defaultvalues are configured.
+Here are some default values configured.
 
  - flare.icon.svg.embedding.path
 	- defines the basepath for the used svg icons.

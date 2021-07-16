@@ -1,5 +1,5 @@
 ========================================
-Html5
+html5 (core library)
 ========================================
 
 Any **flare** components are entirely established on top of the
@@ -25,7 +25,7 @@ leaf-type widgets, which may not contain any children.
 First steps
 -----------
 
-When working with native HTML5 widgets, every widget must be created
+When working with native html5-widgets, every widget must be created
 separately and stacked together in the desired order. This is well known
 from JavaScript's createElement-function.
 
@@ -49,17 +49,19 @@ Here's a little code sample.
 
 Summarized:
 
--  ``html5.Xyz()`` creates an instance of the desired widget (the
+-  ``html5.Xyz()`` creates an instance of the desired widget. The
    notation is that the first letter is always in uppercase-order, the
-   rest is hold in lowercase-order, therefore e.g. :class:`html5.Textarea() <flare.html5.Textarea>`
-   is used for a textarea)
+   rest is hold in lowercase-order, therefore e.g.
+   :class:`html5.Textarea() <flare.html5.Textarea>` is used for a textarea.
 -  Attributes are accessible via the attribute indexing syntax, like
    ``widget["attribute"]``. There are some special attributes like
    ``style`` or ``data`` that are providing a dict-like access, so
    ``widget["style"]["border"] = "1px solid red"`` is used.
--  Stacking is performed with ``widget.appendChild()``. There's also
-   ``widget.prependChild()``, ``widget.insertBefore()`` and
-   ``widget.removeChild()`` for further insertion or removal operations.
+-  Stacking is performed with ``widget.appendChild()``. There are also some additional
+   functions for easier element stacking and child modification, these are
+   - ``widget.prependChild()`` to prepend children,
+   - ``widget.insertBefore()`` to insert a child before another child,
+   - ``widget.removeChild()`` to remove a child.
 -  To access existing child widgets, use ``widget.children(n)`` to
    access the *n*-th child, or without *n* to retrieve a list of a
    children.
@@ -68,7 +70,7 @@ Parsing widgets from HTML-code
 ------------------------------
 
 Above result can also be achieved much faster, by using the build-in
-`HTML5-parser and renderer <#html-parser-reference>`__.
+`html5-parser and renderer <#html-parser-reference>`__.
 
 .. code:: python
 
@@ -224,7 +226,7 @@ instead.
 removeChild(), removeAllChildren()
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Either reemoves one child from the parent element or all available
+Either removes one child from the parent element or any available
 children.
 
 Visibility and usability
@@ -233,7 +235,7 @@ Visibility and usability
 Widgets can be switched hidden or disabled. Form elements, for example,
 might be disabled when a specific condition isn't met. These functions
 here help to quickly change visibility and usability of widgets,
-including their child widgets.
+including their child widgets which are switched recursively.
 
 hide(), show()
 ^^^^^^^^^^^^^^
@@ -305,22 +307,29 @@ name is found and False otherwise.
 HTML parser reference
 ---------------------
 
+The html5-library built into flare brings its own HTML-parser.
+Using this parser, any HTML-code can directly be turned into a flare DOM.
+
+Additionally, some nice extensions regarding flare component and widget
+customization and conditional rendering is supported, as the HTML-renderer
+automatically creates the DOM from a parsed input and serves as some kind of
+template processor.
+
 Data-based rendering
 ~~~~~~~~~~~~~~~~~~~~
 
 Using variables
 ^^^^^^^^^^^^^^^
 
-Any variables provided via kwargs to
-`html5.fromHTML() <#html5fromhtml>`__ can be inserted in attributes or
-as TextNode-elements with their particular content when surrounded by
-``{{`` and ``}}``. Inside this notation, full Python expression syntax
+Any variables provided via kwargs to :meth:`html5.fromHTML() <flare.html5.core.fromHTML>`
+can be inserted in attributes or as TextNode-elements with their particular content
+when surrounded by ``{{`` and ``}}``. Inside this notation, full Python expression syntax
 is allowed, so that even calculations or concatenations can be done.
 
 .. code:: python
 
     html5.Body().appendChild("""
-        <div class="color-{{ l[1] + 40 }}">{{ d[ "world" ] + "World" * 3 }} and {{ d }}</div>
+        <div class="color-{{ l[1] + 40 }}">{{ d["world"] + "World" * 3 }} and {{ d }}</div>
     """, l=[1,2,3], d={"world": "Hello"})
 
 renders into
@@ -350,7 +359,7 @@ any computed non-boolean value representing True.
     """, i=50, j=151)
 
 As variables, any arguments given to
-`html5.fromHTML() <#html5fromhtml>`__ (or related functions) as kwargs
+:meth:`html5.fromHTML() <flare.html5.core.fromHTML>` (or related functions) as kwargs
 can be used.
 
 html5.parseHTML()
@@ -362,11 +371,10 @@ html5.parseHTML()
 
 Parses the provided HTML-code according to the tags registered by
 html5.registerTag() or components that use the
-`html5.tag <#html5tag>`__-decorator.
+:meth:`@tag <flare.html5.core.tag>`-decorator.
 
 The function returns an abstract syntax tree representation (HtmlAst) of
-the HTML-code that can be rendered by
-`html5.fromHTML() <#html5fromhtml>`__.
+the HTML-code that can be rendered by :meth:`html5.fromHTML() <flare.html5.core.fromHTML>`.
 
 html5.fromHTML()
 ~~~~~~~~~~~~~~~~
@@ -385,7 +393,7 @@ Renders HTML-code or compiled HTML-code (HtmlAst).
    expressions <#using-variables>`__.
 
 HTML-code can optionally be pre-compiled with
-`html5.parseHTML() <#html5parsehtml>`__, and then executed multiple
+:meth:`html5.parseHTML() <flare.html5.core.parseHTML>`, and then executed multiple
 times (but with different variables) by fromHTML. This is useful when
 generating lists of same elements with only replaced variable data.
 
