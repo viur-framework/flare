@@ -55,6 +55,7 @@ class HTTPRequest(object):
         callbackFailure=None,
         payload=None,
         content_type=None,
+        response_type=None
     ):
         super(HTTPRequest, self).__init__()
 
@@ -71,6 +72,8 @@ class HTTPRequest(object):
         self.req = html5.jseval("new XMLHttpRequest()")
         self.req.onreadystatechange = self.onReadyStateChange
         self.req.open(method, url, True)
+        if response_type in ["blob", "arraybuffer", "document"]:
+            self.req.responseType = response_type
 
     def onReadyStateChange(self, *args, **kwargs):
         """Internal callback."""
@@ -85,7 +88,10 @@ class HTTPRequest(object):
         if self.req.readyState == 4:
             if 200 <= self.req.status < 300:
                 if self.callbackSuccess:
-                    self.callbackSuccess(self.req.responseText)
+                    if self.req.responseType in ["blob", "arraybuffer", "document"]:
+                        self.callbackSuccess(self.req.response)
+                    else:
+                        self.callbackSuccess(self.req.responseText)
             # todo: report to log?
             else:
                 if self.callbackFailure:
