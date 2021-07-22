@@ -25,7 +25,10 @@ class flare {
 	}
 
 	async initPyodide(config, indexURL) {
-		let pyodide_config = {"indexURL": indexURL};
+		let pyodide_config = {
+		    "indexURL": indexURL,
+		    "fullStdLib": false
+		};
 
 		// Await loadPyodide, then run flare config
 		globalThis.pyodide = await loadPyodide(pyodide_config);
