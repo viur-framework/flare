@@ -4,7 +4,7 @@ emscripten virtual file system so that they can be called from Pyodide.
 
 Please see docs/setup.md in the section "HTML skeleton" for further information on how to use this script.
 */
-const SITE_PACKAGES = "/lib/python3.8/site-packages";
+const SITE_PACKAGES = "/lib/python3.9/site-packages";
 
 class flare {
 	constructor(config) {
@@ -28,7 +28,7 @@ class flare {
 		let pyodide_config = {"indexURL": indexURL};
 
 		// Await loadPyodide, then run flare config
-		await loadPyodide(pyodide_config);
+		globalThis.pyodide = await loadPyodide(pyodide_config);
 
 		let kickoff = (config.kickoff || "");
 
