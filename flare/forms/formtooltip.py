@@ -17,14 +17,13 @@ class ToolTip(html5.Div):
         self.fromHTML(
             """
 			<div class="msg-content" [name]="tooltipMsg">
-				<h2 class="msg-headline" [name]="tooltipHeadline"></h2>
-				<div class="msg-descr" [name]="tooltipDescr"></div>
+				<h2 class="msg-headline" [name]="tooltipHeadline">{{shortText or translate("flare.forms.tooltip")}}</h2>
+				<div class="msg-descr" [name]="tooltipDescr">{{longText}}</div>
 			</div>
-		"""
+		    """,
+            shortText=shortText,
+            longText=longText.replace("\n", "<br />")
         )
-
-        self.tooltipHeadline.element.innerHTML = translate("vi.tooltip.headline")
-        self.tooltipDescr.element.innerHTML = longText.replace("\n", "<br />")
 
     def onClick(self, event):
         self.toggleClass("is-open")
