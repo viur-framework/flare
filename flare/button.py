@@ -1,5 +1,6 @@
 """Flare-styled button Widgets."""
 
+import inspect
 from . import html5
 from flare.icons import SvgIcon
 
@@ -35,15 +36,15 @@ class Button(html5.Button):
         event.preventDefault()
 
         if self.callback is not None:
-            try:
-                self.callback(event,self)
-            except Exception as e:
-                print(e)
-                try:
-                    self.callback(self)
-                except Exception as e:
-                    print(e)
-                    self.callback()
+            parameters = inspect.signature(self.callback).parameters
+
+            # Allow for callback without parameter
+            if len(parameters) == 0:
+                self.callback()
+            elif len(parameters) == 1:
+                self.callback(self)
+            else:
+                self.callback(event, self)
 
     def resetIcon(self):
         self["icon"] = self.initIcon
