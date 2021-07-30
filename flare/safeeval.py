@@ -33,28 +33,14 @@ class SafeEval:
             ast.NameConstant: lambda node, _: node.value,
             ast.Num: lambda node, _: node.n,
             ast.Str: lambda node, _: node.s,
-            ast.JoinedStr: lambda node, names: [
-                self.execute(x, names) for x in node.values
-            ],
-            ast.Subscript: lambda node, names: (
-                self.execute(node.value, names) or {}
-            ).get(self.execute(node.slice, names)),
-            ast.Attribute: lambda node, names: (
-                self.execute(node.value, names) or {}
-            ).get(node.attr),
+            ast.JoinedStr: lambda node, names: [self.execute(x, names) for x in node.values],
+            ast.Subscript: lambda node, names: (self.execute(node.value, names) or {}).get(self.execute(node.slice, names)),
+            ast.Attribute: lambda node, names: (self.execute(node.value, names) or {}).get(node.attr),
             ast.Index: lambda node, names: self.execute(node.value, names),
-            ast.BoolOp: lambda node, names: (
-                all if isinstance(node.op, ast.And) else any
-            )([self.execute(x, names) for x in node.values]),
-            ast.UnaryOp: lambda node, names: self.unaryOpMap[type(node.op)](
-                self.execute(node.operand, names)
-            ),
-            ast.BinOp: lambda node, names: self.dualOpMap[type(node.op)](
-                self.execute(node.left, names), self.execute(node.right, names)
-            ),
-            ast.IfExp: lambda node, names: self.execute(node.body, names)
-            if self.execute(node.test, names)
-            else self.execute(node.orelse, names),
+            ast.BoolOp: self._BoolOp,
+            ast.UnaryOp: lambda node, names: self.unaryOpMap[type(node.op)](self.execute(node.operand, names)),
+            ast.BinOp: lambda node, names: self.dualOpMap[type(node.op)](self.execute(node.left, names), self.execute(node.right, names)),
+            ast.IfExp: lambda node, names: self.execute(node.body, names) if self.execute(node.test, names) else self.execute(node.orelse, names),
         }
 
         self.unaryOpMap: Dict[ast.AST, Callable[[Any], Any]] = {
@@ -77,6 +63,17 @@ class SafeEval:
             ast.Mult: lambda x, y: x * y,
             ast.Div: lambda x, y: x / y,
         }
+
+    def _BoolOp(self, node, names):
+        """Handling ast.BoolOp in a Pythonic style."""
+        for child in node.values:
+            ret = self.execute(child, names)
+            if isinstance(node.op, ast.Or) and ret:
+                return ret
+            elif isinstance(node.op, ast.And) and not ret:
+                return ret
+
+        return None
 
     def callNode(self, node: ast.Call, names: Dict[str, Any]) -> Any:
         """Evaluates the call if present in allowed callables.
