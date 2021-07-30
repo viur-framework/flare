@@ -17,6 +17,7 @@ def updateConf(other: Dict):
 # Main config
 conf = {
     "flare.cache": Cache(),
+    "selectors": {},
     "showBoneNames": True,
     "emptyValue": None,
     "defaultLanguage": "de",
