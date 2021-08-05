@@ -6,6 +6,7 @@ from . import date
 from . import email
 from . import numeric
 from . import password
+from . import raw
 from . import record
 from . import relational
 from . import select

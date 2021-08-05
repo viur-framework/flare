@@ -13,6 +13,7 @@
   "forms/bones/email.py",
   "forms/bones/numeric.py",
   "forms/bones/password.py",
+  "forms/bones/raw.py",
   "forms/bones/record.py",
   "forms/bones/relational.py",
   "forms/bones/select.py",
