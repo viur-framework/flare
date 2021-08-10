@@ -1,5 +1,5 @@
 from flare import html5
-from flare.forms import boneSelector, formatString
+from flare.forms import boneSelector, displayString
 from flare.config import conf
 from flare.forms.widgets.relational import InternalEdit
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
@@ -42,17 +42,17 @@ class RecordViewWidget(BaseViewWidget):
         self.value = value
 
         if value:
-            txt = formatString(
+            displayWidgets = displayString(
                 self.bone.boneStructure["format"],
                 value,
                 self.bone.boneStructure["using"],
-                language=self.language,
+                self.language,
             )
 
         else:
-            txt = None
+            displayWidgets = None
 
-        self.replaceChild(html5.TextNode(txt or conf["emptyValue"]))
+        self.replaceChild(displayWidgets or conf["emptyValue"])
 
 
 class RecordBone(BaseBone):

@@ -9,7 +9,7 @@ from flare.forms.widgets.relational import InternalEdit
 from flare.forms.widgets.tree import TreeLeafWidget, TreeNodeWidget
 from flare.forms.widgets.list import ListWidget
 from flare.config import conf
-from flare.forms import boneSelector, formatString, moduleWidgetSelector
+from flare.forms import boneSelector, displayString, moduleWidgetSelector
 from .base import BaseBone, BaseEditWidget, BaseMultiEditWidget
 
 
@@ -35,7 +35,7 @@ class RelationalEditWidget(BaseEditWidget):
         # language=HTML
         widgetList = self.fromHTML(
             """<div class='flr-value--relational-wrapper'>
-                <flare-input [name]="destWidget" class="input-group-item" readonly>
+                <div [name]="destWidget" class="input-group-item" readonly>
                 <flare-button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="icon-check"></flare-button>
                 <flare-button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="icon-cross"></flare-button>
                 </div>
@@ -90,14 +90,14 @@ class RelationalEditWidget(BaseEditWidget):
 
             return
 
-        txt = formatString(
+        displayWidgets = displayString(
             self.bone.formatString,
             self.value,
             self.bone.boneStructure,
-            language=self.language,
+            self.language
         )
 
-        self.destWidget["value"] = txt
+        self.destWidget.replaceChild(displayWidgets or conf["emptyValue"])
 
     def onChange(self, event):
         if self.dataWidget:
@@ -177,7 +177,7 @@ class RelationalViewWidget(html5.Div):
         self.value = value
 
         if value:
-            txt = formatString(
+            displayWidgets = displayString(
                 self.bone.formatString,
                 value,
                 self.bone.boneStructure,
@@ -185,9 +185,9 @@ class RelationalViewWidget(html5.Div):
             )
 
         else:
-            txt = None
+            displayWidgets = None
 
-        self.replaceChild(html5.TextNode(txt or conf["emptyValue"]))
+        self.replaceChild(displayWidgets or conf["emptyValue"])
 
     def serialize(self):
         return self.value  # fixme: The format here is invalid for POST!
