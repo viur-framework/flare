@@ -149,7 +149,8 @@ class NumericViewWidget(BaseViewWidget):
                 except ValueError:
                     value = None
 
-            value = _formatCurrencyValue(value, self.bone)
+            if self.bone.currency:
+                value = _formatCurrencyValue(value, self.bone)
 
         self.replaceChild(html5.TextNode(conf["emptyValue"] if value is None else value))
 
