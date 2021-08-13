@@ -76,17 +76,11 @@ def formatString(format: str, data: typing.Dict, structure=None, language=None):
             f"Please change it to a Python-expression, like \"{proposal}\""
         )
 
-    if not html5.htmlExpressionEvaluator:
+    if not html5.core.htmlExpressionEvaluator:
         return format
 
     try:
-        ast = html5.htmlExpressionEvaluator.compile(format)
-    except Exception as e:
-        logging.exception(e)
-        ast = html5.htmlExpressionEvaluator.compile("value['name']")
-
-    try:
-        value = html5.htmlExpressionEvaluator.execute(ast, data)
+        value = html5.core.htmlExpressionEvaluator.execute(format, data)
     except Exception as e:
         logging.exception(e)
         value = "(invalid format string)"
