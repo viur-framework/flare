@@ -35,6 +35,7 @@
   "html5/__init__.py",
   "html5/core.py",
   "html5/svg.py",
+  "debug.py",
   "i18n.py",
   "icons.py",
   "ignite.py",

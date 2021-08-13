@@ -18,6 +18,7 @@ from . import observable
 from . import popout
 from . import popup
 from . import utils
+from . import debug
 from .cache import Cache
 from .config import conf, updateConf
 
