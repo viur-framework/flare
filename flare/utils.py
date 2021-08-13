@@ -1,6 +1,7 @@
 """Utility functions."""
 
 from . import html5
+from js import Worker
 
 
 def unescape(val, maxLength=0):
@@ -96,3 +97,32 @@ def parseFloat(s, ret=0.0):
             return float(s)
 
     return ret
+
+def createWorker( pythonCode, callback = None, errorCallback = None, context = { } ):
+    """Generates and starts a Pyodide Webworker.
+
+    def calllog(txt=None):
+        result = txt.data.to_py()
+        if "error" in result:
+            print(result["error"])
+        if "msg" in result:
+            print(result["msg"])
+
+    code='''
+import statistics,time
+from js import self as js_self
+for i in range(0,100):
+    js_self.postMessage("POST %s"%i)
+'''
+
+    createWorker(code,calllog,calllog)
+
+    context can take variables, these are like global startparameters
+
+    """
+    worker = Worker.new( 'public/flare/js/worker.js' )
+    worker.onmessage = callback
+    worker.onerror = errorCallback
+    worker.postMessage(python=pythonCode, **context)
+
+    return worker
