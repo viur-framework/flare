@@ -4,6 +4,7 @@ This file documents any relevant changes.
 
 ## [1.0.0] - 2021-08-13
 - Feat(**BREAKING**): unified buildscripts
+- Feat: added alternative displayStrings for relations
 - Feat: updated to Pyodide 0.18
 - Feat: added debug popup (wip)
 - Feat: pyodide webworker
