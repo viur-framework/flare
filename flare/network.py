@@ -74,6 +74,8 @@ class HTTPRequest(object):
         self.req.open(method, url, True)
         if response_type in ["blob", "arraybuffer", "document"]:
             self.req.responseType = response_type
+        else:
+            self.req.responseType = ""
 
     def onReadyStateChange(self, *args, **kwargs):
         """Internal callback."""
@@ -557,7 +559,7 @@ class NetworkService(object):
         self.params = None
 
     def onFinished(self, success):
-        if not self.group and self.secure and skeyRequestQueue:
+        if self.secure and skeyRequestQueue:
             skeyRequestQueue.remove(self)
             processSkelQueue()
 
