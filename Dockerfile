@@ -14,7 +14,7 @@ RUN wget https://pascalroeleven.nl/deb-pascalroeleven.gpg && apt-key add deb-pas
 RUN echo "deb http://deb.pascalroeleven.nl/python3.8 buster-backports main" >> /etc/apt/sources.list
 
 #install system requirements
-RUN apt-get update && apt-get install -y zip python3-pip python3.8
+RUN apt-get update && apt-get install -y zip python3-pip python3.8 rsync
 
 # activate 3.8 as default python3
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
@@ -28,7 +28,7 @@ COPY requirements.txt /
 RUN pip3 install -r requirements.txt
 
 
-COPY scripts /scripts
+COPY tools /tools
 
 #expose
 VOLUME ["/workspace"]
