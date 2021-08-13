@@ -3,7 +3,7 @@
 // THIS IS THE DEFAULT PYODIDE WEBWORKER
 importScripts("https://cdn.jsdelivr.net/pyodide/v0.18.0/full/pyodide.js");
 
-async function loadScripts() {
+async function loadScripts(scriptPath="../../../flare/flare/") {
     let promises = [];
     let url = "webworker_scripts.py"
 
@@ -12,7 +12,7 @@ async function loadScripts() {
     promises.push(
         new Promise((resolve, reject) => {
             //default workerScriptPath = "/app/s/flare/flare"
-            fetch("../../../flare/flare/"+url, {}).then((response) => {
+            fetch(scriptPath+url, {}).then((response) => {
                 if (response.status === 200) {
                     response.text().then((code) => {
                         let lookup = "";
@@ -52,9 +52,13 @@ let pyodideReadyPromise = loadPyodideAndPackages();
 
 self.onmessage = async (event) => {
     await pyodideReadyPromise;
-    await loadScripts();
 
     const {python, ...context} = event.data;
+    if ("scriptPath" in context){
+        await loadScripts(context["scriptPath"]);
+    }else{
+        await loadScripts();
+    }
 
     for (const key of Object.keys(context)) {
         self[key] = context[key];
