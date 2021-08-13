@@ -10,20 +10,120 @@ import typing
 from typing import Any, Callable, Dict
 
 
+def parseInt(value, ret=0):
+    """
+    Parses a value as int.
+    This function works similar to its JavaScript-pendant, and performs
+    checks to parse most of a string value as integer.
+    :param value: The value that should be parsed as integer.
+    :param ret: The default return value if no integer could be parsed.
+    :return: Either the parse value as int, or ret if parsing not possible.
+    """
+    if value is None:
+        return ret
+
+    if not isinstance(value, str):
+        value = str(value)
+
+    conv = ""
+    value = value.strip()
+
+    for ch in value:
+        if ch not in "+-0123456789":
+            break
+
+        conv += ch
+
+    try:
+        return int(conv)
+    except ValueError:
+        return ret
+
+
+def parseFloat(value, ret=0.0):
+    """
+    Parses a value as float.
+    This function works similar to its JavaScript-pendant, and performs
+    checks to parse most of a string value as float.
+    :param value: The value that should be parsed as float.
+    :param ret: The default return value if no integer could be parsed.
+    :return: Either the parse value as float, or ret if parsing not possible.
+    """
+    if value is None:
+        return ret
+
+    if not isinstance(value, str):
+        value = str(value)
+
+    conv = ""
+    value = value.strip()
+    dot = False
+
+    for ch in value:
+        if ch not in "+-0123456789.":
+            break
+
+        if ch == ".":
+            if dot:
+                break
+
+            dot = True
+
+        conv += ch
+
+    try:
+        return float(conv)
+    except ValueError:
+        return ret
+
+
+def optimizeValue(val, allow=[int, bool, float, list, dict, str], default=str):
+    """
+    Evaluates the best matching value.
+    """
+    # Perform string conversion into float or int, whatever fits best.
+    if isinstance(val, str):
+        ival = parseInt(val, None) if int in allow else None
+        fval = parseFloat(val, None) if float in allow else None
+
+        if fval is not None and str(fval) == val:
+            val = fval
+        elif ival is not None and str(ival) == val:
+            val = ival
+
+    # When a float fits into an int, store it as int
+    if isinstance(val, float) and float in allow and int in allow:
+        ival = int(val)
+        if float(ival) == val:
+            val = ival
+
+    if any([isinstance(val, t) for t in allow]):
+        return val
+
+    if callable(default):
+        return default(val)
+
+    return default
+
+
 class SafeEval:
     """Safely evaluate an expression from an untrusted party."""
 
     def __init__(
-        self, allowedCallables: typing.Union[None, typing.Dict[str, typing.Any]] = None
+            self, allowedCallables: typing.Union[None, typing.Dict[str, typing.Any]] = None
     ):
         """Ctor for an SafeEval instance with optional mapping of function names to callables.
 
         :param allowedCallables: A mapping if function name to callable
         """
-        if allowedCallables is not None:
-            self.allowedCallables = allowedCallables
-        else:
-            self.allowedCallables = dict()
+        self.allowedCallables = {
+            "str": str,
+            "float": float,
+            "int": int
+        }
+
+        if allowedCallables:
+            self.allowedCallables.update(allowedCallables)
 
         self.nodes: Dict[ast.AST, Callable[[ast.AST, Dict[str, Any]], Any]] = {
             ast.Call: self.callNode,
@@ -34,13 +134,17 @@ class SafeEval:
             ast.Num: lambda node, _: node.n,
             ast.Str: lambda node, _: node.s,
             ast.JoinedStr: lambda node, names: [self.execute(x, names) for x in node.values],
-            ast.Subscript: lambda node, names: (self.execute(node.value, names) or {}).get(self.execute(node.slice, names)),
+            ast.Subscript: lambda node, names: (self.execute(node.value, names) or {}).get(
+                self.execute(node.slice, names)),
             ast.Attribute: lambda node, names: (self.execute(node.value, names) or {}).get(node.attr),
             ast.Index: lambda node, names: self.execute(node.value, names),
             ast.BoolOp: self._BoolOp,
             ast.UnaryOp: lambda node, names: self.unaryOpMap[type(node.op)](self.execute(node.operand, names)),
-            ast.BinOp: lambda node, names: self.dualOpMap[type(node.op)](self.execute(node.left, names), self.execute(node.right, names)),
-            ast.IfExp: lambda node, names: self.execute(node.body, names) if self.execute(node.test, names) else self.execute(node.orelse, names),
+            ast.BinOp: lambda node, names: self.dualOpMap[type(node.op)](self.execute(node.left, names),
+                                                                         self.execute(node.right, names)),
+            ast.IfExp: lambda node, names: self.execute(node.body, names) if self.execute(node.test,
+                                                                                          names) else self.execute(
+                node.orelse, names),
         }
 
         self.unaryOpMap: Dict[ast.AST, Callable[[Any], Any]] = {
@@ -84,7 +188,7 @@ class SafeEval:
         :return: If allowed to evaluate the node, its result will be returned
         """
         if node.func.id not in self.allowedCallables:
-            raise NameError("function not found in allowed callables - aborting")
+            raise NameError(f"function '{node.func.id}' not found in allowed callables - aborting")
         args = [self.execute(arg, names) for arg in node.args]
         return self.allowedCallables[node.func.id](*args)
 
@@ -128,7 +232,7 @@ class SafeEval:
         """
         expr = expr.strip()
         assert (
-            len(expr) < 500 and len([x for x in expr if x in {"(", "[", "{"}]) < 60
+                len(expr) < 500 and len([x for x in expr if x in {"(", "[", "{"}]) < 60
         ), "Recursion depth or len exceeded"
         return ast.parse(expr).body[0].value
 

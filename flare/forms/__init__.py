@@ -1,6 +1,6 @@
 from flare.priorityqueue import PriorityQueue
 from .formconf import conf
-from .formatString import formatString
+from .formatString import formatString, displayString
 
 boneSelector = PriorityQueue()  # Queried by editWidget to locate its bones
 moduleWidgetSelector = (

@@ -1,5 +1,5 @@
 from flare import html5
-from flare.forms import boneSelector, formatString
+from flare.forms import boneSelector, formatString, displayString
 from flare.config import conf
 from flare.forms.widgets.relational import InternalEdit
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
@@ -41,18 +41,25 @@ class RecordViewWidget(BaseViewWidget):
     def unserialize(self, value=None):
         self.value = value
 
-        if value:
-            txt = formatString(
-                self.bone.boneStructure["format"],
-                value,
-                self.bone.boneStructure["using"],
-                language=self.language,
-            )
+        if self.value:
+            if display := self.bone.boneStructure["params"].get("display"):
+                displayWidgets = displayString(
+                    display,
+                    self.value,
+                    self.bone.boneStructure["using"],
+                    self.language
+                )
 
-        else:
-            txt = None
-
-        self.replaceChild(html5.TextNode(txt or conf["emptyValue"]))
+                self.replaceChild(displayWidgets or conf["emptyValue"])
+            else:
+                self.replaceChild(
+                    formatString(
+                        self.bone.boneStructure["format"],
+                        self.value,
+                        self.bone.boneStructure["using"],
+                        self.language
+                    ) or conf["emptyValue"]
+                )
 
 
 class RecordBone(BaseBone):
