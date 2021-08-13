@@ -13,7 +13,7 @@ class flare {
 			if (res.ok) {
 				console.debug(`Using local Pyodide...`);
 			} else {
-				indexURL = "https://cdn.jsdelivr.net/pyodide/v0.17.0/full/";
+				indexURL = "https://cdn.jsdelivr.net/pyodide/v0.18.0/full/";
 				console.debug(`Using Pyodide fallback from ${indexURL}...`);
 			}
 
