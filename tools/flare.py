@@ -28,6 +28,7 @@ def copySourcePy(source, target):
     cleanSources(target)
     copyflareAssets(source, target)
     copypackageAssets(source, target)
+    copyWebworkerScripts(source,target)
 
 
 def cleanSources(target):
@@ -137,6 +138,20 @@ def copyflareAssets(source, target):
             os.path.join(flarefolder, "flare", "files.json"),
             os.path.join(target, "flare", "flare", "files.json"),
         )
+
+def copyWebworkerScripts(source, target):
+    flarefolder = os.path.join( source, "flare", "flare", "webworker")
+    if os.path.exists( flarefolder ):
+        shutil.copytree(
+            flarefolder, os.path.join( target, "webworker" ), dirs_exist_ok = True
+        )
+
+    appfolder = os.path.join(source, "webworker")
+    if os.path.exists( appfolder ):
+        shutil.copytree(
+            appfolder, os.path.join( target, "webworker" ), dirs_exist_ok = True
+        )
+
 
 
 def copypackageAssets(source, target):

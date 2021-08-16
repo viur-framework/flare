@@ -3,7 +3,7 @@
 // THIS IS THE DEFAULT PYODIDE WEBWORKER
 importScripts("https://cdn.jsdelivr.net/pyodide/v0.18.0/full/pyodide.js");
 
-async function loadScripts(scriptPath="../../../flare/flare/") {
+async function loadScripts(scriptPath="../../../public/webworker") {
     let promises = [];
     let url = "webworker_scripts.py"
 
