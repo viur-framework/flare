@@ -28,7 +28,6 @@ def copySourcePy(source, target):
     cleanSources(target)
     copyflareAssets(source, target)
     copypackageAssets(source, target)
-    copyWebworkerScripts(source,target)
 
 
 def cleanSources(target):
@@ -93,7 +92,6 @@ def zipPy(target, packagename):
 
     movingFlareBeforeZip(target, packagename)
     movingPackagesBeforeZip(target, packagename)
-
     os.system("rm -f files.zip")  # remove old zip if exists
     os.system(f"zip files.zip -r ./*")  # zip this folder
 
@@ -236,6 +234,12 @@ def main():
 
     if args.zip:
         zipPy(args.target, args.name)
+
+    copyWebworkerScripts(args.source, args.target)
+    if args.minify:
+        minifyPy(os.path.join(args.target,"webworker"))
+    if args.compile:
+        compilePy(os.path.join(args.target,"webworker"))
 
     copyAssets(args.source, args.target)
 

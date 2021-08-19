@@ -3,16 +3,13 @@
 // THIS IS THE DEFAULT PYODIDE WEBWORKER
 importScripts("https://cdn.jsdelivr.net/pyodide/v0.18.0/full/pyodide.js");
 
-async function loadScripts(scriptPath="../../../public/webworker") {
+async function loadScripts(scriptPath="../../../webworker/",file="webworker_scripts.py") {
     let promises = [];
-    let url = "webworker_scripts.py"
-
-    let path = ("/lib/python3.9/site-packages/scripts/" + url).split("/")
+    let path = ("/lib/python3.9/site-packages/scripts/" + file).split("/")
 
     promises.push(
         new Promise((resolve, reject) => {
-            //default workerScriptPath = "/app/s/flare/flare"
-            fetch(scriptPath+url, {}).then((response) => {
+            fetch(scriptPath+file, {}).then((response) => {
                 if (response.status === 200) {
                     response.text().then((code) => {
                         let lookup = "";
@@ -54,11 +51,24 @@ self.onmessage = async (event) => {
     await pyodideReadyPromise;
 
     const {python, ...context} = event.data;
+
+
+    let scriptsPath = "../../../webworker/"
     if ("scriptPath" in context){
-        await loadScripts(context["scriptPath"]);
-    }else{
-        await loadScripts();
+        scriptsPath = context["scriptPath"]
     }
+
+    const isCompiled = await (await fetch(scriptsPath+"webworker_scripts.pyc"))
+    console.log("---")
+    console.log(isCompiled)
+	console.log(scriptsPath)
+
+    let scriptFile = "webworker_scripts.py"
+    if (isCompiled.status === 200){
+        scriptFile = "webworker_scripts.pyc"
+    }
+
+    await loadScripts(scriptsPath,scriptFile);
 
     for (const key of Object.keys(context)) {
         self[key] = context[key];
