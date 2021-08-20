@@ -238,8 +238,8 @@ def main():
     copyWebworkerScripts(args.source, args.target)
     if args.minify:
         minifyPy(os.path.join(args.target,"webworker"))
-    if args.compile:
-        compilePy(os.path.join(args.target,"webworker"))
+    #if args.compile:
+    #    compilePy(os.path.join(args.target,"webworker"))
 
     copyAssets(args.source, args.target)
 

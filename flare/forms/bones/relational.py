@@ -36,7 +36,7 @@ class RelationalEditWidget(BaseEditWidget):
         widgetList = self.fromHTML(
             """
             <div class='flr-value--relational-wrapper'>
-                <div [name]="destWidget" class="input-group-item" readonly></div>
+                <div [name]="destWidget" class="input input-group-item" readonly></div>
                 <flare-button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="icon-check"></flare-button>
                 <flare-button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="icon-cross"></flare-button>
             </div>
