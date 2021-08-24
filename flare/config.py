@@ -23,6 +23,7 @@ conf = {
     "defaultLanguage": "de",
     "flare.icon.svg.embedding.path": "/static/svgs",
     "flare.icon.fallback.error": "icon-error",
+    "flare.icon.cache":{},
     "flare.language.current": "de",
 }
 

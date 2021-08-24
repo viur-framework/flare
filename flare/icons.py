@@ -15,6 +15,7 @@ class SvgIcon(html5.svg.Svg):
     def __init__(self, value=None, fallbackIcon=None, title=""):
         super().__init__()
         self.value = value
+        self.url = self.value
         self.title = title
         self.fallbackIcon = fallbackIcon
 
@@ -40,18 +41,30 @@ class SvgIcon(html5.svg.Svg):
             logging.warning("Please use 'icon-users' or a project specific svg path")
             self.value = "icon-users"
         if self.value and self.value.endswith(".svg"):
-            url = self.value
+            self.url = self.value
         else:
-            url = conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.value
+            self.url = conf["flare.icon.svg.embedding.path"] + "/%s.svg" % self.value
 
-        HTTPRequest(
-            "GET",
-            url,
-            callbackSuccess=self.replaceSVG,
-            callbackFailure=self.requestFallBack,
-        )
+        if self.url in conf["flare.icon.cache"]:
+            try:
+                self.replaceSVG(conf["flare.icon.cache"][self.url])
+            except:
+                HTTPRequest(
+                    "GET",
+                    self.url,
+                    callbackSuccess=self.replaceSVG,
+                    callbackFailure=self.requestFallBack,
+                )
+        else:
+            HTTPRequest(
+                "GET",
+                self.url,
+                callbackSuccess=self.replaceSVG,
+                callbackFailure=self.requestFallBack,
+            )
 
     def replaceSVG(self, icondata):
+        conf["flare.icon.cache"].update({self.url:icondata})
         self.removeAllChildren()
 
         for node in html5.fromHTML(icondata):
