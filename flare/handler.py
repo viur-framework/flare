@@ -1,8 +1,9 @@
 """Flare base handlers for ViUR prototypes."""
 
-from .network import NetworkService
+from .network import NetworkService, HTTPRequest
 from .event import EventDispatcher
 from .observable import StateHandler
+import string, random, os, json
 
 
 class requestHandler:
@@ -20,6 +21,7 @@ class requestHandler:
         self.state.updateState("listStatus", "init")
 
     def requestData(self, *args, **kwargs):
+        print(f'{self.module} request')
         self.state.updateState("listStatus", "loading")
         NetworkService.request(
             self.module,
@@ -141,3 +143,101 @@ class ListHandler(requestHandler):
             self.skellist.append(skel)
         self.state.updateState("listStatus", "success")
         getattr(self, self.eventName).fire(self.skellist)
+
+class SyncHandler(object):
+    @staticmethod
+    def request(url, params=None, jsonResult=None):
+        request = SyncHandler()._request(url, params)
+
+        if request.status == "failed":
+            return request.status
+
+        if not jsonResult:
+            return request.result
+
+        return json.loads(request.result)
+
+    def genReqStr(self, params):
+        boundary_str = "---" + ''.join(
+            [random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(13)])
+        boundary = boundary_str
+
+        res = f"Content-Type: multipart/mixed; boundary=\"{boundary}\"\r\nMIME-Version: 1.0\r\n"
+        res += "\r\n--" + boundary
+
+        def expand(key, value):
+            ret = ""
+
+            if all([x in dir(value) for x in ["name", "read"]]):  # File
+                type = "application/octet-stream"
+                filename = os.path.basename(value.name).decode(sys.getfilesystemencoding())
+
+                ret += \
+                    f"\r\nContent-Type: {type}" \
+                    f"\r\nMIME-Version: 1.0" \
+                    f"\r\nContent-Disposition: form-data; name=\"{key}\"; filename=\"{filename}\"\r\n\r\n"
+                ret += str(value.read())
+                ret += '\r\n--' + boundary
+
+            elif isinstance(value, list):
+                if any([isinstance(entry, dict) for entry in value]):
+                    for idx, entry in enumerate(value):
+                        ret += expand(key + "." + str(idx), entry)
+                else:
+                    for entry in value:
+                        ret += expand(key, entry)
+
+            elif isinstance(value, dict):
+                for key_, entry in value.items():
+                    ret += expand(((key + ".") if key else "") + key_, entry)
+
+            else:
+                ret += \
+                    "\r\nContent-Type: application/octet-stream" \
+                    "\r\nMIME-Version: 1.0" \
+                    f"\r\nContent-Disposition: form-data; name=\"{key}\"\r\n\r\n"
+                ret += str(value) if value is not None else ""
+                ret += '\r\n--' + boundary
+
+            return ret
+
+        for key, value in params.items():
+            res += expand(key, value)
+
+        res += "--\r\n"
+        return res, boundary
+
+    def __init__(self):
+        self.result = None
+        self.status = None
+
+    def _request(self, url, params):
+        if params:
+            method = "POST"
+
+            contentType = None
+
+            if isinstance(params, dict):
+                multipart, boundary = self.genReqStr(params)
+                contentType = "multipart/form-data; boundary=" + boundary + "; charset=utf-8"
+            elif isinstance(params, bytes):
+                contentType = "application/x-www-form-urlencoded"
+                multipart = params
+            else:
+                multipart = params
+
+            HTTPRequest(method, url, self.onCompletion, self.onError, payload=multipart, content_type=contentType,
+                        asynchronous=False)
+        else:
+            method = "GET"
+            HTTPRequest(method, url, self.onCompletion, self.onError, asynchronous=False)
+        return self
+
+    def onCompletion(self, text):
+        self.result = text
+        self.status = "succeeded"
+
+    def onError(self, text, code):
+        self.status = "failed"
+        self.result = text
+        self.code = code

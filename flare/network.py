@@ -55,7 +55,8 @@ class HTTPRequest(object):
         callbackFailure=None,
         payload=None,
         content_type=None,
-        response_type=None
+        response_type=None,
+        asynchronous=True
     ):
         super(HTTPRequest, self).__init__()
 
@@ -71,11 +72,14 @@ class HTTPRequest(object):
 
         self.req = html5.jseval("new XMLHttpRequest()")
         self.req.onreadystatechange = self.onReadyStateChange
-        self.req.open(method, url, True)
-        if response_type in ["blob", "arraybuffer", "document"]:
-            self.req.responseType = response_type
-        else:
-            self.req.responseType = ""
+        self.req.open(method, url, asynchronous)
+        try:
+            if response_type in ["blob", "arraybuffer", "document"]:
+                self.req.responseType = response_type
+            else:
+                self.req.responseType = ""
+        except:
+            pass
 
     def onReadyStateChange(self, *args, **kwargs):
         """Internal callback."""
