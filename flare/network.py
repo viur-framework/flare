@@ -592,8 +592,10 @@ class requestGroup:
             self.callback(self.allRequestsSuccessful)
 
 
-def getUrlHashAsString():
-    urlHash = html5.window.location.hash
+def getUrlHashAsString(urlHash=None):
+    if not urlHash:
+        urlHash = html5.window.location.hash
+
     if not urlHash:
         return None, None
 
@@ -607,8 +609,8 @@ def getUrlHashAsString():
     return hashStr, paramsStr
 
 
-def getUrlHashAsObject():
-    hashStr, paramsStr = getUrlHashAsString()
+def getUrlHashAsObject(urlHash=None):
+    hashStr, paramsStr = getUrlHashAsString(urlHash)
     if hashStr:
         hash = [x for x in hashStr.split("/") if x]
     else:
@@ -638,7 +640,11 @@ def getUrlHashAsObject():
 
 
 def setUrlHash(hash, param=None):
-    hashStr = "/".join(hash)
+    if not isinstance(hash,str):
+        try:
+            hashStr = "/".join(hash)
+        except:
+            return 0
 
     if not param:
         hash = html5.window.location.hash
