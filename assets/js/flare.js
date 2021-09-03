@@ -26,21 +26,29 @@ class flare {
 
 	async initPyodide(config, indexURL) {
 		let pyodide_config = {
-		    "indexURL": indexURL,
-		    "fullStdLib": false
+			"indexURL": indexURL,
+			"fullStdLib": false
 		};
 
 		// Await loadPyodide, then run flare config
 		globalThis.pyodide = await loadPyodide(pyodide_config);
 
-		let kickoff = (config.kickoff || "");
+		// Install required dependencies first
+		if (config.packages) {
+			await pyodide.loadPackage(config.packages);
+		}
 
 		// Run prelude first
-		await pyodide.runPythonAsync(config.prelude || "");
+		if (config.prelude) {
+			console.info("The flare.prelude-config is DEPRECATED! Use packages for this.");
+			await pyodide.loadPackagesFromImports(config.prelude);
+			await pyodide.runPythonAsync(config.prelude);
+		}
 
 		// Then fetch sources and import modules
 		await this.fetchSources(config.fetch || {})
 
+		let kickoff = (config.kickoff || "");
 		for (let module of Object.keys(config.fetch || {})) {
 			if (config.fetch[module].optional === true) {
 				kickoff = `if _importlib.util.find_spec("${module}") is not None: import ${module}\n` + kickoff;
@@ -48,6 +56,9 @@ class flare {
 				kickoff = `import ${module}\n` + kickoff;
 			}
 		}
+
+		// Try to resolve third-party imports
+		await pyodide.loadPackagesFromImports(kickoff);
 
 		// Then, run kickoff code
 		await pyodide.runPythonAsync(kickoff);

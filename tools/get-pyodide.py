@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
 import os, sys, json, requests
 
-VERSION = "0.18.0"
+VERSION = "v0.18.0"
 CDN = "https://cdn.jsdelivr.net/pyodide"
-URL = "{CDN}/v{VERSION}/full/{file}"
+URL = "{CDN}/{VERSION}/full/{file}"
 DIR = "pyodide"
 FILES = [
     "pyodide.asm.data",
     "pyodide.asm.data.js",
     "pyodide.asm.js",
     "pyodide.asm.wasm",
-    "pyodide.js",
+    "pyodide.js"
 ]
 
 # Allow to install additional Pyodide pre-built packages by command-line arguments
-PACKAGES = ["distlib", "micropip", "packaging", "pyparsing", "setuptools"] + sys.argv[
-    1:
-]
+PACKAGES = ["distlib", "distutils", "micropip", "packaging", "pyparsing", "setuptools"] + sys.argv[1:]
+
 for package in PACKAGES:
     FILES.extend(
         [
