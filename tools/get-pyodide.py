@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os, sys, json, requests
 
-VERSION = "0.17.0"
+VERSION = "0.18.0"
 CDN = "https://cdn.jsdelivr.net/pyodide"
 URL = "{CDN}/v{VERSION}/full/{file}"
 DIR = "pyodide"
@@ -74,10 +74,9 @@ packages = requests.get(
     URL.format(file="packages.json", CDN=CDN, VERSION=VERSION)
 ).json()
 
-for part in ["dependencies", "import_name_to_package_name", "versions"]:
-    for k in list(packages[part].keys()):
-        if k not in PACKAGES:
-            del packages[part][k]
+for k in list(packages["packages"].keys()):
+    if k not in PACKAGES:
+        del packages["packages"][k]
 
 with open(file, "w") as f:
     f.write(json.dumps(packages))
