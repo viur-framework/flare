@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import os, sys, json, requests
 
-VERSION = "v0.18.0"
+VERSION = "dev"
+VERSION = "v0.18.0"  # comment this line out to obtain latest dev version
 CDN = "https://cdn.jsdelivr.net/pyodide"
 URL = "{CDN}/{VERSION}/full/{file}"
 DIR = "pyodide"
@@ -31,7 +32,7 @@ if not os.path.isdir(DIR):
     os.mkdir(DIR)
     print("Done")
 
-print(f"Installing Pyodide v{VERSION}:")
+print(f"Installing Pyodide {VERSION}:")
 
 for file in FILES:
     url = URL.format(file=file, CDN=CDN, VERSION=VERSION)
@@ -47,7 +48,7 @@ for file in FILES:
 
     print("Done")
 
-print(f"Done installing Pyodide v{VERSION}")
+print(f"Done installing Pyodide {VERSION}")
 
 # Patch pyodide.js to only use "/pyodide/"
 file = os.path.join(DIR, "pyodide.js")
