@@ -24,7 +24,7 @@ For better load-time optimization, we started to maintain our own fork of Pyodid
 - [pyodide-html](https://github.com/xhlulu/pyodide-html) is another HTML object library for Pyodide which can be directly installed from within Pyodide.
 
 ## License
-Copyright (C) 2021 by Mausbrand Informationssysteme GmbH.
+Copyright © 2021 by Mausbrand Informationssysteme GmbH.
 
 Mausbrand and ViUR are registered trademarks of Mausbrand Informationssysteme GmbH.
 
