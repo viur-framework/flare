@@ -1,30 +1,30 @@
+# Flare
+![Flare Logo](assets/img/flare-logo.webp)
 [![Documentation Status](https://readthedocs.org/projects/viur-flare/badge/?version=latest)](https://viur-flare.readthedocs.io/en/latest/?badge=latest)
 
-
-# flare
 Flare is an application development framework for writing software frontends in pure Python.
 
 ## About
-*flare* is an app development framework for Python-based web-apps running on top of [Pyodide](https://github.com/iodide-project/pyodide) in the browser.
+Flare is an app development framework for Python-based web-apps running on top of [Pyodide](https://github.com/pyodide/pyodide) in the browser.
 
 It has integrations to concepts with [ViUR](https://www.viur.dev/), an MVC-framework for the Google App Engine platform, but can also be used stand-alone.
 
-Fire up the tiny [Hello World](https://raw.githack.com/mausbrand/flare/master/hello.html) live demo. More information can be found [in the documentation](https://mausbrand.github.io/flare/).
+Fire up the tiny [Hello World](https://raw.githack.com/viur-framework/flare/main/hello.html) live demo. More information can be found [in the documentation](https://readthedocs.org/projects/viur-flare/badge/?version=latest).
 
 ## History
-*flare* is the result of a several years experience in writing web-apps in pure Python. Formerly compiled from Python into JavaScript using PyJS, it now entirely settles up on Pyodide. Additionally, *flare* serves as a toolbox for various projects and solutions developed at [Mausbrand Informationssysteme GmbH](https://www.mausbrand.de/en). 
+Flare is the result of a several years experience in writing web-apps in pure Python. Formerly compiled from Python to JavaScript using [PyJS](https://github.com/pyjs/pyjs), it now entirely settles up on Pyodide. Additionally, Flare serves as a toolbox for various projects and solutions developed at [Mausbrand Informationssysteme GmbH](https://www.mausbrand.de/en), a software-company from Dortmund, Germany.
 
 ## Pyodide
-*flare* is designed to be used with [Pyodide](https://github.com/iodide-project/pyodide).
+Pyodide is the [CPython](https://github.com/python/cpython/) reference implementation that is compiled using [emscripten](https://github.com/emscripten-core/emscripten) and runs natively inside modern browsers as WebAssembly (WASM). Pyodide itself comes with the full Python scientific-stack.
 
-Pyodide is described as "The Python scientific stack, compiled to WebAssembly". Precisely speaking, Pyodide is the Python reference implementation ([cpython](https://github.com/python/cpython/)) that is compiled using [emscripten](https://github.com/emscripten-core/emscripten) and runs natively inside modern browsers as WebAssembly (WASM).
+For better load-time optimization, we started to maintain our own fork of Pyodide called [pyodide-nano](https://github.com/mausbrand/pyodide).
 
-Pyodide combines this WASM-compiled Python interpreter with well-known, natively compiled Python-libraries, mostly used in scientific computing. Pure Python packages can also be integrated using the tool `micropip`, which is served together with Pyodide.
-
-In combination with *flare*, we use Pyodide to quickly build modern web-apps entirely in pure Python. 
+## Related projects
+- [html5](https://github.com/viur-framework/viur-html5) became an integrated part of Flare, but also exists stand-alone as a HTML5-DOM-object library. It is the core component of Flare and provides an HTML-parser for rapid DOM prototyping.
+- [pyodide-html](https://github.com/xhlulu/pyodide-html) is another HTML object library for Pyodide which can be directly installed from within Pyodide.
 
 ## License
-Copyright (C) 2021 by Mausbrand Informationssysteme GmbH.
+Copyright © 2021 by Mausbrand Informationssysteme GmbH.
 
 Mausbrand and ViUR are registered trademarks of Mausbrand Informationssysteme GmbH.
 
