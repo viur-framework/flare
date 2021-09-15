@@ -10,11 +10,8 @@
 				"load",
 				() => {
 					new flare({
-						// Prelude to be executed before fetching local modules
-						// language=Python
-						//prelude: `
-//import setuptools, micropip
-//`,
+                        // Packages to preload. This can also be specified in the kickoff-code as import.
+                        //packages: ["python-dateutil"],
 
 						// Fetch location for locally available Python modules
 						fetch: {
