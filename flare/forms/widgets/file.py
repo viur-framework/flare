@@ -1,4 +1,4 @@
-import json
+import json, pyodide
 from flare.ignite import *
 from flare.icons import Icon
 from flare.i18n import translate
@@ -221,20 +221,18 @@ class Uploader(Progress):
         self.uploadFailed = EventDispatcher("uploadFailed")
         self.responseValue = None
         self.targetKey = None
+        self.module = module
         self.showResultMessage = showResultMessage
         self.context = context
+
+        params = {"fileName": file.name, "mimeType": (file.type or "application/octet-stream")}
+        if node:
+            params["node"] = node
 
         r = NetworkService.request(
             module,
             "getUploadURL",
-            params={
-                "fileName": file.name,
-                "mimeType": file.type,
-                "size": file.size,
-                "node": node,
-            }
-            if node
-            else {},
+            params=params,
             successHandler=self.onUploadUrlAvailable,
             failureHandler=self.onFailed,
             secure=True,
@@ -249,29 +247,26 @@ class Uploader(Progress):
         """Internal callback - the actual upload url (retrieved by calling /file/getUploadURL) is known."""
         params = NetworkService.decode(req)["values"]
 
-        formData = html5.jseval("new FormData();")
+        self.proxy_callback = pyodide.create_proxy(self.onLoad)
 
-        # if self.context:
-        # 	for k, v in self.context.items():
-        # 		formData.append(k, v)
+        if "uploadKey" in params:  # New Resumeable upload format
+            self.targetKey = params["uploadKey"]
+            html5.window.fetch(params["uploadUrl"], **{"method": "POST", "body": req.file, "mode": "no-cors"}).then(
+                self.proxy_callback)
+        else:
+            formData = html5.jseval("new FormData();")
 
-        # if req.node and str(req.node) != "null":
-        # 	formData.append("node", req.node)
+            for key, value in params["params"].items():
+                if key == "key":
+                    self.targetKey = value[:-16]  # Truncate source/file.dat
+                    fileName = req.file.name
+                    value = value.replace("file.dat", fileName)
 
-        for key, value in params["params"].items():
-            if key == "key":
-                self.targetKey = value[:-16]  # Truncate source/file.dat
-                fileName = req.file.name
-                value = value.replace("file.dat", fileName)
+                formData.append(key, value)
+            formData.append("file", req.file)
 
-            formData.append(key, value)
-        formData.append("file", req.file)
-
-        self.xhr = html5.jseval("new XMLHttpRequest()")
-        self.xhr.open("POST", params["url"])
-        self.xhr.onload = self.onLoad
-        self.xhr.upload.onprogress = self.onProgress
-        self.xhr.send(formData)
+            html5.window.fetch(params["url"], **{"method": "POST", "body": formData, "mode": "no-cors"}).then(
+                self.proxy_callback)
 
     def onSkeyAvailable(self, req):
         """Internal callback - the Security-Key is known.
@@ -297,16 +292,16 @@ class Uploader(Progress):
 
     def onLoad(self, *args, **kwargs):
         """Internal callback - The state of our upload changed."""
-        if self.xhr.status in [200, 204]:
-            NetworkService.request(
-                "file",
-                "add",
-                {"key": self.targetKey, "node": self.node, "skelType": "leaf"},
-                successHandler=self.onUploadAdded,
-                secure=True,
-            )
-        else:
-            DeferredCall(self.onFailed, self.xhr.status, _delay=1000)
+        NetworkService.request(
+            self.module, "add", {
+                "key": self.targetKey,
+                "node": self.node,
+                "skelType": "leaf"
+            },
+            successHandler=self.onUploadAdded,
+            failureHandler=self.onFailed,
+            secure=True
+        )
 
     def onUploadAdded(self, req):
         self.responseValue = NetworkService.decode(req)
