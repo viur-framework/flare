@@ -16,11 +16,13 @@ PACKAGES = ["distlib", "distutils", "micropip", "packaging", "pyparsing", "setup
 # Parse command line arguments
 ap = argparse.ArgumentParser(description="Service program to obtain self-hosted, stripped copy of Pyodide from CDN")
 ap.add_argument(
-    "-v", "--pyodide", dest="version", default=VERSION, choices=[VERSION, "dev"], help="Pyodide version to download"
+    "-v", "--pyodide", dest="version", default=VERSION, help="Pyodide version to download"
 )
 ap.add_argument("-p", "--packages", nargs="*", help="Further packages to download")
 ap.add_argument("-t", "--target", type=pathlib.Path, default="pyodide", help="Target folder")
 args = ap.parse_args()
+
+assert any([args.version.startswith(accept) for accept in ["v0.18", "dev"]]), "Invalid version provided"
 
 # Allow to install additional Pyodide pre-built packages by command-line arguments
 packages = PACKAGES + (args.packages or [])
