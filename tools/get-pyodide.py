@@ -2,7 +2,7 @@
 import os, sys, json, requests, argparse, pathlib
 
 # Defaults
-VERSION = "v0.18.0"
+VERSION = "v0.18.1"
 CDN = "https://cdn.jsdelivr.net/pyodide"
 URL = "{CDN}/{VERSION}/full/{file}"
 FILES = [
