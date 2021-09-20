@@ -149,11 +149,13 @@ class viurForm(html5.Form):
 
             try:
                 res[key] = widget.serialize()
-                if res[key] is None:
+                if res[key] is None or res[key] == []:
                     res[key] = ""
 
-            except InvalidBoneValueException:
+            except InvalidBoneValueException as e:
+                print(e)
                 pass
+
         # if validityCheck:
         # 	return None
         return res

@@ -424,7 +424,7 @@ class FileEditDirectWidget(RelationalEditWidget):
         uploader = Uploader(
             file, None, showResultMessage=False, module=self.bone.destModule
         )
-        self.appendChild(uploader)
+        self.uploadResult.appendChild(uploader)
         uploader.uploadSuccess.register(self)
         uploader.uploadFailed.register(self)
 
@@ -551,7 +551,7 @@ class FileMultiEditDirectWidget(html5.Div):
         uploader = Uploader(
             file, None, showResultMessage=False, module=self.bone.destModule
         )
-        self.appendChild(uploader)
+        self.uploadResult.appendChild(uploader)
         uploader.uploadSuccess.register(self)
         uploader.uploadFailed.register(self)
 
