@@ -17,8 +17,12 @@ class SelectMultipleEditWidget(BaseEditWidget):
     )
 
     def createWidget(self):
+        self["style"]["margin-top"] = "0px"
+        tpl = html5.Template()
         for key, value in self.bone.boneStructure["values"]:
-            self.appendChild(self.entryTemplate, key=key, value=value)
+            tpl.appendChild(self.entryTemplate, key=key, value=value, bindTo=self)
+
+        return tpl
 
     def updateWidget(self):
         if self.bone.readonly:
