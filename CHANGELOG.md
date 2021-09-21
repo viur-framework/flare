@@ -2,6 +2,15 @@
 
 This file documents any relevant changes.
 
+## [1.0.5] - 2021-09-21
+- Feat: added Icon Caching
+- Feat: added SyncHandler
+- Feat: hash getter und setter can now accept parameters
+- Feat: direct FileUpload is now possible, use `"widget":"direct"` as parameter
+- Feat: Update get-pyodide.py with configurable Version
+- Fix: File and Folder names are displayed again
+- Fix: Multiple SelectBones can be set to ReadOnly again
+
 ## [1.0.4] - 2021-09-20
 - Feat: Update get-pyodide.py command-line parameters and version string check
 
