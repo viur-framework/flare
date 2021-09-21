@@ -607,7 +607,6 @@ class FileMultiEditDirectWidget(html5.Div):
 
 
     def addEntry(self, value=None):
-        print(value)
         entry = self.widgetFactory(self.bone, **self.kwargs)
         if self.entryFactory:
             entry = self.entryFactory(entry)
