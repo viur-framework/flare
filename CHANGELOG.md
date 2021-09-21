@@ -2,6 +2,9 @@
 
 This file documents any relevant changes.
 
+## [1.0.4] - 2021-09-20
+- Feat: Update get-pyodide.py command-line parameters and version string check
+
 ## [1.0.3] - 2021-08-20
 - Fix: updated relational style
 
