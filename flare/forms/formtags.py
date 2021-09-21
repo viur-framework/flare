@@ -39,8 +39,10 @@ class viurForm(html5.Form):
         self["method"] = "POST"
         self["action"] = f"{self.moduleName}/{self.actionName}"
 
-        if structure:
+        if isinstance(structure, list):
             self.structure = {k: v for k, v in structure}
+        else:
+            self.structure = structure
 
         self.formSuccessEvent = EventDispatcher("formSuccess")
         self.formSuccessEvent.register(self)
