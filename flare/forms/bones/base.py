@@ -377,7 +377,7 @@ class BaseBone(object):
     """Base "Catch-All" delegate for everything not handled separately."""
 
     def __init__(
-        self, moduleName, boneName, skelStructure, errors=None, errorQueue=None
+        self, moduleName, boneName, skelStructure, errors=None, errorQueue=None, *args, **kwargs
     ):
         super().__init__()
 
@@ -484,7 +484,7 @@ class BaseBone(object):
             return False
         return ToolTipError(longText=", ".join(self.boneErrors))
 
-    def boneWidget(self, label=True, tooltip=True):
+    def boneWidget(self, label=True, tooltip=True,*args,**kwargs):
         boneId = "%s___%s" % (self.boneName, str(time.time()).replace(".", "_"))
         boneFactory = boneSelector.select(
             self.moduleName, self.boneName, self.skelStructure
@@ -494,6 +494,7 @@ class BaseBone(object):
             self.skelStructure,
             self.errors,
             errorQueue=self.errorQueue,
+            *args, ** kwargs
         )
 
         widget = boneFactory.editWidget(errorInformation=self.errors)

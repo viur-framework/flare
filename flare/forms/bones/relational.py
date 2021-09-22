@@ -156,7 +156,7 @@ class RelationalEditWidget(BaseEditWidget):
 
             selector = selector(self.bone.destModule, **self.bone.destInfo)
 
-            conf["selectors"][self.bone.destModule] = selector
+            #conf["selectors"][self.bone.destModule] = selector
 
         # Set a context if configured so
         context = self.bone.boneStructure["params"].get("context")
@@ -274,6 +274,10 @@ class RelationalBone(BaseBone):
         self.formatString = self.boneStructure["format"]
         self.destModule = self.boneStructure["module"]
         self.destInfo = conf["modules"].get(self.destModule, {"handler": "list"})
+
+        if "filter" in kwargs and kwargs["filter"]:
+            self.destInfo.update({"filter":kwargs["filter"]})
+
         self.destStructure = self.boneStructure["relskel"]
         self.dataStructure = self.boneStructure["using"]
 
@@ -458,7 +462,7 @@ class FileEditDirectWidget(RelationalEditWidget):
         self.previewImg.setFile(entry)
         self.updateString()
         self.updateWidget()
-        self.removeChild(uploader)
+        #self.removeChild(uploader)
         self.uploadResult.hide()
         self.filerow.show()
         # self.uploadResult.element.innerHTML = "Upload erfolgreich"

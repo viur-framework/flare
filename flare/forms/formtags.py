@@ -184,8 +184,8 @@ class viurForm(html5.Form):
 
     def handleErrors(self):
         for error in self.errors:
-            if error["fieldPath"] in self.bones:
-                boneField = self.bones[error["fieldPath"]]  # todo dependency errors
+            if error["fieldPath"][0] in self.bones:
+                boneField = self.bones[error["fieldPath"][0]]  # todo dependency errors
                 if (error["severity"] % 2 == 0 and boneField["required"]) or (
                     error["severity"] % 2 == 1
                 ):  # invalid
@@ -226,8 +226,8 @@ class viurForm(html5.Form):
 
         self.errorhint.removeAllChildren()
         for error in self.errors:
-            if error["fieldPath"] in self.bones:
-                boneField = self.bones[error["fieldPath"]]  # todo dependency errors
+            if error["fieldPath"][0] in self.bones:
+                boneField = self.bones[error["fieldPath"][0]]  # todo dependency errors
                 if error["severity"] == 1 or error["severity"] == 3:  # invalid
                     # language=HTML
                     self.errorhint.appendChild(
@@ -247,7 +247,7 @@ class viurForm(html5.Form):
 
 @html5.tag("flare-form-field")
 class boneField(html5.Div):
-    def __init__(self, boneName=None, form=None, defaultvalue=None, hidden=False):
+    def __init__(self, boneName=None, form=None, defaultvalue=None, hidden=False, filter=None):
         logging.debug("boneField: %r, %r, %r", boneName, form, defaultvalue)
         super().__init__()
         self.boneName = boneName
@@ -256,6 +256,7 @@ class boneField(html5.Div):
         self.hidden = hidden
         self.placeholder = False
         self.defaultvalue = defaultvalue
+        self.filter = filter
 
         self.formloaded = False
 
@@ -301,7 +302,9 @@ class boneField(html5.Div):
                     descrLbl,
                     self.bonewidget,
                     hasError,
-                ) = boneFactory.boneWidget(self.label)
+                ) = boneFactory.boneWidget(self.label,filter=self.filter)
+
+                self.bonelabel = descrLbl
 
             except Exception as e:
                 logging.exception(e)
@@ -364,6 +367,7 @@ class boneField(html5.Div):
         self.defaultvalue = val
 
     def labelTemplate(self):
+        return False
         """Default label."""
         # language=HTML
         return """<label [name]="bonelabel" class="input-group-item--first label flr-label flr-label--{{type}} flr-label--{{boneName}}">{{descr}}</label>"""
