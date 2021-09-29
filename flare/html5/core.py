@@ -163,6 +163,9 @@ class TextNode(object):
     def children(self):
         return []
 
+    def _collectElements(self):
+        return [self.element]
+
 
 # _WidgetClassWrapper -------------------------------------------------------------------------------------------------
 
@@ -306,12 +309,10 @@ class Widget(object):
 
     style = []  # CSS-classes to directly assign to this Widget at construction.
     listeners = {} # a Map of active eventListener {id:[event,proxy,pyfunc,created]}
-    def __init__(self, *args, appendTo=None, style=None, **kwargs):
-        if "_wrapElem" in kwargs.keys():
-            self.element = kwargs["_wrapElem"]
-            del kwargs["_wrapElem"]
-        else:
-            assert self._tagName is not None
+
+    def __init__(self, *args, appendTo=None, style=None, _element=None, **kwargs):
+        self.element = _element
+        if not self.element and self._tagName:
             self.element = domCreateElement(self._tagName, ns=self._namespace)
 
         self._widgetClassWrapper = None
@@ -782,10 +783,10 @@ class Widget(object):
             proxy_obj[1].destroy()
             proxy_obj[3] = False  # disabled
 
-    def __collectChildren(self, *args, **kwargs):
+    def __collectWidgets(self, *args, **kwargs):
         """Internal function for collecting children from args.
 
-        This is used by appendChild(), prependChild(), insertChild() etc.
+        This is used by appendChild(), prependChild(), insertBefore(), insertBehind() etc.
         """
         if kwargs.get("bindTo") is None:
             kwargs["bindTo"] = self
@@ -797,7 +798,7 @@ class Widget(object):
 
             elif isinstance(arg, (list, tuple)):
                 for subarg in arg:
-                    widgets.extend(self.__collectChildren(subarg, **kwargs))
+                    widgets.extend(self.__collectWidgets(subarg, **kwargs))
 
             elif not isinstance(arg, (Widget, TextNode)):
                 widgets.append(TextNode(str(arg)))
@@ -807,19 +808,46 @@ class Widget(object):
 
         return widgets
 
+    def _collectElements(self):
+        """Internal function for collecting all elements from this widget.
+        It is used by element-less Widgets.
+        """
+        if self.element:
+            return [self.element]
+
+        ret = []
+
+        for child in self._children:
+            ret.extend(child._collectElements())
+
+        return ret
+
     def insertBefore(self, insert, child, **kwargs):
         if not child:
             return self.appendChild(insert)
 
         assert child in self._children, "{} is not a child of {}".format(child, self)
 
-        toInsert = self.__collectChildren(insert, **kwargs)
+        toInsert = self.__collectWidgets(insert, **kwargs)
 
         for insert in toInsert:
-            if insert._parent:
+            if insert._parent and insert._parent.element:
                 insert._parent.removeChild(insert)
 
-            self.element.insertBefore(insert.element, child.element)
+            if self.element:
+                # Find the first element of the child elements.
+                childElement = child._collectElements()
+                if childElement:
+                    childElement = childElement[0]
+
+                # Insert all child elements before the first element,
+                # otherwise append all just to this element.
+                for element in insert._collectElements():
+                    if childElement:
+                        self.element.insertBefore(element, childElement)
+                    else:
+                        self.element.appendChild(element)
+
             self._children.insert(self._children.index(child), insert)
 
             insert._parent = self
@@ -834,13 +862,26 @@ class Widget(object):
 
         assert child in self._children, "{} is not a child of {}".format(child, self)
 
-        toInsert = self.__collectChildren(insert, **kwargs)
+        toInsert = self.__collectWidgets(insert, **kwargs)
 
         for insert in toInsert:
-            if insert._parent:
+            if insert._parent and insert._parent.element:
                 insert._parent.removeChild(insert)
 
-            self.element.insertBefore(insert.element, child.element.nextSibling)
+            if self.element:
+                # Find the sibling of the last element of the child elements.
+                childElement = child._collectElements()
+                if childElement:
+                    childElement = childElement[-1].nextSibling
+
+                # Insert all child elements behind the last child element
+                # otherwise append all just to this element.
+                for element in insert._collectElements():
+                    if childElement:
+                        self.element.insertBefore(element, childElement)
+                    else:
+                        self.element.appendChild(element)
+
             self._children.insert(self._children.index(child), insert)
 
             insert._parent = self
@@ -854,10 +895,10 @@ class Widget(object):
             self.removeAllChildren()
             del kwargs["replace"]
 
-        toPrepend = self.__collectChildren(*args, **kwargs)
+        toPrepend = self.__collectWidgets(*args, **kwargs)
 
         for child in toPrepend:
-            if child._parent:
+            if child._parent and child._parent.element:
                 child._parent._children.remove(child)
                 child._parent = None
 
@@ -876,18 +917,20 @@ class Widget(object):
             self.removeAllChildren()
             del kwargs["replace"]
 
-        toAppend = self.__collectChildren(*args, **kwargs)
+        toAppend = self.__collectWidgets(*args, **kwargs)
 
         for child in toAppend:
-            if isinstance(child, Template):
-                return self.appendChild(child._children)
-
-            if child._parent:
+            #print(self, self.element, "=>", child, child.element)
+            if child._parent and child._parent.element:
                 child._parent._children.remove(child)
+                child._parent = None
 
             self._children.append(child)
-            self.element.appendChild(child.element)
             child._parent = self
+
+            if self.element:
+                for element in child._collectElements():
+                    self.element.appendChild(element)
 
             if self._isAttached:
                 child.onAttach()
@@ -904,9 +947,14 @@ class Widget(object):
         if child._isAttached:
             child.onDetach()
 
-        self.element.removeChild(child.element)
+        if self.element:
+            for element in child._collectElements():
+                self.element.removeChild(element)
+
         self._children.remove(child)
-        child._parent = None
+
+        if child._parent and child._parent.element:
+            child._parent = None
 
     def removeAllChildren(self):
         """Removes all child widgets of the current widget."""
@@ -1650,7 +1698,7 @@ class Blockquote(Widget):
 
 class BodyCls(Widget):
     def __init__(self, *args, **kwargs):
-        super().__init__(_wrapElem=domGetElementsByTagName("body")[0], *args, **kwargs)
+        super().__init__(_element=domGetElementsByTagName("body")[0], *args, **kwargs)
         self._isAttached = True
 
 
@@ -2106,7 +2154,7 @@ class Textarea(
 
 class HeadCls(Widget):
     def __init__(self, *args, **kwargs):
-        super().__init__(_wrapElem=domGetElementsByTagName("head")[0], *args, **kwargs)
+        super().__init__(_element=domGetElementsByTagName("head")[0], *args, **kwargs)
         self._isAttached = True
 
 
@@ -2641,7 +2689,7 @@ class Video(Widget, _attrSrc, _attrDimensions, _attrMultimedia):
 
 
 class Template(Widget):
-    _tagName = "template"
+    pass
 
 
 ########################################################################################################################

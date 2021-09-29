@@ -11,7 +11,7 @@ class flare {
 		let indexURL = "/pyodide/"
 		fetch(indexURL + "pyodide.js").then((res) => {
 			if (res.ok) {
-				console.debug(`Using local Pyodide...`);
+				console.debug(`Using self-hosted Pyodide...`);
 			} else {
 				indexURL = "https://cdn.jsdelivr.net/pyodide/v0.18.1/full/";
 				console.debug(`Using Pyodide fallback from ${indexURL}...`);
