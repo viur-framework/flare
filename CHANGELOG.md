@@ -2,6 +2,11 @@
 
 This file documents any relevant changes.
 
+## [1.0.6] - 2021-09-29
+- Feat: listhandler now can emit finished status and locks running requests
+- Feat: Forms - allow dict as BoneStructure
+- Feat: Forms - relationalBone listhandler can now be filtered if the tag is used
+
 ## [1.0.5] - 2021-09-21
 - Feat: added Icon Caching
 - Feat: added SyncHandler
