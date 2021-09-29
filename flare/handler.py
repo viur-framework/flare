@@ -21,7 +21,9 @@ class requestHandler:
         self.state.updateState("listStatus", "init")
 
     def requestData(self, *args, **kwargs):
-        print(f'{self.module} request')
+        if self.state.getState("listStatus") not in ["init","finished"]:
+            return 0
+
         self.state.updateState("listStatus", "loading")
         NetworkService.request(
             self.module,
@@ -41,6 +43,8 @@ class requestHandler:
             resp["values"] = self.buildSelectDescr(resp["values"], resp["structure"])
 
         getattr(self, self.eventName).fire(self.resp)
+        self.state.updateState("listStatus", "finished")
+
 
     def _requestFailed(self, req, *args, **kwargs):
         self.state.updateState("listStatus", "failed")
@@ -49,6 +53,7 @@ class requestHandler:
         # resp = NetworkService.decode(req)
         # print(resp)
         self.requestFailed.fire(req)
+        self.state.updateState("listStatus", "finished")
 
     def onListStatusChanged(self, event, *args, **kwargs):
         pass
@@ -126,7 +131,7 @@ class ListHandler(requestHandler):
             self.requestData()
 
     def requestSuccess(self, req):
-
+        self.state.updateState("listStatus", "success")
         resp = NetworkService.decode(req)
         self.resp = resp
 
@@ -141,8 +146,9 @@ class ListHandler(requestHandler):
         for skel in resp["skellist"]:
             skel = self.buildSelectDescr(skel, self.structure)
             self.skellist.append(skel)
-        self.state.updateState("listStatus", "success")
+
         getattr(self, self.eventName).fire(self.skellist)
+        self.state.updateState("listStatus", "finished")
 
 class SyncHandler(object):
     @staticmethod
