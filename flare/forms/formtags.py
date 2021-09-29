@@ -84,7 +84,7 @@ class viurForm(html5.Form):
                 continue
 
             bonefield = boneField(key, self)
-            bonefield.onAttach()  # we need a better solution
+
             self.appendChild(bonefield)
 
     def registerField(self, key, widget):
@@ -258,7 +258,6 @@ class boneField(html5.Div):
         self.formloaded = False
 
     def onAttach(self):
-
         if not self.formloaded:
             if "boneName" not in dir(self):
                 logging.debug("Please add boneName attribute to {}", self)
@@ -307,6 +306,9 @@ class boneField(html5.Div):
                 self.appendChild(self.bonewidget)
                 return 0
 
+            self.appendChild(containerDiv)
+            containerDiv.onAttach() #fixme
+
             if self.boneName in self.form.hide or self.hidden:
                 self._setHidden(True)
             else:
@@ -315,7 +317,7 @@ class boneField(html5.Div):
             self.form.registerField(self.boneName, self)
 
             self.sinkEvent("onChange")
-            self.appendChild(containerDiv)
+
 
             if self.defaultvalue:
                 self.skel[
