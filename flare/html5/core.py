@@ -822,6 +822,16 @@ class Widget(object):
 
         return ret
 
+    def _getParentElement(self):
+        """
+        Return the next existing parent element.
+        """
+        parent = self
+        while parent and not parent.element:
+            parent = parent._parent
+
+        return parent.element if parent else None
+
     def insertBefore(self, insert, child, **kwargs):
         if not child:
             return self.appendChild(insert)
@@ -919,6 +929,8 @@ class Widget(object):
 
         toAppend = self.__collectWidgets(*args, **kwargs)
 
+        lastElement = None  # hold to safe the last already attached element
+
         for child in toAppend:
             #print(self, self.element, "=>", child, child.element)
             if child._parent and child._parent.element:
@@ -928,9 +940,15 @@ class Widget(object):
             self._children.append(child)
             child._parent = self
 
-            if self.element:
+            if parentElement := self._getParentElement():
                 for element in child._collectElements():
-                    self.element.appendChild(element)
+                    if not element.parentElement:
+                        if lastElement:
+                            lastElement.after(element)
+                        else:
+                            parentElement.appendChild(element)
+
+                    lastElement = element
 
             if self._isAttached:
                 child.onAttach()
