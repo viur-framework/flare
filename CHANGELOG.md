@@ -2,6 +2,9 @@
 
 This file documents any relevant changes.
 
+## [1.0.7] - 2021-09-30
+- Fix: interalEdit Forms no longer lose data 
+
 ## [1.0.6] - 2021-09-29
 - Feat: listhandler now can emit finished status and locks running requests
 - Feat: Forms - allow dict as BoneStructure
