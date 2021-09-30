@@ -9,7 +9,7 @@ from flare.forms.widgets.relational import InternalEdit
 from flare.forms.widgets.tree import TreeLeafWidget, TreeNodeWidget
 from flare.forms.widgets.list import ListWidget
 from flare.config import conf
-from flare.forms import boneSelector, formatString, displayString, moduleWidgetSelector
+from flare.forms import boneSelector, formatString, displayStringHandler, moduleWidgetSelector
 from .base import BaseBone, BaseEditWidget, BaseMultiEditWidget, BaseMultiEditWidgetEntry
 
 
@@ -92,7 +92,7 @@ class RelationalEditWidget(BaseEditWidget):
             return
 
         if display := self.bone.boneStructure["params"].get("display"):
-            displayWidgets = displayString(
+            displayWidgets = displayStringHandler(
                 display,
                 self.value,
                 self.bone.boneStructure,
@@ -105,7 +105,7 @@ class RelationalEditWidget(BaseEditWidget):
         else:
             fmtstr = formatString(
                     self.bone.formatString,
-                    {"value": self.value}
+                    self.value
                 )
 
             if isinstance(self.destWidget,html5.Input):
@@ -195,7 +195,7 @@ class RelationalViewWidget(html5.Div):
 
         if self.value:
             if display := self.bone.boneStructure["params"].get("display"):
-                displayWidgets = displayString(
+                displayWidgets = displayStringHandler(
                     display,
                     value,
                     self.bone.boneStructure,
@@ -207,7 +207,7 @@ class RelationalViewWidget(html5.Div):
                 self.replaceChild(
                     formatString(
                         self.bone.formatString,
-                        {"value": self.value}
+                        self.value
                     ) or conf["emptyValue"]
                 )
 

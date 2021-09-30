@@ -303,7 +303,7 @@ class TreeItemWidget(html5.Li):
 
         # In case there is no bone configured for visualization, use a format-string
         if not hasDescr:
-            format = "name"  # default fallback
+            format = "$(name)"  # default fallback
 
             if self.module in conf["modules"].keys():
                 moduleInfo = conf["modules"][self.module]
