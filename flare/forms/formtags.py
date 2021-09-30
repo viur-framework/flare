@@ -4,6 +4,7 @@ from flare.forms import boneSelector, InvalidBoneValueException
 from flare.network import NetworkService
 from flare.button import Button
 from flare.event import EventDispatcher
+from flare.observable import StateHandler
 
 
 @html5.tag("flare-form")
@@ -46,6 +47,10 @@ class viurForm(html5.Form):
 
         self.formSuccessEvent = EventDispatcher("formSuccess")
         self.formSuccessEvent.register(self)
+
+        self.state = StateHandler( ["submitStatus"] )
+        self.state.register("submitStatus",self)
+
 
         self.addClass("form")
         self.sinkEvent("onChange")
@@ -125,6 +130,7 @@ class viurForm(html5.Form):
                 boneField.show()
 
     def submitForm(self):
+        self.state.updateState("submitStatus","sending")
         res = self.collectCurrentFormValues()
 
         NetworkService.request(
@@ -181,6 +187,8 @@ class viurForm(html5.Form):
             # form rejected
             self.errors = resp["errors"]
             self.handleErrors()
+
+        self.state.updateState("submitStatus", "finished")
 
     def handleErrors(self):
         for error in self.errors:
@@ -249,9 +257,16 @@ class viurForm(html5.Form):
 
     def actionFailed(self, req, *args, **kwargs):
         logging.debug("FAILED: %r", req)
+        self.state.updateState("submitStatus", "failed")
 
     def onFormSuccess(self, event):
         self.createFormSuccessMessage()
+
+    def onSubmitStatusChanged(self,value,*args,**kwargs):
+        if value=="sending":
+            self.addClass("is-loading")
+        else:
+            self.removeClass("is-loading")
 
 
 @html5.tag("flare-form-field")
@@ -417,8 +432,14 @@ class sendForm(Button):
             )
             self.element.innerHTML = "ERROR"
             self.disable()
-
+        self.form.state.register("submitStatus", self)
         self.callback = self.sendViurForm
 
     def sendViurForm(self, widget):
         self.form.submitForm()
+
+    def onSubmitStatusChanged(self, value, *args, **kwargs):
+        if value == "sending":
+            self.addClass("is-loading")
+        else:
+            self.removeClass("is-loading")
