@@ -4,6 +4,7 @@ from flare.forms import boneSelector, InvalidBoneValueException
 from flare.network import NetworkService
 from flare.button import Button
 from flare.event import EventDispatcher
+from flare.observable import StateHandler
 
 
 @html5.tag("flare-form")
@@ -46,6 +47,10 @@ class viurForm(html5.Form):
 
         self.formSuccessEvent = EventDispatcher("formSuccess")
         self.formSuccessEvent.register(self)
+
+        self.state = StateHandler( ["submitStatus"] )
+        self.state.register("submitStatus",self)
+
 
         self.addClass("form")
         self.sinkEvent("onChange")
@@ -126,6 +131,7 @@ class viurForm(html5.Form):
                 boneField.show()
 
     def submitForm(self):
+        self.state.updateState("submitStatus","sending")
         res = self.collectCurrentFormValues()
 
         NetworkService.request(
@@ -183,11 +189,15 @@ class viurForm(html5.Form):
             self.errors = resp["errors"]
             self.handleErrors()
 
+        self.state.updateState("submitStatus", "finished")
+
     def handleErrors(self):
         for error in self.errors:
             if error["fieldPath"][0] in self.bones:
-                boneField = self.bones[error["fieldPath"][0]]  # todo dependency errors
-                if (error["severity"] % 2 == 0 and boneField["required"]) or (
+                boneName = error["fieldPath"][0]
+                boneField = self.bones[boneName]  # todo dependency errors
+                boneStructure = boneField.structure[boneField.boneName]
+                if (error["severity"] % 2 == 0 and boneStructure["required"]) or (
                     error["severity"] % 2 == 1
                 ):  # invalid
 
@@ -221,29 +231,43 @@ class viurForm(html5.Form):
             # language=HTML
             self.prependChild(
                 """
-				<div [name]="errorhint" class="msg is-active msg--error "></div>
+				<div [name]="errorhint" class="msg is-active msg--error " style="flex-direction: column;"></div>
 			"""
             )
 
         self.errorhint.removeAllChildren()
         for error in self.errors:
             if error["fieldPath"][0] in self.bones:
-                boneField = self.bones[error["fieldPath"][0]]  # todo dependency errors
-                if error["severity"] == 1 or error["severity"] == 3:  # invalid
+                boneName = error["fieldPath"][0]
+                boneField = self.bones[boneName]  # todo dependency errors
+                boneStructure = boneField.structure[boneField.boneName]
+                if (error["severity"] % 2 == 0 and boneStructure["required"]) or (
+                        error["severity"] % 2 == 1
+                ):  # invalid
+
                     # language=HTML
                     self.errorhint.appendChild(
                         """<span class="flr-bone--error">{{boneDescr}}: {{error}} </span>""",
-                        boneDescr=boneField.structure[boneField.boneName].get(
+                        boneDescr=boneStructure.get(
                             "descr", boneField.boneName
                         ),
                         error=error["errorMessage"],
                     )
 
+        self.errorhint.element.scrollIntoView()
+
     def actionFailed(self, req, *args, **kwargs):
         logging.debug("FAILED: %r", req)
+        self.state.updateState("submitStatus", "failed")
 
     def onFormSuccess(self, event):
         self.createFormSuccessMessage()
+
+    def onSubmitStatusChanged(self,value,*args,**kwargs):
+        if value=="sending":
+            self.addClass("is-loading")
+        else:
+            self.removeClass("is-loading")
 
 
 @html5.tag("flare-form-field")
@@ -409,8 +433,14 @@ class sendForm(Button):
             )
             self.element.innerHTML = "ERROR"
             self.disable()
-
+        self.form.state.register("submitStatus", self)
         self.callback = self.sendViurForm
 
     def sendViurForm(self, widget):
         self.form.submitForm()
+
+    def onSubmitStatusChanged(self, value, *args, **kwargs):
+        if value == "sending":
+            self.addClass("is-loading")
+        else:
+            self.removeClass("is-loading")
