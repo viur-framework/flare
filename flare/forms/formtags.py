@@ -86,6 +86,7 @@ class viurForm(html5.Form):
                 continue
 
             bonefield = boneField(key, self)
+            bonefield.onAttach() #needed for value loading!
 
             self.appendChild(bonefield)
 
