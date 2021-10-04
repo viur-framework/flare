@@ -73,6 +73,10 @@ sys.stdout.write(f"Creating {args.target}/...")
 sys.stdout.flush()
 
 os.mkdir(args.target)
+
+# Write version info
+open(os.path.join(args.target, f"""{args.version}"""), "a").close()
+
 print("Done")
 
 print(f"Installing Pyodide {args.version}:")
@@ -81,7 +85,6 @@ if is_nano:
     # Pyodide Nano is just downloaded from a ZIP-File
     version = args.version.removeprefix("v").removesuffix("-nano")
     url = f"""https://github.com/phorward/pyodide/releases/download/{version}-nano/pyodide-nano-{version}.zip"""
-
 
     # Download ZIP-file into memory
     sys.stdout.write(f">>> {url}...")
