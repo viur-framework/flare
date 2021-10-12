@@ -19,7 +19,7 @@ class View:
             self.name = name
         else:
             self.name = self.__class__.__name__.lower()
-
+        self.dictOfWidgets = dictOfWidgets.copy()
         self.widgets = dictOfWidgets
         self.loaded = {key: False for key in self.widgets.keys()}
 
