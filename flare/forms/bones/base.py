@@ -300,7 +300,7 @@ class BaseLanguageEditWidget(html5.Div):
         super().__init__(
             """
 			<div [name]="widgets" class="flr-bone-widgets"></div>
-			<div [name]="actions" class="flr-bone-actions input-group vi-bone-language-actions"></div>
+			<div [name]="actions" class="flr-bone-actions input-group flr-bone-language-actions"></div>
 		"""
         )
 
