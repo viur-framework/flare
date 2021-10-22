@@ -2796,6 +2796,8 @@ def isControl(event):  # The Control (Ctrl) key.
 def isShift(event):
     return getKey(event) == "Shift"
 
+def isMeta(event):
+    return getKey(event) == "Meta"
 
 ########################################################################################################################
 # HTML parser
