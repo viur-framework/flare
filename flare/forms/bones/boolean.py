@@ -21,7 +21,7 @@ class BooleanEditWidget(BaseEditWidget):
         self.widget["checked"] = bool(value)
 
     def serialize(self):
-        return "yes" if self.widget["checked"] else "no"
+        return self.widget["checked"]
 
 
 class BooleanViewWidget(BaseViewWidget):
