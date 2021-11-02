@@ -1,13 +1,7 @@
-import logging
-
-from js import console
-
 from flare import html5
-from flare.icons import SvgIcon
 from flare.forms.widgets.file import FilePreviewImage, Uploader
-from flare.forms.widgets.relational import InternalEdit
+from flare.forms.widgets.edit import EditWidget
 from flare.forms.widgets.tree import TreeLeafWidget, TreeNodeWidget
-from flare.forms.widgets.list import ListWidget
 from flare.config import conf
 from flare.forms import boneSelector, formatString, displayStringHandler, moduleWidgetSelector
 from .base import BaseBone, BaseEditWidget, BaseMultiEditWidget, BaseMultiEditWidgetEntry
@@ -68,26 +62,22 @@ class RelationalEditWidget(BaseEditWidget):
 
         # Relation edit widget
         if self.bone.dataStructure:
-            self.dataWidget = InternalEdit(
+            self.editWidget = EditWidget(
                 self.bone.dataStructure,
-                readOnly=self.bone.readonly,
-                errorInformation=kwargs.get("errorInformation"),
-                defaultCat=None,  # fixme: IMHO not necessary
-                errorQueue=self.bone.errorQueue,
-                prefix="{}.rel".format(self.bone.boneName),
+                errors=kwargs.get("errorInformation")
             )
             self.addClass("flr-bone--relational-using")
-            self.appendChild(self.dataWidget)
+            self.appendChild(self.editWidget)
         else:
-            self.dataWidget = None
+            self.editWidget = None
 
         # Current data state
         self.destKey = None
 
     def updateString(self):
         if not self.value:
-            if self.dataWidget:
-                self.dataWidget.disable()
+            if self.editWidget:
+                self.editWidget.disable()
 
             return
 
@@ -117,8 +107,8 @@ class RelationalEditWidget(BaseEditWidget):
 
 
     def onChange(self, event):
-        if self.dataWidget:
-            self.value["rel"] = self.dataWidget.doSave()
+        if self.editWidget:
+            self.value["rel"] = self.editWidget.serialize()
             self.updateString()
 
     def unserialize(self, value=None):
@@ -128,20 +118,17 @@ class RelationalEditWidget(BaseEditWidget):
         else:
             self.destKey = value["dest"]["key"]
 
-        if self.dataWidget:
-            self.dataWidget.unserialize((value["rel"] or {}) if value else {})
-            self.dataWidget.enable()
+        if self.editWidget:
+            self.editWidget.unserialize((value["rel"] or {}) if value else {})
+            self.editWidget.enable()
 
         self.value = value
         self.updateString()
 
     def serialize(self):
-        # fixme: Maybe we need a serializeForDocument also?
-        if self.destKey and self.dataWidget:
-            res = {"key": self.destKey}
-            res.update(
-                self.dataWidget.serializeForPost()
-            )  # fixme: call serializeForPost()?
+        if self.destKey and self.editWidget:
+            res = self.editWidget.serialize()
+            res["key"] = self.destKey
             return res
 
         return self.destKey or None
@@ -168,9 +155,8 @@ class RelationalEditWidget(BaseEditWidget):
             lambda selector, selection: self.unserialize(
                 {
                     "dest": selection[0],
-                    "rel": _getDefaultValues(self.bone.dataStructure)
-                    if self.bone.dataStructure
-                    else None,
+                    "rel": _getDefaultValues(self.bone.dataStructure) \
+                                if self.bone.dataStructure else None
                 }
             ),
             multi=self.bone.multiple,
@@ -433,17 +419,14 @@ class FileEditDirectWidget(RelationalEditWidget):
         uploader.uploadFailed.register(self)
 
     def onDragEnter(self, event):
-        console.log("onDragEnter", event)
         event.stopPropagation()
         event.preventDefault()
 
     def onDragOver(self, event):
-        console.log("onDragEnter", event)
         event.stopPropagation()
         event.preventDefault()
 
     def onDragLeave(self, event):
-        console.log("onDragLeave", event)
         event.stopPropagation()
         event.preventDefault()
 
@@ -560,17 +543,14 @@ class FileMultiEditDirectWidget(html5.Div):
         uploader.uploadFailed.register(self)
 
     def onDragEnter(self, event):
-        console.log("onDragEnter", event)
         event.stopPropagation()
         event.preventDefault()
 
     def onDragOver(self, event):
-        console.log("onDragEnter", event)
         event.stopPropagation()
         event.preventDefault()
 
     def onDragLeave(self, event):
-        console.log("onDragLeave", event)
         event.stopPropagation()
         event.preventDefault()
 

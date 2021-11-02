@@ -1,7 +1,6 @@
-from flare import html5
 from flare.forms import boneSelector, formatString, displayStringHandler
 from flare.config import conf
-from flare.forms.widgets.relational import InternalEdit
+from flare.forms.widgets.edit import EditWidget
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
 
@@ -9,13 +8,9 @@ class RecordEditWidget(BaseEditWidget):
     style = ["flr-value", "flr-value--record"]
 
     def createWidget(self):
-        return InternalEdit(
+        return EditWidget(
             self.bone.boneStructure["using"],
-            errorInformation=self.bone.errors,
-            readOnly=self.bone.readonly,
-            defaultCat=None,  # fixme: IMHO not necessary
-            errorQueue=self.bone.errorQueue,
-            prefix="{}.rel".format(self.bone.boneName),
+            errors=self.bone.errors,
         )
 
     def updateWidget(self):
@@ -28,7 +23,7 @@ class RecordEditWidget(BaseEditWidget):
         self.widget.unserialize(value or {})
 
     def serialize(self):
-        return self.widget.serializeForPost()  # fixme: call serializeForPost()?
+        return self.widget.serialize()
 
 
 class RecordViewWidget(BaseViewWidget):
@@ -68,9 +63,8 @@ class RecordBone(BaseBone):
 
     @staticmethod
     def checkFor(moduleName, boneName, skelStructure, *args, **kwargs):
-        return skelStructure[boneName]["type"] == "record" or skelStructure[boneName][
-            "type"
-        ].startswith("record.")
+        return skelStructure[boneName]["type"] == "record" \
+                or skelStructure[boneName]["type"].startswith("record.")
 
 
 boneSelector.insert(1, RecordBone.checkFor, RecordBone)

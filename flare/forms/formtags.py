@@ -21,6 +21,7 @@ class viurForm(html5.Form):
         visible=(),
         ignore=(),
         hide=(),
+        errors=None,
         defaultValues=(),
         *args,
         **kwargs
@@ -32,7 +33,7 @@ class viurForm(html5.Form):
         self.actionName = actionName
         self.bones = {}
         self.skel = skel
-        self.errors = []
+        self.errors = errors or []
         self.visible = visible
         self.ignore = ignore
         self.hide = hide
@@ -107,7 +108,7 @@ class viurForm(html5.Form):
             )
             return 0
 
-        self.bones.update({key: widget})
+        self.bones[key] = widget
 
     def applyVisiblity(self):
         # only PoC!
@@ -124,7 +125,7 @@ class viurForm(html5.Form):
                 seInst.compile(codestr), self.collectCurrentFormValues()
             )
 
-            widget = boneField.bonewidget
+            widget = boneField.boneWidget
             if not seResult:
                 boneField.hide()
             else:
@@ -151,7 +152,7 @@ class viurForm(html5.Form):
             res["key"] = self.skel["key"]
 
         for key, boneField in self.bones.items():
-            widget = boneField.bonewidget
+            widget = boneField.boneWidget
             # ignore the key, it is stored in self.key, and read-only bones
             if key == "key" or widget.bone.readonly:
                 continue
@@ -275,36 +276,35 @@ class boneField(html5.Div):
     def __init__(self, boneName=None, form=None, defaultvalue=None, hidden=False, filter=None):
         logging.debug("boneField: %r, %r, %r", boneName, form, defaultvalue)
         super().__init__()
+
         self.boneName = boneName
         self.form = form
+        self.moduleName = self.form.moduleName if self.form else None
+        self.skel = None
         self.label = True
         self.hidden = hidden
         self.placeholder = False
-        self.defaultvalue = defaultvalue
+        self.defaultValue = defaultvalue
         self.filter = filter
-
         self.formloaded = False
+
+        self.containerWidget = None
+        self.labelWidget = None
+        self.boneWidget = None
 
     def onAttach(self):
         if not self.formloaded:
-            if "boneName" not in dir(self):
+            if not self.boneName:
                 logging.debug("Please add boneName attribute to {}", self)
 
-            if "form" not in dir(self) or not self.form:
-                logging.debug(
-                    "Please add :form attribute with a named form widget to {}.", self
-                )
+            if self.form:
+                logging.debug("Please add :form attribute with a named form widget to {}.", self)
 
             if "skel" not in dir(self.form) or "structure" not in dir(self.form):
-                logging.debug(
-                    "Missing :skel and :structure databinding on referenced form",
-                    self.form,
-                )
+                logging.debug("Missing :skel and :structure data binding on referenced form", self.form)
 
             if "moduleName" not in dir(self.form):
-                logging.debug(
-                    "Missing moduleName attribute on referenced form", self.form
-                )
+                logging.debug("Missing moduleName attribute on referenced form", self.form)
 
             # self.form existiert und form hat skel und structure
             if isinstance(self.form.structure, list):
@@ -312,32 +312,27 @@ class boneField(html5.Div):
             else:
                 self.structure = self.form.structure
 
-            self.skel = self.form.skel
-            self.moduleName = self.form.moduleName
-
-            formparam = {"formName": self.form.formName}
+            self.skel = self.form.skel  #fixme: do this in __setattr__
+            self.moduleName = self.form.moduleName  #fixme: do this in __setattr__
 
             try:
-                boneFactory = boneSelector.select(
-                    self.moduleName, self.boneName, self.structure, **formparam
-                )(self.moduleName, self.boneName, self.structure, self.form.errors)
-                (
-                    containerDiv,
-                    descrLbl,
-                    self.bonewidget,
-                    hasError,
-                ) = boneFactory.boneWidget(self.label,filter=self.filter)
+                boneClass = boneSelector.select(
+                    self.moduleName,
+                    self.boneName,
+                    self.structure,
+                    formName=self.form.formName
+                )
+                boneFactory = boneClass(self.moduleName, self.boneName, self.structure, self.form.errors)
 
-                self.bonelabel = descrLbl
+                self.containerWidget, self.labelWidget, self.boneWidget, hasError = \
+                    boneFactory.boneWidget(self.label, filter=self.filter)
 
             except Exception as e:
                 logging.exception(e)
-                self.bonewidget = html5.Div("Bone not Found: %s" % self.boneName)
-                self.appendChild(self.bonewidget)
+                self.appendChild(f"""<div>Bone not found our invalid: {self.boneName}</div>""")
                 return 0
 
-            self.appendChild(containerDiv)
-            containerDiv.onAttach() #fixme
+            self.appendChild(self.containerWidget)
 
             if self.boneName in self.form.hide or self.hidden:
                 self._setHidden(True)
@@ -348,11 +343,9 @@ class boneField(html5.Div):
 
             self.sinkEvent("onChange")
 
-
-            if self.defaultvalue:
-                self.skel[
-                    self.boneName
-                ] = self.defaultvalue  # warning overrides server default
+            if self.defaultValue:
+                # warning overrides server default
+                self.skel[self.boneName] = self.defaultValue
 
             self.unserialize(self.skel)
             self.formloaded = True
@@ -360,14 +353,10 @@ class boneField(html5.Div):
     def onChange(self, event, *args, **kwargs):
         pass
 
-    # print(event)
-    # print(args)
-    # print(kwargs)
-
     def unserialize(self, data=None):
         for key, bone in self.form.bones.items():
             if data is not None:
-                bone.bonewidget.unserialize(data.get(key))
+                bone.boneWidget.unserialize(data.get(key))
 
     def _setBonename(self, val):
         self.boneName = val
@@ -391,25 +380,25 @@ class boneField(html5.Div):
             self.hidden = False
 
     def _setValue(self, val):
-        self.defaultvalue = val
+        self.defaultValue = val
 
     def labelTemplate(self):
         return False
         """Default label."""
         # language=HTML
-        return """<label [name]="bonelabel" class="input-group-item--first label flr-label flr-label--{{type}} flr-label--{{boneName}}">{{descr}}</label>"""
+        return """<label [name]="boneLabel" class="input-group-item--first label flr-label flr-label--{{type}} flr-label--{{boneName}}">{{descr}}</label>"""
 
     def setInvalid(self):
         self.toggleClass("is-invalid", "is-valid")  # wrapper
-        if self.bonelabel:
-            self.bonelabel.toggleClass("is-invalid", "is-valid")  # label
-        self.bonewidget.toggleClass("is-invalid", "is-valid")  # bone
+        if self.boneLabel:
+            self.boneLabel.toggleClass("is-invalid", "is-valid")  # label
+        self.boneWidget.toggleClass("is-invalid", "is-valid")  # bone
 
     def setValid(self):
         self.toggleClass("is-valid", "is-invalid")
-        if self.bonelabel:
-            self.bonelabel.toggleClass("is-valid", "is-invalid")
-        self.bonewidget.toggleClass("is-valid", "is-invalid")
+        if self.boneLabel:
+            self.boneLabel.toggleClass("is-valid", "is-invalid")
+        self.boneWidget.toggleClass("is-valid", "is-invalid")
 
 
 @html5.tag("flare-form-submit")
