@@ -48,12 +48,12 @@ if is_nano := args.version.endswith("-nano"):
     PACKAGES = []
 
 # Allow to install additional Pyodide pre-built packages by command-line arguments
-packages = PACKAGES + (args.packages or [])
+PACKAGES += (args.packages or [])
 
-if is_nano and packages:
+if is_nano and PACKAGES:
     raise EnvironmentError("Pyodide-nano does not support additionaly packages currently!")
 
-for package in packages:
+for package in PACKAGES:
     FILES.extend(
         [
             f"{package}.data",
