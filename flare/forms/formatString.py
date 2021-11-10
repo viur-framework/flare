@@ -12,9 +12,9 @@ def formatString(format: str, data: typing.Dict, structure=None, language=None):
 
     """
     if "$(" in format:
-        return formatStringHandler(format,data,structure,language=language)
+        return formatStringHandler(format, data, structure, language=language)
+    return evalStringHandler(format, data, structure, language)
 
-    return evalStringHandler(format,data,structure,language)
 
 # formatString ---------------------------------------------------------------------------------------------------------
 def formatOneEntry(key, format, data, structure=None, prefix=None, language=None, context=None, _rec=0):
@@ -43,7 +43,8 @@ def formatOneEntry(key, format, data, structure=None, prefix=None, language=None
                 res, val, structure, prefix + [key], language, _rec=_rec + 1
             )
 
-    elif isinstance(val, list) and len(val) > 0 and isinstance(val[0], dict):  # if bone is relationalbone with rel and dest
+    elif isinstance(val, list) and len(val) > 0 and isinstance(val[0],
+                                                               dict):  # if bone is relationalbone with rel and dest
         if struct and "dest" in val[0] and "rel" in val[0]:
             if "relskel" in struct and "format" in struct:
                 format = struct["format"]
@@ -83,6 +84,7 @@ def formatOneEntry(key, format, data, structure=None, prefix=None, language=None
     res = res.replace("$(%s)" % (".".join(prefix + [key])), str(val))
     return res
 
+
 def formatStringHandler(format, data, structure=None, prefix=None, language=None, context=None, _rec=0):
     """Parses a string given by format and substitutes placeholders using values specified by data.
     The syntax for the placeholders is $(%s).
@@ -104,7 +106,7 @@ def formatStringHandler(format, data, structure=None, prefix=None, language=None
     :return: The traversed string with the replaced values.
     :rtype: str
     """
-    #print("FORMAT STRING", format, data, structure, prefix)
+    # print("FORMAT STRING", format, data, structure, prefix)
     if structure and isinstance(structure, list):
         structure = {k: v for k, v in structure}
 
@@ -130,8 +132,10 @@ def formatStringHandler(format, data, structure=None, prefix=None, language=None
 
     return res
 
+
 # displayString ---------------------------------------------------------------------------------------------------------
-def displayStringHandler(display: str, value: typing.Dict, structure: typing.Dict, language: str = "de") -> [html5.Widget]:
+def displayStringHandler(display: str, value: typing.Dict, structure: typing.Dict, language: str = "de") -> [
+    html5.Widget]:
     from flare.forms import boneSelector
 
     # --- Helpers ---
@@ -142,6 +146,7 @@ def displayStringHandler(display: str, value: typing.Dict, structure: typing.Dic
 
         assert isinstance(l, dict)
         return l
+
     # ---------------
 
     widgets = []
@@ -188,17 +193,20 @@ def displayStringHandler(display: str, value: typing.Dict, structure: typing.Dic
 
     return widgets
 
+
 # evalString ---------------------------------------------------------------------------------------------------------
 def evalStringHandler(format, data, structure, language):
     if not html5.core.htmlExpressionEvaluator:
         return format
 
     try:
-        value = html5.core.htmlExpressionEvaluator.execute(format, data)
+        value = html5.core.htmlExpressionEvaluator.execute(format, {"value":data,
+                                                                    "structure":structure,
+                                                                    "language":language
+                                                                    }
+                                                           )
     except Exception as e:
         logging.exception(e)
         value = "(invalid format string)"
 
     return value
-
-

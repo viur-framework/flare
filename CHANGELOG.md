@@ -2,6 +2,9 @@
 
 This file documents any relevant changes.
 
+## [1.0.8] - 2021-11-10
+- Fix: EvalFormatStrings now work properly again
+
 ## [1.0.7] - 2021-09-30
 - Fix: interalEdit Forms no longer lose data 
 
