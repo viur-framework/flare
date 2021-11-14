@@ -1,7 +1,7 @@
 from flare import html5
 from flare.forms.widgets.file import FilePreviewImage, Uploader
-from flare.forms.widgets.edit import EditWidget
 from flare.forms.widgets.tree import TreeLeafWidget, TreeNodeWidget
+from flare.forms.formtags import viurForm
 from flare.config import conf
 from flare.forms import boneSelector, formatString, displayStringHandler, moduleWidgetSelector
 from .base import BaseBone, BaseEditWidget, BaseMultiEditWidget, BaseMultiEditWidgetEntry
@@ -62,11 +62,9 @@ class RelationalEditWidget(BaseEditWidget):
 
         # Relation edit widget
         if self.bone.dataStructure:
-            self.editWidget = EditWidget(
-                self.bone.dataStructure,
-                errors=kwargs.get("errorInformation")
-            )
-            self.addClass("flr-bone--relational-using")
+            self.editWidget = viurForm(structure=self.bone.dataStructure, errors=kwargs.get("errorInformation"))
+            self.editWidget.buildInternalForm()
+            self.editWidget.addClass("flr-internal-edit", "flr-bone--relational-using")
             self.appendChild(self.editWidget)
         else:
             self.editWidget = None

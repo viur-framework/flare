@@ -1,7 +1,8 @@
-import logging
-from flare import html5
+import logging, typing
+
+from flare import html5, conf
 from flare.forms import boneSelector, InvalidBoneValueException
-from flare.network import NetworkService
+from flare.network import NetworkService, DeferredCall
 from flare.button import Button
 from flare.event import EventDispatcher
 from flare.observable import StateHandler
@@ -22,7 +23,8 @@ class viurForm(html5.Form):
         ignore=(),
         hide=(),
         errors=None,
-        defaultValues=(),
+        context=None,
+        defaultValues=None,
         *args,
         **kwargs
     ):
@@ -34,30 +36,34 @@ class viurForm(html5.Form):
         self.bones = {}
         self.skel = skel
         self.errors = errors or []
+        self.context = context
         self.visible = visible
         self.ignore = ignore
         self.hide = hide
-        self.defaultValues = defaultValues
+        self.defaultValues = defaultValues or {}
+
         self["method"] = "POST"
         self["action"] = f"{self.moduleName}/{self.actionName}"
 
         if isinstance(structure, list):
             self.structure = {k: v for k, v in structure}
         else:
-            self.structure = structure
+            self.structure = structure  # fixme: What happens when structure is None?????
 
         self.formSuccessEvent = EventDispatcher("formSuccess")
         self.formSuccessEvent.register(self)
 
-        self.state = StateHandler( ["submitStatus"] )
-        self.state.register("submitStatus",self)
-
+        self.state = StateHandler(["submitStatus"])
+        self.state.register("submitStatus", self)
 
         self.addClass("form")
         self.sinkEvent("onChange")
 
     def onChange(self, event):
-        self.applyVisiblity()
+        DeferredCall(self.update)
+
+    def onBoneChange(self, bone):
+        DeferredCall(self.update)
 
     def _setModulename(self, val):
         self.moduleName = val
@@ -69,71 +75,86 @@ class viurForm(html5.Form):
         self.formName = val
 
     def buildForm(self):
-        for key, bone in self.structure.items():
-            if key in self.ignore:
-                continue
-            elif self.visible and key not in self.visible:
-                continue
-
-            boneValue = None
-            if key in self.defaultValues:
-                boneValue = self.defaultValues[key]
-            bonefield = boneField(key, self, boneValue)
-            self.appendChild(bonefield)
-
-        submitbtn = sendForm(text="speichern", form=self)
-        self.appendChild(submitbtn)
+        """
+        Builds a form with save button.
+        """
+        self.buildInternalForm()
+        self.appendChild(
+            sendForm(text="speichern", form=self)
+        )
 
     def buildInternalForm(self):
+        """
+        Builds only the form.
+        """
         for key, bone in self.structure.items():
-            if key in self.ignore:
-                continue
-            elif self.visible and key not in self.visible:
+            if key in self.ignore or (self.visible and key not in self.visible):
                 continue
 
-            bonefield = boneField(key, self)
-            bonefield.onAttach() #needed for value loading!
+            bonefield = boneField(key, self, self.defaultValues.get("key"))
+            bonefield.onAttach()  # needed for value loading!
 
             self.appendChild(bonefield)
 
     def registerField(self, key, widget):
-        if key in self.ignore:
-            return 0
-        elif self.visible and key not in self.visible:
-            return 0
+        if key in self.ignore or (self.visible and key not in self.visible):
+            return
 
         if key in self.bones:
-            logging.debug(
+            logging.error(
                 "Double field definition in {}!, only first field will be used", self
             )
-            return 0
+            return
 
         self.bones[key] = widget
 
-    def applyVisiblity(self):
-        # only PoC!
-        # WIP
-        for key, boneField in self.bones.items():
-            codestr = getattr(boneField, "visibleif", None)
-            if not codestr:
-                continue
+    def update(self):
+        """
+        Updates current form view state regarding conditional input fields.
+        """
+        values = self.serialize()
 
-            from flare.config import conf
+        for key, desc in self.structure.items():
+            for event in ("visibleIf", "readonlyIf", "evaluate"):
+                if not (expr := desc["params"].get(event)):
+                    continue
 
-            seInst = conf["safeEvalInstance"]
-            seResult = seInst.execute(
-                seInst.compile(codestr), self.collectCurrentFormValues()
-            )
+                # Compile expression at first run
+                if isinstance(expr, str):
+                    desc["params"][event] = conf["expressionEvaluator"].compile(expr)
+                    if desc["params"][event] is None:
+                        logging.error("Parse error: %s", expr)
+                        continue
 
-            widget = boneField.boneWidget
-            if not seResult:
-                boneField.hide()
-            else:
-                boneField.show()
+                    expr = desc["params"][event]
+
+                try:
+                    res = conf["expressionEvaluator"].execute(expr, values)
+                except Exception as e:
+                    logging.error("ScheißEval has thrown some more bullshitty error nobody understands, probably due to its 'compatibility' to logics...")
+                    logging.exception(e)
+                    res = False
+
+                if event == "evaluate":
+                    self.bones[key].unserialize({key: res})
+                elif res:
+                    if event == "visibleIf":
+                        self.bones[key].show()
+                    elif event == "readonlyIf":
+                        self.bones[key].disable()
+                    else:
+                        raise NotImplementedError("Unknown event %r", event)
+                else:
+                    if event == "visibleIf":
+                        self.bones[key].hide()
+                    elif event == "readonlyIf":
+                        self.bones[key].enable()
+                    else:
+                        raise NotImplementedError("Unknown event %r", event)
 
     def submitForm(self):
-        self.state.updateState("submitStatus","sending")
-        res = self.collectCurrentFormValues()
+        self.state.updateState("submitStatus", "sending")
+        res = self.serialize()
 
         NetworkService.request(
             module=self.moduleName,
@@ -146,13 +167,30 @@ class viurForm(html5.Form):
 
         return res
 
-    def collectCurrentFormValues(self):
-        res = {}
-        if "key" in self.skel and self.skel["key"]:
-            res["key"] = self.skel["key"]
+    def unserialize(self, skel: typing.Dict = None):
+        """
+        Unserializes a dict of values into this form.
+        :param skel: Either a dict of values to be unserialized into this form, or None for emptying all values.
+        """
+        self.skel = skel or {}
 
-        for key, boneField in self.bones.items():
-            widget = boneField.boneWidget
+        for key, widget in self.bones.items():
+            if "setContext" in dir(widget) and callable(widget.setContext):
+                widget.setContext(self.context)
+
+            widget.unserialize(self.values.get(key))
+
+        DeferredCall(self.update)
+
+    def serialize(self) -> typing.Dict:
+        """
+        Serializes all bone's values into a dict to be sent to ViUR or the be evaluated.
+        """
+        res = {}
+        if key := self.skel.get("key"):
+            res["key"] = key
+
+        for key, widget in self.bones.items():
             # ignore the key, it is stored in self.key, and read-only bones
             if key == "key" or widget.bone.readonly:
                 continue
@@ -163,11 +201,8 @@ class viurForm(html5.Form):
                     res[key] = ""
 
             except InvalidBoneValueException as e:
-                print(e)
-                pass
+                logging.exception(e)
 
-        # if validityCheck:
-        # 	return None
         return res
 
     def actionSuccess(self, req):
@@ -288,6 +323,7 @@ class boneField(html5.Div):
         self.filter = filter
         self.formloaded = False
 
+        self.bone = None
         self.containerWidget = None
         self.labelWidget = None
         self.boneWidget = None
@@ -326,6 +362,7 @@ class boneField(html5.Div):
 
                 self.containerWidget, self.labelWidget, self.boneWidget, hasError = \
                     boneFactory.boneWidget(self.label, filter=self.filter)
+                self.bone = self.boneWidget.bone
 
             except Exception as e:
                 logging.exception(e)
@@ -347,16 +384,24 @@ class boneField(html5.Div):
                 # warning overrides server default
                 self.skel[self.boneName] = self.defaultValue
 
-            self.unserialize(self.skel)
+            self.unserializeAll(self.skel) # fixme why does a bone unserializes the entire form?????????
             self.formloaded = True
 
     def onChange(self, event, *args, **kwargs):
         pass
 
-    def unserialize(self, data=None):
+    def unserializeAll(self, data=None):  # fixme why does a bone unserializes the entire form?????????
+        if not data:
+            return
+
         for key, bone in self.form.bones.items():
-            if data is not None:
-                bone.boneWidget.unserialize(data.get(key))
+            bone.boneWidget.unserialize(data.get(key))
+
+    def unserialize(self, data=None):
+        self.boneWidget.unserialize(data)
+
+    def serialize(self):
+        return self.boneWidget.serialize()
 
     def _setBonename(self, val):
         self.boneName = val
