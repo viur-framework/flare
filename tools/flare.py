@@ -3,9 +3,16 @@
 flare application packager and build tool
 """
 
-import os, shutil, json, argparse, pathlib
+import os, shutil, json, argparse, pathlib, fnmatch, watchgod
 
-PATHBLACKLIST = ["assets", "docs", "examples", "test", "tools"]
+ignore_patterns = [
+    "flare/assets/*",
+    "flare/docs/*",
+    "flare/examples/*",
+    "flare/test/*",
+    "flare/tools/*",
+    "gen-*"
+]
 
 
 def cleanString(str):
@@ -120,13 +127,9 @@ def copyAssets(source, target):
     if os.path.exists(assetfolder):
         shutil.copytree(assetfolder, os.path.join(target, "public"), dirs_exist_ok=True)
 
-    toplevelFiles = (".html", ".js", ".webmanifest", ".json")
-
-    _ = [
-        shutil.copyfile(os.path.join(source, i), os.path.join(target, i))
-        for i in os.listdir(source)
-        if i.endswith(toplevelFiles)
-    ]
+    for i in os.listdir(source):
+        if i.endswith((".html", ".js", ".webmanifest", ".json")):
+            shutil.copyfile(os.path.join(source, i), os.path.join(target, i))
 
 
 def copyflareAssets(source, target):
@@ -139,17 +142,16 @@ def copyflareAssets(source, target):
 
 def copyWebworkerScripts(source, target):
     flarefolder = os.path.join( source, "flare", "flare", "webworker")
-    if os.path.exists( flarefolder ):
+    if os.path.exists(flarefolder):
         shutil.copytree(
-            flarefolder, os.path.join( target, "webworker" ), dirs_exist_ok = True
+            flarefolder, os.path.join(target, "webworker"), dirs_exist_ok=True
         )
 
     appfolder = os.path.join(source, "webworker")
-    if os.path.exists( appfolder ):
+    if os.path.exists(appfolder):
         shutil.copytree(
-            appfolder, os.path.join( target, "webworker" ), dirs_exist_ok = True
+            appfolder, os.path.join(target, "webworker"), dirs_exist_ok=True
         )
-
 
 
 def copypackageAssets(source, target):
@@ -165,7 +167,8 @@ def clearTarget(target):
     """Clear target folder."""
     if not os.path.exists(target):
         os.makedirs(target)
-    os.system(f"rm -rf {target}/*")
+    else:
+        os.system(f"rm -rf {target}/*")  # fixme: Make this more Pythonic?
 
 
 def generateFilesJson(source):
@@ -174,22 +177,17 @@ def generateFilesJson(source):
     """
     files = []
 
-    walkObj = os.walk(source)
-    for root, dirnames, filenames in walkObj:
-        for f in filenames:
-            pathObject = pathlib.Path(root).joinpath(f)
-            pathParts = pathObject.parts
-            if (
-                f.endswith(".py")
-                and "(" not in f
-                and not any([f.startswith(i) for i in ["get-", "gen-", "test-"]])  # this might be unnecessary...
-                and not any([p in PATHBLACKLIST for p in pathParts])  # ignore folders from blacklist
-            ):
-                f = pathObject.as_posix().rstrip("./")
-                #print(f)
-                files.append(f)
+    for root, _, filenames in os.walk(source):
+        root = os.path.relpath(root, source)
 
-    with open("files.json", "w") as outputFile:
+        for filename in filenames:
+            filename = str(os.path.join(root, filename)).removeprefix("./")
+
+            if filename.endswith(".py") and not any([fnmatch.fnmatch(filename, pat) for pat in ignore_patterns]):
+                files.append(filename)
+                #print(files[-1])
+
+    with open(os.path.join(source, "files.json"), "w") as outputFile:
         json.dump(sorted(files), outputFile, indent=2)
         print("", file=outputFile)  # append line break
 
@@ -223,49 +221,58 @@ def main():
 
     os.chdir(cleanString(os.environ.get("PROJECT_WORKSPACE", ".")))
 
+    # Clear target first
     clearTarget(args.target)
+
+    # Regenerate files JSON
+    generateFilesJson(args.source)
+
+    # Copy sources
     copySourcePy(args.source, args.target)
 
     if args.minify:
+        # Minify copied sources
         minifyPy(args.target)
 
     if args.compile:
+        # Turn PY into pre-compiled PYC files
         compilePy(args.target)
 
     if args.zip:
+        # Compress target into zip archive
         zipPy(args.target, args.name)
 
+    # Copy and handle webworker scripts separately
     copyWebworkerScripts(args.source, args.target)
+
     if args.minify:
-        minifyPy(os.path.join(args.target,"webworker"))
+        minifyPy(os.path.join(args.target, "webworker"))
     #if args.compile:
     #    compilePy(os.path.join(args.target,"webworker"))
 
+    # Copy further assets
     copyAssets(args.source, args.target)
 
     if args.watch:
         print("watching for changes...")
 
-        from watchgod import watch, PythonWatcher
-        from watchgod.watcher import Change
-
-        for changes in watch(args.source, watcher_cls=PythonWatcher):
+        for changes in watchgod.watch(args.source, watcher_cls=watchgod.PythonWatcher):
             changes = list(changes)
+            filename = os.path.relpath(changes[0][1], args.source)
 
-            # dont copy py files from blacklisted folders
-            if any(map(changes[0][1].__contains__, [f"/{p}/" for p in PATHBLACKLIST])):
+            if any([fnmatch.fnmatch(filename, pat) for pat in ignore_patterns]):
                 continue
 
             recreateFilesJson = False
 
-            if changes[0][0] == Change.added:
-                print(f"{changes[0][1]} added")
+            if changes[0][0] == watchgod.watcher.Change.added:
+                print(f"{filename} added")
                 recreateFilesJson = True
-            elif changes[0][0] == Change.deleted:
-                print(f"{changes[0][1]} deleted")
+            elif changes[0][0] == watchgod.watcher.Change.deleted:
+                print(f"{filename} deleted")
                 recreateFilesJson = True
             else:
-                print(f"{changes[0][1]} modified")
+                print(f"{filename} modified")
 
             if recreateFilesJson:
                 print("regenerating files.json")
@@ -274,7 +281,7 @@ def main():
             filepath = changes[0][1].replace(str(args.source) + "/", "")
 
             if not args.zip:
-                if changes[0][0] == Change.deleted:
+                if changes[0][0] == watchgod.watcher.Change.deleted:
                     os.remove(os.path.join(args.target, filepath))
                 else:
                     # copy changed or added file
