@@ -15,14 +15,6 @@ ignore_patterns = [
 ]
 
 
-def cleanString(str):
-    """Replace characters from string which could brake the commands.
-
-    actual used to clean the environment workspace variable
-    """
-    return str.replace('"', "").replace("'", "")
-
-
 def copySourcePy(source, target):
     """Copy python source files to destination respecting the folder structure."""
     cwd = os.getcwd()
@@ -225,7 +217,7 @@ def main():
     if args.watch:
         print("starting initial build")
 
-    os.chdir(cleanString(os.environ.get("PROJECT_WORKSPACE", ".")))
+    os.chdir(os.environ.get("PROJECT_WORKSPACE", "."))
 
     # Clear target first
     clearTarget(args.target)
