@@ -3,7 +3,7 @@
 flare application packager and build tool
 """
 
-import os, shutil, json, argparse, pathlib, fnmatch, watchgod
+import os, shutil, json, argparse, pathlib, fnmatch, watchgod, python_minifier
 
 ignore_patterns = [
     "flare/assets/*",
@@ -47,11 +47,17 @@ def cleanSources(target):
 
 
 def minifyPy(target):
-    """Minifies oll py files and strips comments and documentation."""
-    os.system(
-        f'for py in `find {target} -name "*.py"`; do echo "Minifying ${{py}}..."; pyminify --remove-literal-statements ${{py}} > ${{py}}.min; mv ${{py}}.min ${{py}}; done'
-    )
+    """Minifies all .py-files and strips comments and documentation."""
+    for root, _, filenames in os.walk(target):
+        for filename in filenames:
+            filename = os.path.join(root, filename)
 
+            if filename.endswith(".py"):
+                with open(filename, "r+") as f:
+                    code = f.read()
+                    f.seek(0)
+                    f.truncate()
+                    f.write(python_minifier.minify(code, remove_literal_statements=True))
 
 def compilePy(target):
     """Compiles py files to pyc and removes all py files at the end."""
