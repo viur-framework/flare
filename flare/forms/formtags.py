@@ -1,3 +1,5 @@
+# fixme: Rename this module to something useful....
+
 import logging, typing
 
 from flare import html5, conf
@@ -42,8 +44,9 @@ class viurForm(html5.Form):
         self.hide = hide
         self.defaultValues = defaultValues or {}
 
-        self["method"] = "POST"
-        self["action"] = f"{self.moduleName}/{self.actionName}"
+        if self.moduleName and self.actionName:
+            self["method"] = "POST"
+            self["action"] = f"{self.moduleName}/{self.actionName}"
 
         if isinstance(structure, list):
             self.structure = {k: v for k, v in structure}
@@ -91,9 +94,9 @@ class viurForm(html5.Form):
             if key in self.ignore or (self.visible and key not in self.visible):
                 continue
 
+            #fixme: Need to watch for bones which may become visible by Logics.
             bonefield = boneField(key, self, self.defaultValues.get("key"))
-            bonefield.onAttach()  # needed for value loading!
-
+            bonefield.onAttach()  # needed for value loading!  # fixme this is bullshit... must be solved differently.
             self.appendChild(bonefield)
 
     def registerField(self, key, widget):
@@ -105,6 +108,10 @@ class viurForm(html5.Form):
                 "Double field definition in {}!, only first field will be used", self
             )
             return
+
+        # Set change event
+        if "changeEvent" in dir(widget.boneWidget):
+            widget.boneWidget.changeEvent.register(self)  # onBoneChange
 
         self.bones[key] = widget
 
@@ -327,6 +334,7 @@ class boneField(html5.Div):
         self.containerWidget = None
         self.labelWidget = None
         self.boneWidget = None
+        self.hasError = None  # ??? no plan why this is required
 
     def onAttach(self):
         if not self.formloaded:
@@ -343,7 +351,7 @@ class boneField(html5.Div):
                 logging.debug("Missing moduleName attribute on referenced form", self.form)
 
             # self.form existiert und form hat skel und structure
-            if isinstance(self.form.structure, list):
+            if isinstance(self.form.structure, list): # fixme: Muss das sein???
                 self.structure = {k: v for k, v in self.form.structure}
             else:
                 self.structure = self.form.structure
@@ -360,7 +368,7 @@ class boneField(html5.Div):
                 )
                 boneFactory = boneClass(self.moduleName, self.boneName, self.structure, self.form.errors)
 
-                self.containerWidget, self.labelWidget, self.boneWidget, hasError = \
+                self.containerWidget, self.labelWidget, self.boneWidget, self.hasError = \
                     boneFactory.boneWidget(self.label, filter=self.filter)
                 self.bone = self.boneWidget.bone
 
