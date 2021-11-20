@@ -3,7 +3,7 @@
 flare application packager and build tool
 """
 
-import os, shutil, json, argparse, pathlib, fnmatch, watchgod, python_minifier
+import os, shutil, json, argparse, pathlib, fnmatch, watchgod, python_minifier, compileall
 
 ignore_patterns = [
     "flare/assets/*",
@@ -21,7 +21,7 @@ def copySourcePy(source, target):
     os.chdir(os.path.join(cwd, source))
     absTarget = os.path.join(cwd, target)
 
-    os.system(f'find "." -name "*.py" -exec rsync -Rq \\{{\\}} "{absTarget}" \;')
+    os.system(f'find "." -name "*.py" -exec rsync -Rq \\{{\\}} "{absTarget}" \;')  # fixme: WTF! Why not use Python for this??
     os.chdir(cwd)
 
     cleanSources(target)
@@ -35,7 +35,7 @@ def cleanSources(target):
 
     for folder in ["bin", "docs", "examples", "scripts", "test"]:
         target = os.path.join(absTarget, "flare", folder)
-        os.system(f"rm -rf {target}")
+        os.system(f"rm -rf {target}")  # fixme: Make this more Pythonic?
 
 
 def minifyPy(target):
@@ -53,10 +53,18 @@ def minifyPy(target):
 
 def compilePy(target):
     """Compiles py files to pyc and removes all py files at the end."""
-    import compileall
+    compileall.compile_dir(target, force=True, legacy=True, quiet=1)  # fixme: This does not work when local Python is 3.9.7 but Pyodide is 3.9.5...
 
-    compileall.compile_dir(target, force=True, legacy=True)
-    os.system(f'find "{target}" -name "*.py" -type f -delete')
+    # Remove all source files from target folder
+    for root, _, filenames in os.walk(target):
+        for filename in filenames:
+            filename = os.path.join(root, filename)
+
+            if filename.endswith(".py"):
+                os.remove(filename)
+
+    # Update files.json
+    generateFilesJson(target, ".pyc")
 
 
 def movingFlareBeforeZip(target, packagename):
@@ -91,18 +99,18 @@ def zipPy(target, packagename):
 
     os.system(
         f'find {targetpath} -maxdepth 1 -not -name {packagename} -exec mv \\{{\\}} "{packagepath}" \;'
-    )
+    )  # fixme: WTF....
 
     os.chdir(targetpath)  # switch to root folder
 
     movingFlareBeforeZip(target, packagename)
     movingPackagesBeforeZip(target, packagename)
-    os.system("rm -f files.zip")  # remove old zip if exists
-    os.system(f"zip files.zip -r ./*")  # zip this folder
+    os.system("rm -f files.zip")  # fixme... ey... what should that?
+    os.system(f"zip files.zip -r ./*")  # fixme: Use Python's zip for this...
 
     # remove everything thats not files.zip
     _ = [
-        os.system(f"rm -rf {i}")
+        os.system(f"rm -rf {i}")  # fixme: Eyyy... this is not a shell scripting language............ man ey.....
         for i in os.listdir(os.path.join(cwd, target))
         if i != "files.zip"
     ]
@@ -126,7 +134,7 @@ def copyAssets(source, target):
         shutil.copytree(assetfolder, os.path.join(target, "public"), dirs_exist_ok=True)
 
     for i in os.listdir(source):
-        if i.endswith((".html", ".js", ".webmanifest", ".json")):
+        if i.endswith((".html", ".js", ".webmanifest")):
             shutil.copyfile(os.path.join(source, i), os.path.join(target, i))
 
 
@@ -169,7 +177,7 @@ def clearTarget(target):
         os.system(f"rm -rf {target}/*")  # fixme: Make this more Pythonic?
 
 
-def generateFilesJson(source):
+def generateFilesJson(source, ext=".py"):
     """Walks over the source app directory hierarchy and collects all _wanted_ and _needed_ python files.
     This should work for all of Linux, MacOS and Windows and uses posix compliant path structure.
     """
@@ -181,7 +189,7 @@ def generateFilesJson(source):
         for filename in filenames:
             filename = str(os.path.join(root, filename)).removeprefix("./")
 
-            if filename.endswith(".py") and not any([fnmatch.fnmatch(filename, pat) for pat in ignore_patterns]):
+            if filename.endswith(ext) and not any([fnmatch.fnmatch(filename, pat) for pat in ignore_patterns]):
                 files.append(filename)
                 #print(files[-1])
 
@@ -222,9 +230,6 @@ def main():
     # Clear target first
     clearTarget(args.target)
 
-    # Regenerate files JSON
-    generateFilesJson(args.source)
-
     # Copy sources
     copySourcePy(args.source, args.target)
 
@@ -235,6 +240,9 @@ def main():
     if args.compile:
         # Turn PY into pre-compiled PYC files
         compilePy(args.target)
+    else:
+        # If this is not wanted, generate ordinary files.json
+        generateFilesJson(args.target)
 
     if args.zip:
         # Compress target into zip archive
@@ -272,10 +280,6 @@ def main():
             else:
                 print(f"{filename} modified")
 
-            if recreateFilesJson:
-                print("regenerating files.json")
-                generateFilesJson(args.source)
-
             filepath = changes[0][1].replace(str(args.source) + "/", "")
 
             if not args.zip:
@@ -291,6 +295,10 @@ def main():
             else:
                 clearTarget(args.target)
                 copySourcePy(args.source, args.target)
+
+            if recreateFilesJson:
+                print("regenerating files.json")
+                generateFilesJson(args.target)
 
             if args.minify:
                 minifyPy(args.target)
