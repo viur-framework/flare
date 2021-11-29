@@ -131,5 +131,12 @@ As seen with the ``addView`` calls, we register the two view classes, giving the
 names are then used to switch the ``activeView``, as we already did earlier in the ``switch`` methods of the view
 widgets.
 
-That's it. Make flare load your ``views.py`` file as described in the Hello World tutorial, and you can have fun with
-flipping and flopping the two views.
+That's it. Make flare load your ``views.py`` by adding the following lines of code to you ``__init__.py`` file:
+
+.. code:: python
+
+    from . import views
+
+    views.App()
+
+Now and you can have fun with flipping and flopping the two views.
