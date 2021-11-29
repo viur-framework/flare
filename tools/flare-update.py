@@ -67,10 +67,10 @@ if __name__ == "__main__":
                     count += 1
 
             if count:
-                if not args.daredevil:
-                    os.rename(filename, filename + ".bak")
-
                 if not args.dryrun:
+                    if not args.daredevil:
+                        os.rename(filename, filename + ".bak")
+
                     with open(filename, "w") as f:
                         f.write(content)
 

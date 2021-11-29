@@ -1,5 +1,5 @@
 from flare import html5, utils
-from flare.forms import boneSelector
+from flare.viur import BoneSelector
 from flare.config import conf
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
@@ -79,4 +79,4 @@ class StringBone(BaseBone):
         ].startswith("str.")
 
 
-boneSelector.insert(1, StringBone.checkFor, StringBone)
+BoneSelector.insert(1, StringBone.checkFor, StringBone)

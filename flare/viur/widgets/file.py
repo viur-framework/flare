@@ -1,13 +1,13 @@
-import json, pyodide
+import pyodide
 from flare.ignite import *
 from flare.icons import Icon
 from flare.i18n import translate
 from flare.popup import Popup
 from flare.event import EventDispatcher
-from flare.forms import moduleWidgetSelector, displayDelegateSelector
+from flare.viur import ModuleWidgetSelector, DisplayDelegateSelector
 from flare.network import NetworkService, DeferredCall
 from flare.button import Button
-from flare.forms.widgets.tree import TreeNodeWidget, TreeLeafWidget, TreeBrowserWidget
+from flare.viur.widgets.tree import TreeNodeWidget, TreeLeafWidget, TreeBrowserWidget
 
 
 def getImagePreview(data, cropped=False, size=150):
@@ -429,5 +429,5 @@ class FileWidget(TreeBrowserWidget):
         ].startswith("tree.simple.file")
 
 
-moduleWidgetSelector.insert(0, FileWidget.canHandle, FileWidget)
-displayDelegateSelector.insert(0, FileWidget.canHandle, FileWidget)
+ModuleWidgetSelector.insert(0, FileWidget.canHandle, FileWidget)
+DisplayDelegateSelector.insert(0, FileWidget.canHandle, FileWidget)

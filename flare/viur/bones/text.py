@@ -1,7 +1,7 @@
 from flare.ignite import *
-from flare.forms import boneSelector
+from flare.viur import BoneSelector
 from flare.config import conf
-from flare.forms.widgets.htmleditor import HtmlEditor
+from flare.viur.widgets.htmleditor import HtmlEditor
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
 
@@ -69,4 +69,4 @@ class TextBone(BaseBone):
         ].startswith("text.")
 
 
-boneSelector.insert(1, TextBone.checkFor, TextBone)
+BoneSelector.insert(1, TextBone.checkFor, TextBone)

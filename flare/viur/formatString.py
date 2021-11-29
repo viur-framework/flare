@@ -132,7 +132,7 @@ def formatStringHandler(format, data, structure=None, prefix=None, language=None
 
 # displayString ---------------------------------------------------------------------------------------------------------
 def displayStringHandler(display: str, value: typing.Dict, structure: typing.Dict, language: str = "de") -> [html5.Widget]:
-    from flare.forms import boneSelector
+    from flare.viur import BoneSelector
 
     # --- Helpers ---
     def listToDict(l):
@@ -176,7 +176,7 @@ def displayStringHandler(display: str, value: typing.Dict, structure: typing.Dic
                 raise ValueError(f"Access to unknown bone '{bone}' in variable '$({var})'")
 
             if bone is parts[-1]:
-                boneFactory = boneSelector.select(None, bone, partStructure)
+                boneFactory = BoneSelector.select(None, bone, partStructure)
                 assert boneFactory, f"Couldn't find matching bone factory for bone '{bone}' in variable '$({var})'"
 
                 widgets.append(boneFactory(None, bone, partStructure).viewWidget(partValue))

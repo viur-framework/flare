@@ -1,9 +1,9 @@
 from flare import html5
-from flare.forms.widgets.file import FilePreviewImage, Uploader
-from flare.forms.widgets.tree import TreeLeafWidget, TreeNodeWidget
-from flare.forms.formtags import ViurForm
+from flare.viur.widgets.file import FilePreviewImage, Uploader
+from flare.viur.widgets.tree import TreeLeafWidget, TreeNodeWidget
+from flare.viur import ViurForm
 from flare.config import conf
-from flare.forms import boneSelector, formatString, displayStringHandler, moduleWidgetSelector
+from flare.viur import BoneSelector, formatString, displayStringHandler, ModuleWidgetSelector
 from .base import BaseBone, BaseEditWidget, BaseMultiEditWidget, BaseMultiEditWidgetEntry
 
 
@@ -134,7 +134,7 @@ class RelationalEditWidget(BaseEditWidget):
     def onSelectBtnClick(self):
         selector = conf["selectors"].get(self.bone.destModule)
         if selector is None:
-            selector = moduleWidgetSelector.select(
+            selector = ModuleWidgetSelector.select(
                 self.bone.destModule, self.bone.destInfo
             )
             assert selector, "No selector can be found for %r" % self.destModule
@@ -211,7 +211,7 @@ class RelationalMultiEditWidget(BaseMultiEditWidget):
         selector = conf["selectors"].get(self.bone.destModule)
 
         if selector is None:
-            selector = moduleWidgetSelector.select(
+            selector = ModuleWidgetSelector.select(
                 self.bone.destModule, self.bone.destInfo
             )
             assert selector, "No selector can be found for %r" % self.destModule
@@ -274,7 +274,7 @@ class RelationalBone(BaseBone):
         ]["type"].startswith("relational.")
 
 
-boneSelector.insert(1, RelationalBone.checkFor, RelationalBone)
+BoneSelector.insert(1, RelationalBone.checkFor, RelationalBone)
 
 
 # --- hierarchyBone ---
@@ -290,7 +290,7 @@ class HierarchyBone(
         ]["type"].startswith("hierarchy.")
 
 
-boneSelector.insert(1, HierarchyBone.checkFor, HierarchyBone)
+BoneSelector.insert(1, HierarchyBone.checkFor, HierarchyBone)
 
 
 # --- treeItemBone ---
@@ -304,7 +304,7 @@ class TreeItemBone(RelationalBone):
         return skelStructure[boneName]["type"] == "relational.tree.leaf"
 
 
-boneSelector.insert(2, TreeItemBone.checkFor, TreeItemBone)
+BoneSelector.insert(2, TreeItemBone.checkFor, TreeItemBone)
 
 
 # --- treeDirBone ---
@@ -322,7 +322,7 @@ class TreeDirBone(RelationalBone):
         )
 
 
-boneSelector.insert(2, TreeDirBone.checkFor, TreeDirBone)
+BoneSelector.insert(2, TreeDirBone.checkFor, TreeDirBone)
 
 
 # --- fileBone direct upload without repo---
@@ -639,7 +639,7 @@ class FileDirectBone(TreeItemBone):
                skelStructure[boneName]["params"].get("widget")=="direct")
 
 
-boneSelector.insert(7, FileDirectBone.checkFor, FileDirectBone)
+BoneSelector.insert(7, FileDirectBone.checkFor, FileDirectBone)
 
 
 # --- fileBone ---
@@ -674,4 +674,4 @@ class FileBone(TreeItemBone):
         )
 
 
-boneSelector.insert(5, FileBone.checkFor, FileBone)
+BoneSelector.insert(5, FileBone.checkFor, FileBone)

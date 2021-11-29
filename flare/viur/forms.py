@@ -1,9 +1,7 @@
-# fixme: Rename this module to something useful....
-
 import logging, typing
 
 from flare import html5, conf
-from flare.forms import boneSelector, InvalidBoneValueException
+from flare.viur import BoneSelector, InvalidBoneValueException
 from flare.network import NetworkService, DeferredCall
 from flare.button import Button
 from flare.event import EventDispatcher
@@ -356,7 +354,7 @@ class ViurFormBone(html5.Div):
             self.moduleName = self.form.moduleName  # fixme: do this in __setattr__
 
             try:
-                boneClass = boneSelector.select(
+                boneClass = BoneSelector.select(
                     self.moduleName,
                     self.boneName,
                     self.structure,

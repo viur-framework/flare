@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 import logging
 
 from time import time
 
 from flare import html5, utils
-from flare.forms import boneSelector, moduleWidgetSelector, displayDelegateSelector
+from flare.viur import BoneSelector, ModuleWidgetSelector, DisplayDelegateSelector
 from flare.network import NetworkService
 from flare.config import conf
 from flare.i18n import translate
-from flare.forms.formatString import formatString
+from flare.viur.formatString import formatString
 from flare.icons import SvgIcon, Icon
 
 
@@ -291,7 +290,7 @@ class TreeItemWidget(html5.Li):
                     and params["frontend_default_visible"]
                 ):
                     structure = {k: v for k, v in self.structure.items()}
-                    wdg = boneSelector.select(self.module, boneName, structure)
+                    wdg = BoneSelector.select(self.module, boneName, structure)
 
                     if wdg is not None:
                         self.nodeHeadline.appendChild(
@@ -423,8 +422,8 @@ class TreeWidget(html5.Div):
         )
 
 
-moduleWidgetSelector.insert(0, TreeWidget.canHandle, TreeWidget)
-displayDelegateSelector.insert(0, TreeWidget.canHandle, TreeWidget)
+ModuleWidgetSelector.insert(0, TreeWidget.canHandle, TreeWidget)
+DisplayDelegateSelector.insert(0, TreeWidget.canHandle, TreeWidget)
 
 
 class BrowserLeafWidget(TreeLeafWidget):
@@ -471,5 +470,5 @@ class TreeBrowserWidget(TreeWidget):
         ].startswith("tree.browser.")
 
 
-moduleWidgetSelector.insert(0, TreeBrowserWidget.canHandle, TreeBrowserWidget)
-displayDelegateSelector.insert(0, TreeBrowserWidget.canHandle, TreeBrowserWidget)
+ModuleWidgetSelector.insert(0, TreeBrowserWidget.canHandle, TreeBrowserWidget)
+DisplayDelegateSelector.insert(0, TreeBrowserWidget.canHandle, TreeBrowserWidget)

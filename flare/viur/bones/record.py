@@ -1,6 +1,6 @@
-from flare.forms import boneSelector, formatString, displayStringHandler
+from flare.viur import BoneSelector, formatString, displayStringHandler
 from flare.config import conf
-from flare.forms.formtags import ViurForm
+from flare.viur import ViurForm
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
 
@@ -67,4 +67,4 @@ class RecordBone(BaseBone):
                 or skelStructure[boneName]["type"].startswith("record.")
 
 
-boneSelector.insert(1, RecordBone.checkFor, RecordBone)
+BoneSelector.insert(1, RecordBone.checkFor, RecordBone)
