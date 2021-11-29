@@ -2,8 +2,13 @@
 
 This file documents any relevant changes.
 
+## [main] - unreleased yet
+- Feat: Conditional displaying of bones based on Python expressions
+- Feat(**BREAKING**): Entire refactoring of the stuff from formerly `flare.forms.formtags` (now just `flare.viur`)
+- Feat(**BREAKING**): Several renaming, e.g. `forms` into `viur`; Use the script `tools/flare-update.py` to fix your projects
+
 ## [1.0.7] - 2021-09-30
-- Fix: interalEdit Forms no longer lose data 
+- Fix: internalEdit Forms no longer loses data
 
 ## [1.0.6] - 2021-09-29
 - Feat: listhandler now can emit finished status and locks running requests

@@ -1,7 +1,7 @@
 from flare import html5
 from flare.viur.widgets.file import FilePreviewImage, Uploader
 from flare.viur.widgets.tree import TreeLeafWidget, TreeNodeWidget
-from flare.viur import ViurForm
+from flare.viur.forms import ViurForm
 from flare.config import conf
 from flare.viur import BoneSelector, formatString, displayStringHandler, ModuleWidgetSelector
 from .base import BaseBone, BaseEditWidget, BaseMultiEditWidget, BaseMultiEditWidgetEntry

@@ -1,6 +1,6 @@
 from flare.viur import BoneSelector, formatString, displayStringHandler
 from flare.config import conf
-from flare.viur import ViurForm
+from flare.viur.forms import ViurForm
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
 
