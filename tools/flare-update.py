@@ -8,7 +8,14 @@ lookup = {
 
     "boneField": "ViurFormBone",
     "sendForm": "ViurFormSubmit",
-    "viurForm": "ViurForm"
+    "viurForm": "ViurForm",
+
+    "boneSelector": "BoneSelector",
+    "moduleWidgetSelector": "ModuleWidgetSelector",
+    "displayDelegateSelector": "DisplayDelegateSelector",
+
+    "from flare.forms.formtags import": "from flare.viur import",
+    "from flare.forms": "from flare.viur",
 }
 
 if __name__ == "__main__":
