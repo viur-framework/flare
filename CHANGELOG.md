@@ -2,10 +2,13 @@
 
 This file documents any relevant changes.
 
-## [1.0.8] - 2021-11-29
+## [1.0.9] - 2021-11-29
 - Feat: Conditional displaying of bones based on Python expressions
 - Feat(**BREAKING**): Entire refactoring of the stuff from formerly `flare.forms.formtags` (now just `flare.viur`)
 - Feat(**BREAKING**): Several renaming, e.g. `forms` into `viur`; Use the script `tools/flare-update.py` to fix your projects
+
+## [1.0.8] - 2021-11-10
+- Fix: EvalFormatStrings now work properly again
 
 ## [1.0.7] - 2021-09-30
 - Fix: internalEdit Forms no longer loses data

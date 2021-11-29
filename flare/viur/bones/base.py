@@ -2,6 +2,7 @@
 
 import json, time
 from enum import IntEnum
+from flare import html5
 from flare.button import Button
 from flare.ignite import *
 from flare.viur import BoneSelector
@@ -300,7 +301,7 @@ class BaseLanguageEditWidget(html5.Div):
         super().__init__(
             """
 			<div [name]="widgets" class="flr-bone-widgets"></div>
-			<div [name]="actions" class="flr-bone-actions input-group vi-bone-language-actions"></div>
+			<div [name]="actions" class="flr-bone-actions input-group flr-bone-language-actions"></div>
 		"""
         )
 

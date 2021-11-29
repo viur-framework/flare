@@ -14,6 +14,11 @@ class ObservableValue(object):
             self.setValue(value)
 
     def setValue(self, value):
+        if isinstance(self.value,list) or isinstance(self.value,dict):
+            oldValue = self.value.copy()
+        else:
+            oldValue = self.value
+
         self.value = value
 
         if isinstance(value, html5.Widget):
@@ -25,7 +30,7 @@ class ObservableValue(object):
         else:
             event = value
 
-        self.valueChanged.fire(event, value)
+        self.valueChanged.fire(event, value, oldValue)
 
 
 class StateHandler:
@@ -36,7 +41,6 @@ class StateHandler:
             self.internalStates.update({entry: ObservableValue(entry)})
 
     def updateState(self, key, value):
-
         if key in self.internalStates:
             self.internalStates[key].setValue(value)
         else:  # key does not exist
@@ -49,7 +53,10 @@ class StateHandler:
 
     def getState(self, key, empty=None):
         if key in self.internalStates:
-            return self.internalStates[key].value
+            value = self.internalStates[key].value
+            if isinstance(value,list) or isinstance(value,dict):
+                return value.copy()
+            return value
         return empty
 
     def register(self, key, widget):

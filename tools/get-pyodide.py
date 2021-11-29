@@ -1,8 +1,21 @@
 #!/usr/bin/env python3
-import os, sys, json, requests, argparse, pathlib
+import io, os, sys, json, shutil, argparse, pathlib, zipfile
+from urllib.request import urlopen
+from urllib.error import HTTPError
+
+SUPPORTED=[
+    # Full Pyodide releases
+    "v0.18.0",
+    "v0.18.1",
+    # Current development version of the Pyodide standard
+    "dev",
+    # Pyodide-nano is shipped as a zip-file
+    "v0.18.0-nano",
+    "v0.18.1-nano",
+]
 
 # Defaults
-VERSION = "v0.18.1"
+VERSION = SUPPORTED[0]
 CDN = "https://cdn.jsdelivr.net/pyodide"
 URL = "{CDN}/{VERSION}/full/{file}"
 FILES = [
@@ -11,23 +24,36 @@ FILES = [
     "pyodide.asm.wasm",
     "pyodide.js"
 ]
-PACKAGES = ["distlib", "distutils", "micropip", "packaging", "pyparsing", "setuptools"]
+PACKAGES = [
+    "distlib",
+    "distutils",
+    "micropip",
+    "packaging",
+    "pyparsing",
+    "setuptools"
+]
 
 # Parse command line arguments
-ap = argparse.ArgumentParser(description="Service program to obtain self-hosted, stripped copy of Pyodide from CDN")
+ap = argparse.ArgumentParser(
+    description="Service program to obtain self-hosted, stripped copy of Pyodide from CDN"
+)
 ap.add_argument(
-    "-v", "--pyodide", dest="version", default=VERSION, help="Pyodide version to download"
+    "-v", "--pyodide", dest="version", default=VERSION, choices=SUPPORTED, help="Pyodide version to download"
 )
 ap.add_argument("-p", "--packages", nargs="*", help="Further packages to download")
 ap.add_argument("-t", "--target", type=pathlib.Path, default="pyodide", help="Target folder")
 args = ap.parse_args()
 
-assert any([args.version.startswith(accept) for accept in ["v0.18", "dev"]]), "Invalid version provided"
+if is_nano := args.version.endswith("-nano"):
+    PACKAGES = []
 
 # Allow to install additional Pyodide pre-built packages by command-line arguments
-packages = PACKAGES + (args.packages or [])
+PACKAGES += (args.packages or [])
 
-for package in packages:
+if is_nano and PACKAGES:
+    raise EnvironmentError("Pyodide-nano does not support additionaly packages currently!")
+
+for package in PACKAGES:
     FILES.extend(
         [
             f"{package}.data",
@@ -35,14 +61,53 @@ for package in packages:
         ]
     )
 
-if not os.path.isdir(args.target):
-    sys.stdout.write(f"Creating {args.target}/...")
+# Remove old target folder first
+if os.path.dirname(args.target) not in [".", ".."] and os.path.isdir(args.target):
+    sys.stdout.write(f"Removing {args.target}/...")
     sys.stdout.flush()
 
-    os.mkdir(args.target)
+    shutil.rmtree(args.target)
     print("Done")
 
+sys.stdout.write(f"Creating {args.target}/...")
+sys.stdout.flush()
+
+os.mkdir(args.target)
+
+# Write version info
+open(os.path.join(args.target, f"""{args.version}"""), "a").close()
+
+print("Done")
+
 print(f"Installing Pyodide {args.version}:")
+
+if is_nano:
+    # Pyodide Nano is just downloaded from a ZIP-File
+    version = args.version.removeprefix("v").removesuffix("-nano")
+    url = f"""https://github.com/phorward/pyodide/releases/download/{version}-nano/pyodide-nano-{version}.zip"""
+
+    # Download ZIP-file into memory
+    sys.stdout.write(f">>> {url}...")
+    sys.stdout.flush()
+
+    zip = urlopen(url).read()
+
+    print("Done")
+
+    # Unpack ZIP file from memory
+    sys.stdout.write(f"Unpacking...")
+    sys.stdout.flush()
+
+    zip = zipfile.ZipFile(io.BytesIO(zip))
+    zip.extractall(args.target)
+    zip.close()
+
+    print("Done")
+
+    print(f"Done installing Pyodide {args.version}")
+    sys.exit(0)
+
+# Normal install of CDN version
 
 for file in FILES:
     url = URL.format(file=file, CDN=CDN, VERSION=args.version)
@@ -51,16 +116,12 @@ for file in FILES:
     sys.stdout.write(f">>> {url}...")
     sys.stdout.flush()
 
-    r = requests.get(url, stream=True)
-    assert r.status_code == 200, f"Error retrieving {url}"
+    r = urlopen(url).read()
 
     with open(file, "wb") as f:
-        for chunk in r.iter_content(2 * 1024):
-            f.write(chunk)
+        f.write(r)
 
     print("Done")
-
-print(f"Done installing Pyodide {args.version}")
 
 # Patch pyodide.js to only use "/pyodide/"
 file = os.path.join(args.target, "pyodide.js")
@@ -82,9 +143,7 @@ file = os.path.join(args.target, "packages.json")
 sys.stdout.write(f"Rewriting {file}...")
 sys.stdout.flush()
 
-packages = requests.get(
-    URL.format(file="packages.json", CDN=CDN, VERSION=args.version)
-).json()
+packages = json.loads(urlopen(URL.format(file="packages.json", CDN=CDN, VERSION=args.version)).read())
 
 for k in list(packages["packages"].keys()):
     if k not in PACKAGES:
@@ -94,3 +153,5 @@ with open(file, "w") as f:
     f.write(json.dumps(packages))
 
 print("Done")
+
+print(f"Done installing Pyodide {args.version}")

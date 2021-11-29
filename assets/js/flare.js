@@ -71,8 +71,8 @@ class flare {
 		let bar = null;
 		let info = null;
 		try {
-			bar = document.getElementById("loadingbar")
-			info = document.getElementById("fileinfo")
+			bar = document.getElementById("splash-loadingbar")
+			info = document.getElementById("splash-fileinfo")
 			bar.max += files.length
 		} catch (e) {
 		}
@@ -198,7 +198,7 @@ class flare {
 
 		return Promise.all(promises).then(() => {
 			try {
-				let bar = document.getElementById("loadingbar")
+				let bar = document.getElementById("splash-loadingbar")
 				bar.max = bar.value
 			} catch (e) {
 			}
@@ -223,9 +223,9 @@ class flare {
 
 
 			try {
-				//wrapper
-				let wrapper = document.getElementById("wrapper")
-				wrapper.style.display = "none"
+				//splash
+				let splash = document.getElementById("splash")
+				splash.style.display = "none"
 				document.body.classList.add("is-loading")
 			} catch (e) {
 			}
