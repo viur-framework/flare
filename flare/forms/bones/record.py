@@ -1,6 +1,6 @@
 from flare.forms import boneSelector, formatString, displayStringHandler
 from flare.config import conf
-from flare.forms.formtags import viurForm
+from flare.forms.formtags import ViurForm
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
 
@@ -8,7 +8,7 @@ class RecordEditWidget(BaseEditWidget):
     style = ["flr-value", "flr-value--record"]
 
     def createWidget(self):
-        widget = viurForm(structure=self.bone.boneStructure["using"], errors=self.bone.errors)
+        widget = ViurForm(structure=self.bone.boneStructure["using"], errors=self.bone.errors)
         widget.buildInternalForm()
         widget.addClass("flr-internal-edit")
         return widget
