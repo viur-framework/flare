@@ -83,7 +83,7 @@ your own python module structure fairly quickly.
         def show(self):
             popup.Alert(self._message)
 
-4. Creaet a ``files.json`` file in your module directory and add the following content:
+4. Create a ``files.json`` file in your module directory and add the following content:
 
 .. code:: json
 
