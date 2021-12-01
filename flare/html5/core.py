@@ -6,6 +6,7 @@
 """
 
 import string, re, logging, inspect
+from types import SimpleNamespace
 from typing import Any, Callable, Dict
 
 # htmlExpressionEvaluator is used for interpreting conditional expressions
@@ -25,6 +26,7 @@ try:
     document = window.document
 
 except:
+    # This is only a dummy, but a demo to show how to bind html5 to another rendering environment.
     print("Emulation mode")
     from xml.dom.minidom import parseString
 
@@ -302,10 +304,9 @@ class Widget(object):
     _namespace = None  # Namespace
     _tagName = None  # Defines the DOM element name that is used for construction
     _leafTag = False  # Defines whether ths Widget may contain other Widgets (default) or is a leaf
-    # This will be checked by appendChild()
 
     style = []  # CSS-classes to directly assign to this Widget at construction.
-    listeners = {} # a Map of active eventListener {id:[event,proxy,pyfunc,created]}
+
     def __init__(self, *args, appendTo=None, style=None, **kwargs):
         if "_wrapElem" in kwargs.keys():
             self.element = kwargs["_wrapElem"]
@@ -315,7 +316,7 @@ class Widget(object):
             self.element = domCreateElement(self._tagName, ns=self._namespace)
 
         self._widgetClassWrapper = None
-        self.listeners = {}
+        self._event_listeners = {}  # a map of attached event listeners, and their proxies.
 
         super().__init__()
 
@@ -340,16 +341,11 @@ class Widget(object):
         for event_attrName in args:
             event = event_attrName.lower()
 
-            if event_attrName in self._catchedEvents or event in [
-                "onattach",
-                "ondetach",
-            ]:
+            if event_attrName in self._catchedEvents or event in ["onattach", "ondetach"]:
                 continue
 
             eventFn = getattr(self, event_attrName, None)
-            assert eventFn and callable(
-                eventFn
-            ), f"{self} must provide a {event_attrName}-function"
+            assert eventFn and callable(eventFn), f"{self} must provide a {event_attrName}-function"
 
             self._catchedEvents[event_attrName] = eventFn
 
@@ -383,7 +379,11 @@ class Widget(object):
             or receive both the pure Event-object from JavaScript and the Widget-instance \
             where the event was triggered on.
         """
+        event_listener_key =  f"{event}_{hash(callback)}"
+        assert event_listener_key not in self._event_listeners, f"{callback} already assigned, please remove it first"
+
         parameters = inspect.signature(callback).parameters
+        org_callback = callback
 
         # Allow for callback without parameter
         if len(parameters) == 0:
@@ -391,7 +391,7 @@ class Widget(object):
             def _wrapEventCallback(callback):
                 return lambda _: callback()
 
-            callback = _wrapEventCallback(callback)
+            callback = _wrapEventCallback(org_callback)
 
         # Allow for callback with two or more parameters, to catch the event's source
         elif len(parameters) >= 2:
@@ -399,11 +399,22 @@ class Widget(object):
             def _wrapEventWidgetCallback(callback, widget):
                 return lambda event: callback(event, widget)
 
-            callback = _wrapEventWidgetCallback(callback, self)
-        proxy_callback = pyodide.create_proxy(callback)
+            callback = _wrapEventWidgetCallback(org_callback, self)
 
-        self.listeners.update({id(callback):[event,proxy_callback,callback,True]})
-        self.element.addEventListener(event, proxy_callback)
+        if pyodide:
+            # In Pyodide, add a proxy for the callback and keep its usage
+            proxy = pyodide.create_proxy(callback)
+        else:
+            proxy = None
+
+        self.element.addEventListener(event, proxy or callback)
+
+        event_listener = SimpleNamespace(
+            event=event, proxy=proxy, callback=callback, org_callback=org_callback, attached=True
+        )
+
+        # print("_event_listeners add", event_listener_key)
+        self._event_listeners[event_listener_key] = event_listener
 
     def removeEventListener(self, event, callback):
         """Removes an event listener callback from a Widget.
@@ -413,12 +424,13 @@ class Widget(object):
         :param event: The event string, e.g. "click" or "mouseover"
         :param callback: The callback function to be removed
         """
-        proxy_callback_obj = self.listeners.pop(id(callback), None)
-        self.element.removeEventListener(event, proxy_callback_obj[1])
-        if  proxy_callback_obj:
-            proxy_callback_obj[1].destroy()
-            proxy_callback_obj[3] = False #disabled
+        event_listener_key = f"{event}_{hash(callback)}"
+        assert event_listener_key in self._event_listeners, f"{callback} was not added by addEventListener previously"
 
+        if event_listener := self._event_listeners.pop(event_listener_key, None):
+            # print("_event_listeners remove", event_listener_key)
+            self.element.removeEventListener(event, event_listener.proxy or event_listener.callback)
+            event_listener.proxy.destroy()
 
     def disable(self):
         """Disables an element, in case it is not already disabled.
@@ -768,19 +780,35 @@ class Widget(object):
         for c in self._children:
             c.onAttach()
 
-        for _id, proxy_obj in self.listeners.items():
-            if not proxy_obj[3]:#only add if removed.
-                 self.addEventListener(proxy_obj[0],proxy_obj[2]) #add eventlisteners
+        for event_listener in self._event_listeners.values():
+            if event_listener.attached:  # only add if detached.
+                continue
+
+            if pyodide:
+                assert not event_listener.proxy
+                event_listener.proxy = pyodide.create_proxy(event_listener.callback)
+
+            self.element.addEventListener(event_listener.event, event_listener.proxy or event_listener.callback)
+            event_listener.attached = True  # mark as attached
+            # print("_event_listeners attach", event_listener)
 
     def onDetach(self):
         self._isAttached = False
         for c in self._children:
             c.onDetach()
 
-        for _id, proxy_obj in self.listeners.items():
-            self.element.removeEventListener(proxy_obj[0], proxy_obj[1])
-            proxy_obj[1].destroy()
-            proxy_obj[3] = False  # disabled
+        for event_listener in self._event_listeners.values():
+            if not event_listener.attached:
+                continue
+
+            self.element.removeEventListener(event_listener.event, event_listener.proxy or event_listener.callback)
+
+            if event_listener.proxy:
+                event_listener.proxy.destroy()
+                event_listener.proxy = None
+
+            event_listener.attached = False  # mark as detached
+            # print("_event_listeners detach", event_listener)
 
     def __collectChildren(self, *args, **kwargs):
         """Internal function for collecting children from args.
@@ -2864,7 +2892,7 @@ def tag(arg):
         else:
             tagName = cls.__name__
 
-        print("%r registered as <%s>" % (cls, tagName))
+        #print("%r registered as <%s>" % (cls, tagName))
         registerTag(tagName, cls)
         return cls
 
@@ -3289,6 +3317,7 @@ def fromHTML(
                             logging.exception(e)
                             continue
 
+                        # print(wdg, att, hash(callback))
                         wdg.addEventListener(att[1:], callback)
 
                     else:

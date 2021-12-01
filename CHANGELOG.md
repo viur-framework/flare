@@ -2,6 +2,9 @@
 
 This file documents any relevant changes.
 
+## [main] - unreleased
+- Feat: Improved and bug-fixed book-keeping for proxies used by event-listeners.
+
 ## [1.0.8] - 2021-11-10
 - Fix: EvalFormatStrings now work properly again
 
