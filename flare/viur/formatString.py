@@ -134,9 +134,12 @@ def formatStringHandler(format, data, structure=None, prefix=None, language=None
 
 
 # displayString ---------------------------------------------------------------------------------------------------------
-def displayStringHandler(display: str, value: typing.Dict, structure: typing.Dict, language: str = "de") -> [
-    html5.Widget]:
-    from flare.forms import boneSelector
+def displayStringHandler(
+        display: str,
+        value: typing.Dict,
+        structure: typing.Dict,
+        language: str = "de") -> [html5.Widget]:
+    from flare.viur import BoneSelector
 
     # --- Helpers ---
     def listToDict(l):
@@ -181,7 +184,7 @@ def displayStringHandler(display: str, value: typing.Dict, structure: typing.Dic
                 raise ValueError(f"Access to unknown bone '{bone}' in variable '$({var})'")
 
             if bone is parts[-1]:
-                boneFactory = boneSelector.select(None, bone, partStructure)
+                boneFactory = BoneSelector.select(None, bone, partStructure)
                 assert boneFactory, f"Couldn't find matching bone factory for bone '{bone}' in variable '$({var})'"
 
                 widgets.append(boneFactory(None, bone, partStructure).viewWidget(partValue))
@@ -200,11 +203,13 @@ def evalStringHandler(format, data, structure, language):
         return format
 
     try:
-        value = html5.core.htmlExpressionEvaluator.execute(format, {"value":data,
-                                                                    "structure":structure,
-                                                                    "language":language
-                                                                    }
-                                                           )
+        value = html5.core.htmlExpressionEvaluator.execute(
+            format, {
+                "value": data,
+                "structure": structure,
+                "language": language
+            }
+        )
     except Exception as e:
         logging.exception(e)
         value = "(invalid format string)"

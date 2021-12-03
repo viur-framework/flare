@@ -1,5 +1,5 @@
 from flare import html5
-from flare.forms import moduleWidgetSelector
+from flare.viur import ModuleWidgetSelector
 from flare.i18n import translate
 from flare.popup import Popup
 from flare.handler import ListHandler
@@ -54,7 +54,7 @@ class ListWidget(html5.Div):
         )
 
 
-moduleWidgetSelector.insert(0, ListWidget.canHandle, ListWidget)
+ModuleWidgetSelector.insert(0, ListWidget.canHandle, ListWidget)
 
 
 # @html5.tag  # fixme: What should be the tag-name for this?

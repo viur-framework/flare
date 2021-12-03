@@ -1,7 +1,7 @@
 import re, logging
 from flare import utils
 from flare.ignite import *
-from flare.forms import boneSelector
+from flare.viur import BoneSelector
 from flare.config import conf
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
@@ -208,4 +208,4 @@ class NumericBone(BaseBone):
         ].startswith("numeric.")
 
 
-boneSelector.insert(1, NumericBone.checkFor, NumericBone)
+BoneSelector.insert(1, NumericBone.checkFor, NumericBone)

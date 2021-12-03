@@ -1,5 +1,5 @@
 from flare import html5
-from flare.forms import boneSelector
+from flare.viur import BoneSelector
 from flare.config import conf
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
@@ -136,7 +136,7 @@ class SelectMultipleBone(BaseBone):
         ) and skelStructure[boneName].get("multiple")
 
 
-boneSelector.insert(1, SelectMultipleBone.checkFor, SelectMultipleBone)
+BoneSelector.insert(1, SelectMultipleBone.checkFor, SelectMultipleBone)
 
 
 class SelectSingleBone(SelectMultipleBone):
@@ -150,4 +150,4 @@ class SelectSingleBone(SelectMultipleBone):
         ) and not skelStructure[boneName].get("multiple")
 
 
-boneSelector.insert(1, SelectSingleBone.checkFor, SelectSingleBone)
+BoneSelector.insert(1, SelectSingleBone.checkFor, SelectSingleBone)

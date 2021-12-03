@@ -1,6 +1,6 @@
 from flare import html5
 from flare.ignite import *
-from flare.forms import boneSelector
+from flare.viur import BoneSelector
 from flare.i18n import translate
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
@@ -21,7 +21,7 @@ class BooleanEditWidget(BaseEditWidget):
         self.widget["checked"] = bool(value)
 
     def serialize(self):
-        return "yes" if self.widget["checked"] else "no"
+        return self.widget["checked"]
 
 
 class BooleanViewWidget(BaseViewWidget):
@@ -41,4 +41,4 @@ class BooleanBone(BaseBone):
         ].startswith("bool.")
 
 
-boneSelector.insert(1, BooleanBone.checkFor, BooleanBone)
+BoneSelector.insert(1, BooleanBone.checkFor, BooleanBone)
