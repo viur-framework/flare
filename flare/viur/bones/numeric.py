@@ -142,7 +142,7 @@ class NumericViewWidget(BaseViewWidget):
     def unserialize(self, value=None):
         self.value = value
 
-        if value is not None:
+        if value not in [None, []]:
             if self.bone.precision:
                 try:
                     value = "%0.*f" % (self.bone.precision, float(value))
