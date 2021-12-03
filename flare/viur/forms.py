@@ -372,6 +372,7 @@ class ViurFormBone(html5.Div):
                 return 0
 
             self.appendChild(self.containerWidget)
+            self.containerWidget.onAttach() #this is needed! AGAIN!
 
             if self.boneName in self.form.hide or self.hidden:
                 self._setHidden(True)
