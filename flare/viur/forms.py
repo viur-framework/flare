@@ -186,7 +186,7 @@ class ViurForm(html5.Form):
             if "setContext" in dir(widget) and callable(widget.setContext):
                 widget.setContext(self.context)
 
-            widget.unserialize(self.values.get(key))
+            widget.unserialize(self.skel.get(key))
 
         DeferredCall(self.update)
 
