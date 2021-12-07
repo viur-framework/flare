@@ -107,7 +107,7 @@ class BaseMultiEditWidgetEntry(html5.Div):
 
         # language=HTML
         self.appendChild(
-            """<div [name]="dragArea" class="flr-bone-dragger"><flare-svg-icon value="icon-drag-handle" ></flare-svg-icon></div>""",
+            """<div [name]="dragArea" class="flr-bone-dragger label"><flare-svg-icon value="icon-drag-handle" ></flare-svg-icon></div>""",
             self.widget,
             """<flare-button [name]="removeBtn" class="btn--delete" text="Delete" icon="icon-cross" />""",
         )
