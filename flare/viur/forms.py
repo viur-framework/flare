@@ -24,24 +24,22 @@ class ViurForm(html5.Form):
             hide=(),
             errors=None,
             context=None,
-            defaultValues=None,
             *args,
             **kwargs
     ):
         logging.debug("ViurForm: %r, %r, %r, %r, %r, %r, %r, %r, %r, %r, %r", formName, moduleName, actionName, skel,
-                      structure, visible, ignore, hide, defaultValues, args, kwargs)
+                      structure, visible, ignore, hide, args, kwargs)
         super().__init__()
         self.formName = formName
         self.moduleName = moduleName
         self.actionName = actionName
         self.bones = {}
-        self.skel = skel
+        self.skel = skel or {}
         self.errors = errors or []
         self.context = context
         self.visible = visible
         self.ignore = ignore
         self.hide = hide
-        self.defaultValues = defaultValues or {}
 
         if self.moduleName and self.actionName:
             self["method"] = "POST"
@@ -93,10 +91,12 @@ class ViurForm(html5.Form):
             if key in self.ignore or (self.visible and key not in self.visible):
                 continue
 
-            # fixme: Need to watch for bones which may become visible by Logics.
-            bone_field = ViurFormBone(key, self, self.defaultValues.get("key"))
-            bone_field.onAttach()  # needed for value loading!  # fixme this is bullshit... must be solved differently.
+            bone_field = ViurFormBone(key, self)
+            bone_field.onAttach()  # needed for value loading!  # fixme should be solved differently.
+
             self.appendChild(bone_field)
+
+        self.update()  # Update conditional fields
 
     def registerField(self, key, widget):
         if key in self.ignore or (self.visible and key not in self.visible):
@@ -137,9 +137,7 @@ class ViurForm(html5.Form):
                 try:
                     res = conf["expressionEvaluator"].execute(expr, values)
                 except Exception as e:
-                    logging.error(
-                        "ScheißEval has thrown some more bullshit error nobody understands, "
-                        "probably due to its 'compatibility' to ViUR/Logics...")
+                    logging.error("ScheißEval has thrown a useful error message for you:")
                     logging.exception(e)
                     res = False
 
@@ -465,7 +463,7 @@ class ViurFormSubmit(Button):
         self.callback = self.sendViurForm
 
     def onAttach(self):
-        if "form" not in dir(self) or not self.form:
+        if "form" not in dir(self) or not self.form:  # fixme... please solve this differenly...
             logging.debug("Please add :form attribute with a named form widget to {}.", self)
             self.element.innerHTML = "ERROR"
             self.disable()
