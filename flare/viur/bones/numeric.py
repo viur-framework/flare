@@ -1,7 +1,7 @@
 import re, logging
 from flare import utils
 from flare.ignite import *
-from flare.forms import boneSelector
+from flare.viur import BoneSelector
 from flare.config import conf
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
@@ -142,7 +142,7 @@ class NumericViewWidget(BaseViewWidget):
     def unserialize(self, value=None):
         self.value = value
 
-        if value is not None:
+        if value not in [None, []]:
             if self.bone.precision:
                 try:
                     value = "%0.*f" % (self.bone.precision, float(value))
@@ -208,4 +208,4 @@ class NumericBone(BaseBone):
         ].startswith("numeric.")
 
 
-boneSelector.insert(1, NumericBone.checkFor, NumericBone)
+BoneSelector.insert(1, NumericBone.checkFor, NumericBone)

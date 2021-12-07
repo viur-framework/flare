@@ -1,4 +1,4 @@
-from flare.forms import boneSelector, InvalidBoneValueException
+from flare.viur import BoneSelector, InvalidBoneValueException
 from flare.i18n import translate
 from .base import BaseBone, BaseEditWidget
 
@@ -55,4 +55,4 @@ class PasswordBone(BaseBone):
         ].startswith("password.")
 
 
-boneSelector.insert(1, PasswordBone.checkFor, PasswordBone)
+BoneSelector.insert(1, PasswordBone.checkFor, PasswordBone)

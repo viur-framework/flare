@@ -1,5 +1,5 @@
 from flare.ignite import *
-from flare.forms import boneSelector
+from flare.viur import BoneSelector
 from flare.config import conf
 from flare import html5
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
@@ -35,4 +35,4 @@ class RawBone(BaseBone):
         ].startswith("raw.")
 
 
-boneSelector.insert(1, RawBone.checkFor, RawBone)
+BoneSelector.insert(1, RawBone.checkFor, RawBone)

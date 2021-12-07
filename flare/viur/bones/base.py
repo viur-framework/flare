@@ -2,13 +2,14 @@
 
 import json, time
 from enum import IntEnum
+from flare import html5
 from flare.button import Button
 from flare.ignite import *
-from flare.forms import boneSelector
+from flare.viur import BoneSelector
 from flare.config import conf
 from flare.i18n import translate
-from flare.forms.formtooltip import ToolTip
-from flare.forms.formerrors import collectBoneErrors, checkErrors, ToolTipError
+from flare.viur.formtooltip import ToolTip
+from flare.viur.formerrors import collectBoneErrors, ToolTipError
 
 
 class ReadFromClientErrorSeverity(IntEnum):
@@ -539,4 +540,4 @@ class BaseBone(object):
     """
 
 
-boneSelector.insert(0, lambda *args, **kwargs: True, BaseBone)
+BoneSelector.insert(0, lambda *args, **kwargs: True, BaseBone)

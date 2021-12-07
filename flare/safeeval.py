@@ -128,6 +128,7 @@ class SafeEval:
         self.nodes: Dict[ast.AST, Callable[[ast.AST, Dict[str, Any]], Any]] = {
             ast.Call: self.callNode,
             ast.Compare: self.compareNode,
+            ast.List: self.listNode,
             ast.Name: lambda node, names: names.get(node.id),
             ast.Constant: lambda node, _: node.n,
             ast.NameConstant: lambda node, _: node.value,
@@ -207,6 +208,9 @@ class SafeEval:
                 return False
             left = right
         return True
+
+    def listNode(self, node, names):
+        return [self.execute(node, names) for node in node.elts]
 
     def execute(self, node: [str, ast.AST], names: Dict[str, Any]) -> Any:
         """Evaluates the current node with optional data.
