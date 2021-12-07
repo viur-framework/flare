@@ -2,6 +2,9 @@
 
 This file documents any relevant changes.
 
+## [main] - unreleased
+- Feat: Improved and bug-fixed book-keeping for proxies used by event-listeners.
+
 ## [1.0.9] - 2021-11-29
 - Feat: Conditional displaying of bones based on Python expressions
 - Feat(**BREAKING**): Entire refactoring of the stuff from formerly `flare.forms.formtags` (now just `flare.viur`)
