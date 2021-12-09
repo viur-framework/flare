@@ -31,7 +31,7 @@ class RelationalEditWidget(BaseEditWidget):
             """
             <div class='flr-value--relational-wrapper'>
                 <div [name]="destWidget" class="input input-group-item" readonly></div>
-                <flare-button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="icon-check"></flare-button>
+                <flare-button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="icon-save"></flare-button>
                 <flare-button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="icon-cross"></flare-button>
             </div>
             """
@@ -202,10 +202,6 @@ class RelationalViewWidget(html5.Div):
 class RelationalMultiEditWidget(BaseMultiEditWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.addBtn["text"] = "Add"
-        self.addBtn["icon"] = "icon-add"
-        self.addBtn.removeClass("btn--add")
-        self.addBtn.addClass("btn--add")
 
     def onAddBtnClick(self):
         selector = conf["selectors"].get(self.bone.destModule)
