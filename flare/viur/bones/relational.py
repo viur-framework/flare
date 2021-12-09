@@ -32,7 +32,7 @@ class RelationalEditWidget(BaseEditWidget):
             <div class='flr-value--relational-wrapper'>
                 <div [name]="destWidget" class="input input-group-item" readonly></div>
                 <flare-button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="icon-save"></flare-button>
-                <flare-button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="icon-cross"></flare-button>
+                <flare-button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="icon-cancel"></flare-button>
             </div>
             """
         )
@@ -353,8 +353,8 @@ class FileEditDirectWidget(RelationalEditWidget):
                 <div class="flr-bone-widgets">
                     <div class="flr-widgets-item input-group" [name]='filerow'>
                         <flare-input [name]="destWidget" readonly>
-                        <flare-button [name]="selectBtn" class="btn--select input-group-item--last is-hidden" text="Select" icon="icon-select"></flare-button>
-                        <flare-button hidden [name]="deleteBtn" class="btn--delete" text="Delete" icon="icon-delete"></flare-button>
+                        <flare-button [name]="selectBtn" class="btn--select input-group-item--last is-hidden" text="Select" icon="icon-list"></flare-button>
+                        <flare-button hidden [name]="deleteBtn" class="btn--delete" text="Delete" icon="icon-cancel"></flare-button>
                     </div>
                     <div class="flr-widgets-item">
                         <div [name]="dropArea" class="supports-upload">

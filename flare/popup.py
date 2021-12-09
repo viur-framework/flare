@@ -31,7 +31,7 @@ class Popup(html5.Div):
                             </div>
                         </div>
 
-                        <flare-icon value="icon-cross" @click="onClose"
+                        <flare-icon value="icon-cancel" @click="onClose"
                             flare-if="closeable" title="{{ translate('flare.label.close') }}"
                             class="item-action btn--transparent btn--icon">
                     </div>

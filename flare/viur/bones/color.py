@@ -13,7 +13,7 @@ class ColorEditWidget(BaseEditWidget):
         tpl.appendChild(
             """
                 <input [name]="widget" type="color" class="input flr-input">
-                <flare-button [name]="unsetBtn" text="Unset" icon="icon-cross" class="btn--delete">
+                <flare-button [name]="unsetBtn" text="Unset" icon="icon-cancel" class="btn--delete">
             """,
             bindTo=self,
         )
