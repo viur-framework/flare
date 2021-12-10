@@ -386,18 +386,11 @@ class ViurFormBone(html5.Div):
                 # warning overrides server default
                 self.skel[self.boneName] = self.defaultValue
 
-            self.unserializeAll(self.skel)  # fixme why does a bone unserializes the entire form?????????
+            self.unserialize(self.skel.get(self.boneName))
             self.formloaded = True
 
     def onChange(self, event, *args, **kwargs):
         pass
-
-    def unserializeAll(self, data=None):  # fixme why does a bone unserializes the entire form?????????
-        if not data:
-            return
-
-        for key, bone in self.form.bones.items():
-            bone.boneWidget.unserialize(data.get(key))
 
     def unserialize(self, data=None):
         self.boneWidget.unserialize(data)

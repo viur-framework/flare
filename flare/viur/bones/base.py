@@ -289,10 +289,17 @@ class BaseMultiViewWidget(html5.Ul):
         if not isinstance(value, list):
             return
 
-        for entry in value:
+        long = False
+        for idx,entry in enumerate(value):
             widget = self.widgetFactory(self.bone, **self.kwargs)
             widget.unserialize(entry)
+            if idx >=10:
+                widget.hide()
+                long = True
             self.appendChild(widget)
+
+        if long:
+            self.appendChild("...")
 
     def serialize(self):
         ret = []
