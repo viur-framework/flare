@@ -91,7 +91,10 @@ class ViurForm(html5.Form):
             if key in self.ignore or (self.visible and key not in self.visible):
                 continue
 
-            self.appendChild(ViurFormBone(key, self))
+            bone_field = ViurFormBone(key, self)
+            bone_field.onAttach()  # needed for value loading!  # fixme should be solved differently.
+
+            self.appendChild(bone_field)
 
         self.update()  # Update conditional fields
 
@@ -324,6 +327,7 @@ class ViurFormBone(html5.Div):
         self.labelWidget = None
         self.boneWidget = None
         self.hasError = None  # ??? no plan why this is required
+        self.addClass("flr-viur-form-bone")
 
     def onAttach(self):
         if not self.formloaded:

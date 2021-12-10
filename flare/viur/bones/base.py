@@ -217,6 +217,7 @@ class BaseMultiEditWidget(html5.Div):
             """
             <div [name]="actions" class="flr-bone-actions input-group">
                 <flare-button [name]="addBtn" class="btn--add" text="Add" icon="icon-add"></flare-button>
+                <flare-button [name]="removeBtn" class="btn--delete" text="Clear" icon="icon-cancel"></flare-button>
             </div>
             <div [name]="widgets" class="flr-bone-multiple-wrapper"></div>
             """
@@ -234,10 +235,15 @@ class BaseMultiEditWidget(html5.Div):
 
         if self.bone.boneStructure["readonly"]:
             self.addBtn.hide()
+            self.removeBtn.hide()
 
     def onAddBtnClick(self):
         entry = self.addEntry()
         entry.focus()
+
+    def onRemoveBtnClick(self):
+        self.widgets.removeAllChildren()
+        self.widgets.hide()
 
     def addEntry(self, value=None):
         entry = self.widgetFactory(self.bone, **self.kwargs)

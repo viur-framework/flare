@@ -66,6 +66,7 @@ class RelationalEditWidget(BaseEditWidget):
             self.editWidget.buildInternalForm()
             self.editWidget.addClass("flr-internal-edit", "flr-bone--relational-using")
             self.appendChild(self.editWidget)
+            self.addClass("flr-bone--relational-form")
         else:
             self.editWidget = None
 
@@ -350,7 +351,7 @@ class FileEditDirectWidget(RelationalEditWidget):
         tpl.appendChild(
             self.fromHTML(
                 """
-                <div class="flr-bone-widgets">
+                <div class="flr-bone-file-widgets">
                     <div class="flr-widgets-item input-group" [name]='filerow'>
                         <flare-input [name]="destWidget" readonly>
                         <flare-button [name]="selectBtn" class="btn--select input-group-item--last is-hidden" text="Select" icon="icon-list"></flare-button>
@@ -489,7 +490,7 @@ class FileMultiEditDirectWidget(html5.Div):
         super().__init__(
             """
 			<div [name]="actions" class="flr-bone-actions input-group" style="width:100%">
-			    <div class="flr-bone-widgets">
+			    <div class="flr-bone-file-widgets">
 				<div [name]="dropArea" class="supports-upload" style="position:relative; border:2px dashed #ccc; padding:10px 10px 25px; margin: 0 -2px;">
                     <flare-svg-icon value='icon-upload-file' title='Upload'> </flare-svg-icon>
                     <label for="inplace-upload" class="flr-inplace-upload-label"><strong>Datei auswählen</strong><span [name]="dropText"> oder hierhin ziehen</span>. </label>

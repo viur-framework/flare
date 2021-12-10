@@ -11,7 +11,7 @@ class SpatialEditWidget(BaseEditWidget):
             self.fromHTML(
                 """
             <flare-input [name]="latitude" type="number" placeholder="latitude" step="any">
-            <flare-input [name]="longitude" type="number" placeholer="longitute" step="any">
+            <flare-input [name]="longitude" type="number" placeholder="longitute" step="any">
             """
             )
         )
