@@ -2050,6 +2050,7 @@ class Select(
     _attrRequired,
     _attrMultiple,
     _attrSize,
+    _attrValue,
 ):
     _tagName = "select"
 
