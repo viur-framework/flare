@@ -94,6 +94,14 @@ class ViurForm(html5.Form):
             bone_field = ViurFormBone(key, self)
             bone_field.onAttach()  # needed for value loading!  # fixme should be solved differently.
 
+            # Hide invisible fields or fields with conditional flagging
+            if not bone["visible"] or bone["params"].get("visibleIf"):
+                bone_field.hide()
+
+            # Disable fields with conditional flagging
+            if bone["params"].get("readonlyIf"):
+                bone_field.disable()
+
             self.appendChild(bone_field)
 
         self.update()  # Update conditional fields
@@ -118,12 +126,19 @@ class ViurForm(html5.Form):
         """
         Updates current form view state regarding conditional input fields.
         """
-        values = self.serialize()
+        values = None
 
         for key, desc in self.structure.items():
             for event in ("visibleIf", "readonlyIf", "evaluate"):
                 if not (expr := desc["params"].get(event)):
                     continue
+
+                # In case no conditionals are available, serialize only on first call.
+                if values is None:
+                    values = self.serialize()
+
+                #print(event, "=>", expr)
+                #print(values.get("type"))
 
                 # Compile expression at first run
                 if isinstance(expr, str):
@@ -143,6 +158,7 @@ class ViurForm(html5.Form):
 
                 if event == "evaluate":
                     self.bones[key].unserialize({key: res})
+
                 elif res:
                     if event == "visibleIf":
                         self.bones[key].show()
@@ -150,6 +166,7 @@ class ViurForm(html5.Form):
                         self.bones[key].disable()
                     else:
                         raise NotImplementedError("Unknown event %r", event)
+
                 else:
                     if event == "visibleIf":
                         self.bones[key].hide()
