@@ -12,4 +12,5 @@ lngEn = {
     "flare.network.error.500": "Internal Server Error",
     "flare.network.hint.401": "\n\nPlease verify that you're logged in,\nand restart the program.",
     "flare.forms.tooltip": "Hint",
+    "flare.forms.error": "Error"
 }

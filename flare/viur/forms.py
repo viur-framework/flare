@@ -251,17 +251,19 @@ class ViurForm(html5.Form):
         self.state.updateState("submitStatus", "finished")
 
     def handleErrors(self):
-        for error in self.errors:
-            if error["fieldPath"][0] in self.bones:
-                boneName = error["fieldPath"][0]
-                bone_field = self.bones[boneName]  # todo dependency errors
-                boneStructure = self.structure[bone_field.boneName]
-                if (error["severity"] % 2 == 0 and boneStructure["required"]) or error["severity"] % 2 == 1:  # invalid
-                    bone_field.setInvalid()
-                else:
-                    bone_field.setValid()
+        at_least_one_silly_error_meeeh = False
 
-        self.createFormErrorMessage()
+        for key, form_bone in self.bones.items():
+            if errors := [error for error in self.errors
+                          if error["fieldPath"][0] == key and
+                             ((error["severity"] > 0 and form_bone.bone.required) or error["severity"] % 2 == 1)]:
+                form_bone.setInvalid(errors)
+                at_least_one_silly_error_meeeh = True
+            else:
+                form_bone.setValid()
+
+        if at_least_one_silly_error_meeeh:
+            self.createFormErrorMessage()
 
     def createFormSuccessMessage(self):
         try:
@@ -343,7 +345,8 @@ class ViurFormBone(html5.Div):
         self.containerWidget = None
         self.labelWidget = None
         self.boneWidget = None
-        self.hasError = None  # ??? no plan why this is required
+        self.errorWidget = None
+
         self.addClass("flr-viur-form-bone")
 
     def onAttach(self):
@@ -376,10 +379,17 @@ class ViurFormBone(html5.Div):
                     self.structure,
                     formName=self.form.formName
                 )
-                boneFactory = boneClass(self.moduleName, self.boneName, self.structure, self.form.errors)
 
-                self.containerWidget, self.labelWidget, self.boneWidget, self.hasError = \
+                boneFactory = boneClass(
+                    self.moduleName,
+                    self.boneName,
+                    self.structure,
+                    self.form.errors
+                )
+
+                self.containerWidget, self.labelWidget, self.boneWidget, self.errorWidget = \
                     boneFactory.boneWidget(self.label, filter=self.filter)
+
                 self.bone = self.boneWidget.bone
 
             except Exception as e:
@@ -439,23 +449,35 @@ class ViurFormBone(html5.Div):
     def _setValue(self, val):
         self.defaultValue = val
 
-    def labelTemplate(self):
-        return False
-        """Default label."""
-        # language=HTML
-        return """<label [name]="boneLabel" class="input-group-item--first label flr-label flr-label--{{type}} flr-label--{{boneName}}">{{descr}}</label>"""
+    def setInvalid(self, errors=None):
+        self.addClass("is-invalid")
+        self.removeClass("is-valid")
 
-    def setInvalid(self):
-        self.toggleClass("is-invalid", "is-valid")  # wrapper
-        if self.boneLabel:
-            self.boneLabel.toggleClass("is-invalid", "is-valid")  # label
-        self.boneWidget.toggleClass("is-invalid", "is-valid")  # bone
+        self.boneWidget.addClass("is-invalid")
+        self.boneWidget.removeClass("is-valid")
+
+        if self.labelWidget:
+            self.labelWidget.addClass("is-invalid")
+            self.labelWidget.removeClass("is-valid")
+
+        if errors:
+            self.errorWidget.tooltipDescr.replaceChild("<br>".join([error["errorMessage"] for error in errors]))
+            self.errorWidget.show()
+        else:
+            self.errorWidget.hide()
 
     def setValid(self):
-        self.toggleClass("is-valid", "is-invalid")
-        if self.boneLabel:
-            self.boneLabel.toggleClass("is-valid", "is-invalid")
-        self.boneWidget.toggleClass("is-valid", "is-invalid")
+        self.addClass("is-valid")
+        self.removeClass("is-invalid")
+
+        self.boneWidget.addClass("is-valid")
+        self.boneWidget.removeClass("is-invalid")
+
+        if self.labelWidget:
+            self.labelWidget.addClass("is-valid")
+            self.labelWidget.removeClass("is-invalid")
+
+        self.errorWidget.hide()
 
 
 @html5.tag("viur-form-submit")

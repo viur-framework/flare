@@ -9,7 +9,7 @@ from flare.viur import BoneSelector
 from flare.config import conf
 from flare.i18n import translate
 from flare.viur.formtooltip import ToolTip
-from flare.viur.formerrors import collectBoneErrors, ToolTipError
+from flare.viur.formerrors import collectBoneErrors
 
 
 class ReadFromClientErrorSeverity(IntEnum):
@@ -485,25 +485,21 @@ class BaseBone(object):
         return descrLbl
 
     def tooltipWidget(self):
-        if (
-            "params" in self.boneStructure.keys()
-            and isinstance(self.boneStructure["params"], dict)
-            and "tooltip" in self.boneStructure["params"].keys()
-        ):
+        if tooltip := self.boneStructure["params"].get("tooltip"):
             return ToolTip(
                 shortText=self.boneName
-                if conf["showBoneNames"]
-                else self.boneStructure.get("descr", self.boneName),
-                longText=self.boneStructure["params"]["tooltip"],
+                if conf["showBoneNames"] else self.boneStructure.get("descr", self.boneName),
+                longText=tooltip,
             )
-        return ""
+
+        return None
 
     def errorWidget(self):
-        if not self.boneErrors:
-            return False
-        return ToolTipError(longText=", ".join(self.boneErrors))
+        tooltip = ToolTip(shortText=translate("flare.forms.error"), longText=", ".join(self.boneErrors))
+        tooltip.addClass("msg--error", "is-open")
+        return tooltip
 
-    def boneWidget(self, label=True, tooltip=True,*args,**kwargs):
+    def boneWidget(self, *args, **kwargs):
         boneId = "%s___%s" % (self.boneName, str(time.time()).replace(".", "_"))
 
         widget = self.editWidget(errorInformation=self.errors)
@@ -512,17 +508,13 @@ class BaseBone(object):
         label = self.labelWidget()
         label["for"] = boneId
 
-        tooltip = self.tooltipWidget()
-
-        error = self.errorWidget()
-
         containerDiv = html5.Div()
-
         containerDiv.addClass(
             "flr-bone",
             "flr-bone--%s " % self.boneStructure["type"].replace(".", "-"),
             "flr-bone--%s" % self.boneName,
         )
+
         if self.multiple:
             containerDiv.addClass("flr-bone-multiple")
         if self.languages:
@@ -534,10 +526,14 @@ class BaseBone(object):
         valueDiv = html5.Div()
         valueDiv.addClass("flr-value-wrapper")
         valueDiv.appendChild(widget)
-        if tooltip:
+
+        if tooltip := self.tooltipWidget():
             valueDiv.appendChild(tooltip)
 
-        if error:
+        if error := self.errorWidget():
+            if not self.boneErrors:
+                error.hide()
+
             valueDiv.appendChild(error)
 
         containerDiv.appendChild(valueDiv)
