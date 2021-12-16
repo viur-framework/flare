@@ -36,7 +36,7 @@ class ViurForm(html5.Form):
         self.bones = {}
         self.skel = skel or {}
         self.errors = errors or []
-        self.context = context
+        self.context = context or {}
         self.visible = visible
         self.ignore = ignore
         self.hide = hide
@@ -135,10 +135,11 @@ class ViurForm(html5.Form):
 
                 # In case no conditionals are available, serialize only on first call.
                 if values is None:
-                    values = self.serialize()
+                    values = self.context.copy()
+                    values.update(self.serialize())
 
-                #print(event, "=>", expr)
-                #print(values.get("type"))
+                logging.debug("%r => %r", event, expr)
+                #logging.debug("values = %r", values)
 
                 # Compile expression at first run
                 if isinstance(expr, str):
@@ -156,8 +157,10 @@ class ViurForm(html5.Form):
                     logging.exception(e)
                     res = False
 
+                logging.debug("res = %r", res)
+
                 if event == "evaluate":
-                    self.bones[key].unserialize({key: res})
+                    self.bones[key].unserialize(res)
 
                 elif res:
                     if event == "visibleIf":

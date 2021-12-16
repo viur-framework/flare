@@ -119,7 +119,8 @@ class SafeEval:
         self.allowedCallables = {
             "str": str,
             "float": float,
-            "int": int
+            "int": int,
+            "bool": bool
         }
 
         if allowedCallables:
@@ -171,6 +172,8 @@ class SafeEval:
 
     def _BoolOp(self, node, names):
         """Handling ast.BoolOp in a Pythonic style."""
+        ret = None
+
         for child in node.values:
             ret = self.execute(child, names)
             if isinstance(node.op, ast.Or) and ret:
@@ -178,7 +181,7 @@ class SafeEval:
             elif isinstance(node.op, ast.And) and not ret:
                 return ret
 
-        return None
+        return ret
 
     def callNode(self, node: ast.Call, names: Dict[str, Any]) -> Any:
         """Evaluates the call if present in allowed callables.
