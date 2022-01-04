@@ -107,16 +107,23 @@ class HTTPRequest(object):
 
 def NiceError(req, code, params="", then=None):
     """Displays a descriptive error message using an Alert dialog to the user."""
-    reason = i18n.translate(
-        f"flare.network.error.{code}", fallback=i18n.translate("flare.network.error")
-    )
+    # Try to obtain error reason from header
+    if not (reason := req.request.req.getResponseHeader("x-viur-error")):
+        reason = i18n.translate(
+            f"flare.network.error.{code}", fallback=i18n.translate("flare.network.error")
+        )
+
     hint = i18n.translate(f"flare.network.hint.{code}", fallback="")
 
     from . import popup
 
+    # Show parameters in GET-notation.
+    if params := "&".join(f"{key}={value}" for key, value in req.params.items()):
+        params = "?" + params
+
     popup.Alert(
         # language=HTML
-        f"<strong>{reason}</strong>{hint}\n\n<em>{req.module}/{req.url}/{req.params}</em>",
+        f"<strong>{reason}</strong>{hint}\n\n<em>{req.module}/{req.url}{params}</em>",
         title=i18n.translate("flare.label.error") + " " + str(code),
         icon="icon-error",
         okCallback=then,
@@ -345,6 +352,7 @@ class NetworkService(object):
         self.requestFinishedEvent.register(self)
         self.modifies = modifies
         self.secure = secure
+        self.request = None  # the underlying HTTPRequest
 
         self.kickoffs = 0
         if kickoff:
@@ -453,7 +461,7 @@ class NetworkService(object):
             else:
                 multipart = params
 
-            HTTPRequest(
+            self.request = HTTPRequest(
                 "POST",
                 url,
                 self.onCompletion,
@@ -469,7 +477,7 @@ class NetworkService(object):
                 else:
                     url += "?skey=%s" % skey
 
-            HTTPRequest("GET", url, self.onCompletion, self.onError)
+            self.request = HTTPRequest("GET", url, self.onCompletion, self.onError)
 
     def onCompletion(self, text):
         """Internal hook for the AJAX call."""
