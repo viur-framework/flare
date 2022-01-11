@@ -118,7 +118,7 @@ def NiceError(req, code, params="", then=None):
     from . import popup
 
     # Show parameters in GET-notation.
-    if params := "&".join(f"{key}={value}" for key, value in req.params.items()):
+    if params := "&".join(f"{key}={value}" for key, value in (req.params or {}).items()):
         params = "?" + params
 
     popup.Alert(
