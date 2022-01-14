@@ -83,7 +83,7 @@ class NumericEditWidget(BaseEditWidget):
 
     def setValue(self, value):
         if not self.bone.currency:
-            if not self.bone.required and (value is None or str(value).strip() is ""):
+            if not self.bone.required and (value is None or not str(value).strip()):
                 self.value = None
             elif self.bone.precision:
                 self.value = utils.parseFloat(value or 0.0)
