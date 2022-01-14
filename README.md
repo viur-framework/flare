@@ -9,7 +9,7 @@ Flare is an app development framework for Python-based web-apps running on top o
 
 It has integrations to concepts with [ViUR](https://www.viur.dev/), an MVC-framework for the Google App Engine platform, but can also be used stand-alone.
 
-Fire up the tiny [Hello World](https://raw.githack.com/viur-framework/flare/main/hello.html) live demo. More information can be found [in the documentation](https://readthedocs.org/projects/viur-flare/badge/?version=latest).
+Fire up the tiny [Hello World](https://raw.githack.com/viur-framework/flare/main/hello.html) live demo. More information can be found [in the documentation](https://viur-flare.readthedocs.io/en/stable/).
 
 ## History
 Flare is the result of a several years experience in writing web-apps in pure Python. Formerly compiled from Python to JavaScript using [PyJS](https://github.com/pyjs/pyjs), it now entirely settles up on Pyodide. Additionally, Flare serves as a toolbox for various projects and solutions developed at [Mausbrand Informationssysteme GmbH](https://www.mausbrand.de/en), a software-company from Dortmund, Germany.
