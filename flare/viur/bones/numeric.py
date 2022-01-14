@@ -35,6 +35,7 @@ def _formatCurrencyValue(value, bone):
         + (bone.currency or "")
     )
 
+
 class NumericEditWidget(BaseEditWidget):
     style = ["flr-value", "flr-value--numeric"]
 
@@ -82,8 +83,10 @@ class NumericEditWidget(BaseEditWidget):
 
     def setValue(self, value):
         if not self.bone.currency:
-            if self.bone.precision:
-                self.value = utils.parseFloat(value or 0)
+            if not self.bone.required and (value is None or str(value).strip() is ""):
+                self.value = None
+            elif self.bone.precision:
+                self.value = utils.parseFloat(value or 0.0)
             else:
                 self.value = utils.parseInt(value or 0)
 
