@@ -20,7 +20,7 @@ conf = {
     "showBoneNames": True,
     "emptyValue": None,
     "defaultLanguage": "de",
-    "flare.icon.svg.embedding.path": "/static/svgs",
+    "flare.icon.svg.embedding.path": "./static/svgs",
     "flare.icon.fallback.error": "icon-error",
     "flare.language.current": "de",
 }
