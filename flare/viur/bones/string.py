@@ -2,7 +2,7 @@ from flare import html5, utils
 from flare.viur import BoneSelector
 from flare.config import conf
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
-
+import pyodide
 
 class StringEditWidget(BaseEditWidget):
     style = ["flr-value", "flr-value--string"]
@@ -39,7 +39,7 @@ class StringEditWidget(BaseEditWidget):
         if self.timeout:
             html5.window.clearTimeout(self.timeout)
 
-        self.timeout = html5.window.setTimeout(self.renderTimeout, 125)
+        self.timeout = html5.window.setTimeout(pyodide.create_once_callable(self.renderTimeout), 125)
         event.stopPropagation()
 
     def renderTimeout(self):

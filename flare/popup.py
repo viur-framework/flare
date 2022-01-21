@@ -1,7 +1,8 @@
 """Pre-defined dialog widgets for user interaction."""
-
+import pyodide
 from . import html5, utils, icons, i18n
 from .button import Button
+
 
 
 class Popup(html5.Div):
@@ -80,13 +81,15 @@ class Popup(html5.Div):
             self.onDocumentKeyDownMethod = (
                 self.onDocumentKeyDown
             )  # safe reference to method
-            html5.document.addEventListener("keydown", self.onDocumentKeyDownMethod)
+            self.keydown_proxy = pyodide.create_proxy(self.onDocumentKeyDownMethod)
+            html5.document.addEventListener("keydown", self.keydown_proxy)
 
     def onDetach(self):
         super(Popup, self).onDetach()
 
         if self.enableShortcuts:
-            html5.document.removeEventListener("keydown", self.onDocumentKeyDownMethod)
+            html5.document.removeEventListener("keydown", self.keydown_proxy)
+            self.keydown_proxy.destroy()
 
     def onDocumentKeyDown(self, event):
         if html5.isEscape(event):

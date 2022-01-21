@@ -9,7 +9,8 @@ from flare.config import conf
 from flare.i18n import translate
 from flare.viur.formatString import formatString
 from flare.icons import SvgIcon, Icon
-
+from flare.event import EventDispatcher
+import pyodide
 
 # fixme embedsvg
 
@@ -173,7 +174,7 @@ class TreeItemWidget(html5.Li):
         if "beforeDiv" in dir(self) or "afterDiv" in dir(self):
             w = html5.window
             w.setTimeout(
-                self.disableDragMarkers, 2000
+                pyodide.create_once_callable(self.disableDragMarkers), 2000
             )  # test later to leave, to avoid flickering...
 
     def disableDragMarkers(self):
@@ -188,7 +189,7 @@ class TreeItemWidget(html5.Li):
         else:
             self.leaveElement = True
             w = html5.window
-            w.setTimeout(self.disableDragMarkers, 5000)
+            w.setTimeout(pyodide.create_once_callable(self.disableDragMarkers), 5000)
 
     def onDrop(self, event):
         """We received a drop.
@@ -406,6 +407,13 @@ class TreeWidget(html5.Div):
         :type rootNode: str or None
         """
         super(TreeWidget, self).__init__()
+        # Entry frame
+        self.entryFrame = html5.Ol()
+        self.entryFrame.addClass("hierarchy")
+        self.appendChild(self.entryFrame)
+
+        self.selectionActivatedEvent = EventDispatcher("selectionActivated")
+        #FIXME
 
     def setSelector(self, callback, multi=True, allow=None):
         """Configures the widget as selector for a relationalBone and shows it."""
@@ -413,7 +421,6 @@ class TreeWidget(html5.Div):
         self.selectionAllow = allow or TreeItemWidget
         self.selectionMulti = multi
 
-        logging.debug("TREEEE")
 
     @staticmethod
     def canHandle(moduleName, moduleInfo):

@@ -1,6 +1,6 @@
 """Wrapper to handle ViUR-related Ajax requests."""
 
-import logging
+import logging,pyodide
 from flare.event import EventDispatcher
 import os, sys, json, string, random
 from . import html5, i18n
@@ -35,7 +35,9 @@ class DeferredCall(object):
         self._tFunc = func
         self._tArgs = args
         self._tKwArgs = kwargs
-        html5.window.setTimeout(self.run, delay)
+
+        self.proxy_run = pyodide.create_once_callable(self.run)
+        html5.window.setTimeout(self.proxy_run, milliseconds=delay)
 
     def run(self):
         """Internal callback that executes the callback function."""
@@ -71,7 +73,8 @@ class HTTPRequest(object):
         self.content_type = content_type
 
         self.req = html5.jseval("new XMLHttpRequest()")
-        self.req.onreadystatechange = self.onReadyStateChange
+        self.proxy_readystate = pyodide.create_proxy(self.onReadyStateChange)
+        self.req.onreadystatechange = self.proxy_readystate
         self.req.open(method, url, asynchronous)
         try:
             if response_type in ["blob", "arraybuffer", "document"]:

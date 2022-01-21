@@ -13,7 +13,7 @@ class flare {
 			if (res.ok) {
 				console.debug(`Using local Pyodide...`);
 			} else {
-				indexURL = "https://cdn.jsdelivr.net/pyodide/v0.18.1/full/";
+				indexURL = "https://cdn.jsdelivr.net/pyodide/v0.19.0/full/";
 				console.debug(`Using Pyodide fallback from ${indexURL}...`);
 			}
 
@@ -104,7 +104,7 @@ class flare {
 										continue;
 									}
 
-									lookup += (lookup ? "/" : "") + path[i];
+									lookup += "/" + path[i];
 									if (parseInt(i) === path.length - 1) {
 										pyodide._module.FS.writeFile(lookup, code);
 										console.debug(`fetched ${lookup}`);

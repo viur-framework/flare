@@ -1,4 +1,4 @@
-import logging
+import logging, pyodide
 
 from js import Event as JSevent, encodeURI as JSencodeURI
 
@@ -164,7 +164,7 @@ class HtmlEditor(html5.Textarea):
 
         """
         self.summernote.get(0).addEventListener(
-            "summernote.change", self.onEditorChange
+            "summernote.change", pyodide.create_proxy(self.onEditorChange)
         )  # ARGGGGG! WTF
 
     def enable(self):
