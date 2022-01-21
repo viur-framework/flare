@@ -2,6 +2,9 @@
 
 This file documents any relevant changes.
 
+## [1.0.11] - 2022-01-21
+- (**BREAKING**): Switch to Pyodide 0.19.X
+
 ## [1.0.10] - 2021-12-16
 - Feat: ViurForm and ViurFormBone with improved error reporting
 - Feat: Improved and bug-fixed book-keeping for proxies used by event-listeners.
