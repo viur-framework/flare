@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 import io, os, sys, json, shutil, argparse, pathlib, zipfile
 from urllib.request import urlopen
-from urllib.error import HTTPError
 
 SUPPORTED=[
     # Full Pyodide releases
-    "v0.18.0",
-    "v0.18.1",
+    "v0.19.0",
     # Current development version of the Pyodide standard
     "dev",
     # Pyodide-nano is shipped as a zip-file
-    "v0.18.0-nano",
-    "v0.18.1-nano",
+    #"v0.18.0-nano",
+    #"v0.18.1-nano",
 ]
 
 # Defaults
@@ -22,7 +20,8 @@ FILES = [
     "pyodide.asm.data",
     "pyodide.asm.js",
     "pyodide.asm.wasm",
-    "pyodide.js"
+    "pyodide.js",
+    "pyodide_py.tar"
 ]
 PACKAGES = [
     "distlib",
