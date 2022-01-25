@@ -27,7 +27,7 @@ class ViurForm(html5.Form):
             *args,
             **kwargs
     ):
-        logging.debug("ViurForm: %r, %r, %r, %r, %r, %r, %r, %r, %r, %r, %r", formName, moduleName, actionName, skel,
+        logging.debug("ViurForm: %r, %r, %r, %r, %r, %r, %r, %r, %r, %r", formName, moduleName, actionName, skel,
                       structure, visible, ignore, hide, args, kwargs)
         super().__init__()
         self.formName = formName
@@ -136,7 +136,7 @@ class ViurForm(html5.Form):
                 # In case no conditionals are available, serialize only on first call.
                 if values is None:
                     values = self.context.copy()
-                    values.update(self.serialize())
+                    values.update(self.serialize(all=True))
 
                 logging.debug("%r => %r", event, expr)
                 #logging.debug("values = %r", values)
@@ -208,7 +208,7 @@ class ViurForm(html5.Form):
 
         DeferredCall(self.update)
 
-    def serialize(self) -> typing.Dict:
+    def serialize(self, all=False) -> typing.Dict:
         """
         Serializes all bone's values into a dict to be sent to ViUR or the be evaluated.
         """
@@ -218,7 +218,7 @@ class ViurForm(html5.Form):
 
         for key, widget in self.bones.items():
             # ignore the key, it is stored in self.key, and read-only bones
-            if key == "key" or widget.bone.readonly:
+            if key == "key" or (widget.bone.readonly and not all):
                 continue
 
             try:
@@ -355,16 +355,16 @@ class ViurFormBone(html5.Div):
     def onAttach(self):
         if not self.formloaded:
             if not self.boneName:
-                logging.debug("Please add boneName attribute to {}", self)
+                logging.error("Please add boneName attribute to %r", self)
 
-            if self.form:
-                logging.debug("Please add :form attribute with a named form widget to {}.", self)
+            if not self.form:
+                logging.error("Please add :form attribute with a named form widget to %r", self)
 
-            if "skel" not in dir(self.form) or "structure" not in dir(self.form):
-                logging.debug("Missing :skel and :structure data binding on referenced form", self.form)
+            if self.form and "skel" not in dir(self.form) or "structure" not in dir(self.form):
+                logging.error("Missing :skel and :structure data binding on referenced form %r", self.form)
 
             if "moduleName" not in dir(self.form):
-                logging.debug("Missing moduleName attribute on referenced form", self.form)
+                logging.error("Missing moduleName attribute on referenced form %r", self.form)
 
             # self.form existiert und form hat skel und structure
             if isinstance(self.form.structure, list):  # fixme: Muss das sein???
