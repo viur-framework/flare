@@ -7,7 +7,7 @@ In this tutorial, we will introduce the widgets of flare.
 Reusable UI components
 --------------------
 
-Flare widgets UI components that encapsulate one HTML element. They render their content using a template, other
+Flare widgets are UI components that encapsulate one HTML element. They render their content using a template, other
 widgets or a mixture of both. When using templates, placeholders can be used to fill in dynamic data, elements can be
 qualified with a name to make them accessible, and events - such as a click - can have a handlers registered to.
 
