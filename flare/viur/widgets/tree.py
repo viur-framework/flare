@@ -314,8 +314,7 @@ class TreeItemWidget(html5.Li):
                 formatString(
                     format,
                     self.data,
-                    self.structure,
-                    language=conf["flare.language.current"],
+                    self.structure
                 )
             )
 

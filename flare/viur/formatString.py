@@ -1,4 +1,4 @@
-from flare import html5, utils
+from flare import html5, utils, conf
 import logging, re, typing
 
 # Choose your flavor; Because we don't have any real plan how to render values from RelationalBones and RecordBones
@@ -14,6 +14,9 @@ def formatString(format: str, data: typing.Dict, structure=None, language=None):
 
     """
     if "$(" in format:
+        if language is None:
+            language = conf["flare.language.current"]
+
         return formatStringHandler(format, data, structure, language=language)
 
     return evalStringHandler(format, data, structure, language)
@@ -26,8 +29,8 @@ def formatStringHandler(
     format: str,
     value: typing.Dict,
     structure: typing.Dict,
-    language: str = "de"  # fixme: language not supported yet.
-)-> str:
+    language: str = "de"
+) -> str:
 
     # --- Helpers ---
     def listToDict(l):
@@ -72,6 +75,7 @@ def formatStringHandler(
                 raise ValueError(f"Access to unknown bone '{bone}' in variable '$({var})'")
 
             if bone is parts[-1]:
+                # bone with further format setting
                 if partFormat := partBone.get("format"):
                     if isinstance(partValue, list):
                         ret += ", ".join([
@@ -79,8 +83,22 @@ def formatStringHandler(
                         ])
                     else:
                         ret += formatStringHandler(partFormat, partValue, partStructure.get(bone))
+
+                # bone with language setting
+                elif (partLanguages := partBone.get("languages")) and language in partLanguages:
+                    # bone is a list
+                    if isinstance(partValue, list):
+                        ret += ", ".join([str(v.get(language, conf["emptyValue"])) for v in partValue])
+
+                    # just the value
+                    else:
+                        ret += str(partValue.get(language, conf["emptyValue"]))
+
+                # bone is a list
                 elif isinstance(partValue, list):
-                    ret += ", ".join(partValue)
+                    ret += ", ".join([str(v) for v in partValue])
+
+                # just the value
                 else:
                     ret += str(partValue)
             else:
