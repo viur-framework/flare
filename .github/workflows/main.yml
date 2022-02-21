@@ -37,7 +37,7 @@ jobs:
           echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
 
       - name: Build image
-        run: docker build . --file Dockerfile --tag $IMAGE_NAME:${{steps.tag_name.outputs.current_version}} --label "runnumber=${GITHUB_RUN_ID}"
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
 
       - name: Log in to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -56,7 +56,7 @@ jobs:
           # [ "$VERSION" == "main" ] && VERSION=latest
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
-          docker push $IMAGE_ID
+
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
 
