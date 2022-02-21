@@ -23,8 +23,14 @@ For better load-time optimization, we started to maintain our own fork of Pyodid
 - [html5](https://github.com/viur-framework/viur-html5) became an integrated part of Flare, but also exists stand-alone as a HTML5-DOM-object library. It is the core component of Flare and provides an HTML-parser for rapid DOM prototyping.
 - [pyodide-html](https://github.com/xhlulu/pyodide-html) is another HTML object library for Pyodide which can be directly installed from within Pyodide.
 
+## Docker
+docker build . -t flare:1.0.13
+docker run -v $(pwd):/workspace -it flare:1.0.13
+
+python3 /tools/flare.py
+
 ## License
-Copyright © 2021 by Mausbrand Informationssysteme GmbH.
+Copyright © 2022 by Mausbrand Informationssysteme GmbH.
 
 Mausbrand and ViUR are registered trademarks of Mausbrand Informationssysteme GmbH.
 
