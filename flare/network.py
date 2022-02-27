@@ -1,9 +1,31 @@
-"""Wrapper to handle ViUR-related Ajax requests."""
+"""
+Tools for handling Ajax/fetch-network requests
+"""
 
-import logging,pyodide
+import logging, pyodide, asyncio
 from flare.event import EventDispatcher
 import os, sys, json, string, random
 from . import html5, i18n
+
+
+def fetch_json(url, callback, **kwargs):
+    """
+    Wrapper that performs a fetch request (with all parameters related to [pyfetch](https://pyodide.org/en/stable/usage/api/python-api.html#pyodide.http.pyfetch).
+
+    :param url: URL to fetch from.
+    :param then: Callback for getting the JSON object as parameter, status-code and status-text as parameters. JSON is None in case of an error.
+    :param catch:  Optional callback for failure, getting the [FetchResponse](https://pyodide.org/en/stable/usage/api/python-api.html#pyodide.http.FetchResponse) as parameter.
+    :param kwargs:  Any kwargs being passed to pyfetch.
+    """
+
+    async def do_fetch(url, callback, **kwargs):
+        res = await pyodide.http.pyfetch(url, **kwargs)
+        if res.ok:
+            return callback(await res.json(), res.status, res.status_text)
+
+        callback(None, res.status, res.status_text)
+
+    asyncio.ensure_future(do_fetch(url, callback, **kwargs))
 
 
 class DeferredCall(object):
