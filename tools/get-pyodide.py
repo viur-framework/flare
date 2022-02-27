@@ -4,6 +4,7 @@ from urllib.request import urlopen
 
 SUPPORTED=[
     # Full Pyodide releases
+    "v0.19.1",
     "v0.19.0",
     # Current development version of the Pyodide standard
     "dev",
