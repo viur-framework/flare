@@ -36,40 +36,27 @@ class TextInsertImageAction(Button):
         conf["mainWindow"].stackWidget(currentSelector)
 
     def onSelectionActivated(self, selectWdg, selection):
-        logging.debug("onSelectionActivated")
+        print("onSelectionActivated")
 
         if not selection:
             return
-
         for item in selection:
-
             if "mimetype" in item.data.keys() and item.data["mimetype"].startswith(
                 "image/"
             ):
-                dataUrl = "/file/download/%s/%s" % (
-                    item.data["dlkey"],
-                    JSencodeURI(item.data["name"]),
-                )
-
                 self.summernote.summernote(
-                    "editor.insertImage", dataUrl, item.data["name"].replace('"', "")
+                    "editor.insertImage", item.data["downloadUrl"], item.data["name"].replace('"', "")
                 )
-                logging.debug("insert img %r", dataUrl)
             else:
-                dataUrl = "/file/download/%s/%s" % (
-                    item.data["dlkey"],
-                    JSencodeURI(item.data["name"]),
-                )
-
                 text = str(self.summernote.summernote("createRange"))  # selected text
                 if not text:
                     text = item.data["name"].replace('"', "")
 
                 self.summernote.summernote(
                     "editor.createLink",
-                    {"url": dataUrl, "text": text, "isNewWindow": True},
+                    {"url": item.data["downloadUrl"], "text": text, "isNewWindow": True},
                 )
-                logging.debug("insert link %r<%r> ", text, dataUrl)
+
 
     @staticmethod
     def isSuitableFor(modul, handler, actionName):
