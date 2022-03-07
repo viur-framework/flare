@@ -343,7 +343,9 @@ class TreeItemWidget(html5.Li):
 
     def onDblClick(self, event):
         self.widget.activateSelection(self)
-        self.widget.parent().parent().parent().close()
+        try:
+            self.widget.parent().parent().parent().close()
+        except:pass
 
         event.preventDefault()
         event.stopPropagation()
