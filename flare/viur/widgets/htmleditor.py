@@ -95,10 +95,10 @@ class HtmlEditor(html5.Textarea):
             DeferredCall(self._attachSummernote, retry=retry + 1, _delay=1000)
             return
 
-        imagebtn = TextInsertImageAction(
-            summernote=self.summernote, boneName=self.boneName
-        )
-        self.parent().appendChild(imagebtn)
+        #imagebtn = TextInsertImageAction(
+        #    summernote=self.summernote, boneName=self.boneName
+        #)
+        #self.parent().appendChild(imagebtn)
 
         if not self.enabled:
             self.summernote.summernote("disable")
