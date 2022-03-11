@@ -142,7 +142,7 @@ class flare {
 					fetch(zipurl, {}).then((response) => {
 						if (response.status === 200) {
 							return response.blob().then((blob) => {
-								let zipfile = "/" + module + ".zip";
+								let zipfile = "/home/pyodide/" + module + ".zip";
 
 								//pyodide._module.FS.writeFile(zipfile, content);
 								//pyodide._module.FS.createPreloadedFile("/", module + ".zip", zipurl, true, false);
