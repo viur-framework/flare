@@ -13,7 +13,7 @@ class flare {
 			if (res.ok) {
 				console.debug(`Using local Pyodide...`);
 			} else {
-				indexURL = "https://cdn.jsdelivr.net/pyodide/v0.18.1/full/";
+				indexURL = "https://cdn.jsdelivr.net/pyodide/v0.19.1/full/";
 				console.debug(`Using Pyodide fallback from ${indexURL}...`);
 			}
 
@@ -104,7 +104,7 @@ class flare {
 										continue;
 									}
 
-									lookup += (lookup ? "/" : "") + path[i];
+									lookup += "/" + path[i];
 									if (parseInt(i) === path.length - 1) {
 										pyodide._module.FS.writeFile(lookup, code);
 										console.debug(`fetched ${lookup}`);
@@ -142,7 +142,7 @@ class flare {
 					fetch(zipurl, {}).then((response) => {
 						if (response.status === 200) {
 							return response.blob().then((blob) => {
-								let zipfile = "/" + module + ".zip";
+								let zipfile = "/home/pyodide/" + module + ".zip";
 
 								//pyodide._module.FS.writeFile(zipfile, content);
 								//pyodide._module.FS.createPreloadedFile("/", module + ".zip", zipurl, true, false);

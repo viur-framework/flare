@@ -2,11 +2,23 @@
 
 This file documents any relevant changes.
 
+## [1.0.11] - 2022-01-21
+- (**BREAKING**): Switch to Pyodide 0.19.X
+
+## [1.0.10] - 2021-12-16
+- Feat: ViurForm and ViurFormBone with improved error reporting
+- Feat: Improved and bug-fixed book-keeping for proxies used by event-listeners.
+
+## [1.0.9] - 2021-11-29
+- Feat: Conditional displaying of bones based on Python expressions
+- Feat(**BREAKING**): Entire refactoring of the stuff from formerly `flare.forms.formtags` (now just `flare.viur`)
+- Feat(**BREAKING**): Several renaming, e.g. `forms` into `viur`; Use the script `tools/flare-update.py` to fix your projects
+
 ## [1.0.8] - 2021-11-10
 - Fix: EvalFormatStrings now work properly again
 
 ## [1.0.7] - 2021-09-30
-- Fix: interalEdit Forms no longer lose data 
+- Fix: internalEdit Forms no longer loses data
 
 ## [1.0.6] - 2021-09-29
 - Feat: listhandler now can emit finished status and locks running requests

@@ -1,7 +1,7 @@
 import re, logging
 from flare import utils
 from flare.ignite import *
-from flare.forms import boneSelector
+from flare.viur import BoneSelector
 from flare.config import conf
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
@@ -34,6 +34,7 @@ def _formatCurrencyValue(value, bone):
         + " "
         + (bone.currency or "")
     )
+
 
 class NumericEditWidget(BaseEditWidget):
     style = ["flr-value", "flr-value--numeric"]
@@ -82,8 +83,10 @@ class NumericEditWidget(BaseEditWidget):
 
     def setValue(self, value):
         if not self.bone.currency:
-            if self.bone.precision:
-                self.value = utils.parseFloat(value or 0)
+            if not self.bone.required and (value is None or not str(value).strip()):
+                self.value = None
+            elif self.bone.precision:
+                self.value = utils.parseFloat(value or 0.0)
             else:
                 self.value = utils.parseInt(value or 0)
 
@@ -142,7 +145,7 @@ class NumericViewWidget(BaseViewWidget):
     def unserialize(self, value=None):
         self.value = value
 
-        if value is not None:
+        if value not in [None, []]:
             if self.bone.precision:
                 try:
                     value = "%0.*f" % (self.bone.precision, float(value))
@@ -208,4 +211,4 @@ class NumericBone(BaseBone):
         ].startswith("numeric.")
 
 
-boneSelector.insert(1, NumericBone.checkFor, NumericBone)
+BoneSelector.insert(1, NumericBone.checkFor, NumericBone)

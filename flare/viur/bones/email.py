@@ -1,4 +1,4 @@
-from flare.forms import boneSelector
+from flare.viur import BoneSelector
 from flare.config import conf
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
@@ -36,4 +36,4 @@ class EmailBone(BaseBone):
         ]["type"].startswith("str.email.")
 
 
-boneSelector.insert(2, EmailBone.checkFor, EmailBone)
+BoneSelector.insert(2, EmailBone.checkFor, EmailBone)

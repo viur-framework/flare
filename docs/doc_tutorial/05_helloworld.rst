@@ -83,8 +83,7 @@ your own python module structure fairly quickly.
         def show(self):
             popup.Alert(self._message)
 
-4. Run the ``flare/bin/gen-files-json.py`` utility script in your module directory. This will generate a ``files.json``
-file, that will look like this:
+4. Create a ``files.json`` file in your module directory and add the following content:
 
 .. code:: json
 
@@ -113,6 +112,6 @@ file, that will look like this:
     from helloworld import *
     helloworld.HelloWorld("Hello module world!").show()
 
-Note that you do not need to maintain the ``files.json`` list of your module yourself. Whenever you add or remove
-files from it, you can simply run the ``flare/bin/gen-files-json.py`` utility script in the modules directory to
-regenerate it.
+
+To execute your hello world sample you can use the test webserver located in the ``flare/tools/`` folder.
+Just run ``test-server.py`` in your project directory and open ``http://localhost:8080/index.html`` in your browser. 

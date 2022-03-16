@@ -1,5 +1,5 @@
 from flare import html5
-from flare.forms import boneSelector
+from flare.viur import BoneSelector
 from flare.config import conf
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
@@ -12,9 +12,9 @@ class ColorEditWidget(BaseEditWidget):
         # language=HTML
         tpl.appendChild(
             """
-							<input [name]="widget" type="color" class="input flr-input">
-							<flare-button [name]="unsetBtn" text="Unset" icon="icon-cross" class="btn--delete">
-						""",
+                <input [name]="widget" type="color" class="input flr-input">
+                <flare-button [name]="unsetBtn" text="Unset" icon="icon-cancel" class="btn--delete">
+            """,
             bindTo=self,
         )
 
@@ -58,4 +58,4 @@ class ColorBone(BaseBone):
         ].startswith("color.")
 
 
-boneSelector.insert(1, ColorBone.checkFor, ColorBone)
+BoneSelector.insert(1, ColorBone.checkFor, ColorBone)

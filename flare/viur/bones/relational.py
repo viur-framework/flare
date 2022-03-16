@@ -1,15 +1,9 @@
-import logging
-
-from js import console
-
 from flare import html5
-from flare.icons import SvgIcon
-from flare.forms.widgets.file import FilePreviewImage, Uploader
-from flare.forms.widgets.relational import InternalEdit
-from flare.forms.widgets.tree import TreeLeafWidget, TreeNodeWidget
-from flare.forms.widgets.list import ListWidget
+from flare.viur.widgets.file import FilePreviewImage, Uploader
+from flare.viur.widgets.tree import TreeLeafWidget, TreeNodeWidget
+from flare.viur.forms import ViurForm
 from flare.config import conf
-from flare.forms import boneSelector, formatString, displayStringHandler, moduleWidgetSelector
+from flare.viur import BoneSelector, formatString, displayStringHandler, ModuleWidgetSelector
 from .base import BaseBone, BaseEditWidget, BaseMultiEditWidget, BaseMultiEditWidgetEntry
 
 
@@ -37,8 +31,8 @@ class RelationalEditWidget(BaseEditWidget):
             """
             <div class='flr-value--relational-wrapper'>
                 <div [name]="destWidget" class="input input-group-item" readonly></div>
-                <flare-button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="icon-check"></flare-button>
-                <flare-button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="icon-cross"></flare-button>
+                <flare-button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="icon-save"></flare-button>
+                <flare-button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="icon-cancel"></flare-button>
             </div>
             """
         )
@@ -68,26 +62,21 @@ class RelationalEditWidget(BaseEditWidget):
 
         # Relation edit widget
         if self.bone.dataStructure:
-            self.dataWidget = InternalEdit(
-                self.bone.dataStructure,
-                readOnly=self.bone.readonly,
-                errorInformation=kwargs.get("errorInformation"),
-                defaultCat=None,  # fixme: IMHO not necessary
-                errorQueue=self.bone.errorQueue,
-                prefix="{}.rel".format(self.bone.boneName),
-            )
-            self.addClass("flr-bone--relational-using")
-            self.appendChild(self.dataWidget)
+            self.editWidget = ViurForm(structure=self.bone.dataStructure, errors=kwargs.get("errorInformation"))
+            self.editWidget.buildInternalForm()
+            self.editWidget.addClass("flr-internal-edit", "flr-bone--relational-using")
+            self.appendChild(self.editWidget)
+            self.addClass("flr-bone--relational-form")
         else:
-            self.dataWidget = None
+            self.editWidget = None
 
         # Current data state
         self.destKey = None
 
     def updateString(self):
         if not self.value:
-            if self.dataWidget:
-                self.dataWidget.disable()
+            if self.editWidget:
+                self.editWidget.disable()
 
             return
 
@@ -105,7 +94,9 @@ class RelationalEditWidget(BaseEditWidget):
         else:
             fmtstr = formatString(
                     self.bone.formatString,
-                    self.value
+                    self.value,
+                    self.bone.boneStructure,
+                    self.language
                 )
 
             if isinstance(self.destWidget,html5.Input):
@@ -117,8 +108,8 @@ class RelationalEditWidget(BaseEditWidget):
 
 
     def onChange(self, event):
-        if self.dataWidget:
-            self.value["rel"] = self.dataWidget.doSave()
+        if self.editWidget:
+            self.value["rel"] = self.editWidget.serialize()
             self.updateString()
 
     def unserialize(self, value=None):
@@ -128,20 +119,17 @@ class RelationalEditWidget(BaseEditWidget):
         else:
             self.destKey = value["dest"]["key"]
 
-        if self.dataWidget:
-            self.dataWidget.unserialize((value["rel"] or {}) if value else {})
-            self.dataWidget.enable()
+        if self.editWidget:
+            self.editWidget.unserialize((value["rel"] or {}) if value else {})
+            self.editWidget.enable()
 
         self.value = value
         self.updateString()
 
     def serialize(self):
-        # fixme: Maybe we need a serializeForDocument also?
-        if self.destKey and self.dataWidget:
-            res = {"key": self.destKey}
-            res.update(
-                self.dataWidget.serializeForPost()
-            )  # fixme: call serializeForPost()?
+        if self.destKey and self.editWidget:
+            res = self.editWidget.serialize()
+            res["key"] = self.destKey
             return res
 
         return self.destKey or None
@@ -149,7 +137,7 @@ class RelationalEditWidget(BaseEditWidget):
     def onSelectBtnClick(self):
         selector = conf["selectors"].get(self.bone.destModule)
         if selector is None:
-            selector = moduleWidgetSelector.select(
+            selector = ModuleWidgetSelector.select(
                 self.bone.destModule, self.bone.destInfo
             )
             assert selector, "No selector can be found for %r" % self.destModule
@@ -168,9 +156,8 @@ class RelationalEditWidget(BaseEditWidget):
             lambda selector, selection: self.unserialize(
                 {
                     "dest": selection[0],
-                    "rel": _getDefaultValues(self.bone.dataStructure)
-                    if self.bone.dataStructure
-                    else None,
+                    "rel": _getDefaultValues(self.bone.dataStructure) \
+                                if self.bone.dataStructure else None
                 }
             ),
             multi=self.bone.multiple,
@@ -199,7 +186,7 @@ class RelationalViewWidget(html5.Div):
                     display,
                     value,
                     self.bone.boneStructure,
-                    language=self.language,
+                    self.language,
                 )
 
                 self.replaceChild(displayWidgets or conf["emptyValue"])
@@ -207,7 +194,9 @@ class RelationalViewWidget(html5.Div):
                 self.replaceChild(
                     formatString(
                         self.bone.formatString,
-                        self.value
+                        self.value,
+                        self.bone.boneStructure,
+                        self.language,
                     ) or conf["emptyValue"]
                 )
 
@@ -218,16 +207,12 @@ class RelationalViewWidget(html5.Div):
 class RelationalMultiEditWidget(BaseMultiEditWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.addBtn["text"] = "Add"
-        self.addBtn["icon"] = "icon-add"
-        self.addBtn.removeClass("btn--add")
-        self.addBtn.addClass("btn--add")
 
     def onAddBtnClick(self):
         selector = conf["selectors"].get(self.bone.destModule)
 
         if selector is None:
-            selector = moduleWidgetSelector.select(
+            selector = ModuleWidgetSelector.select(
                 self.bone.destModule, self.bone.destInfo
             )
             assert selector, "No selector can be found for %r" % self.destModule
@@ -290,7 +275,7 @@ class RelationalBone(BaseBone):
         ]["type"].startswith("relational.")
 
 
-boneSelector.insert(1, RelationalBone.checkFor, RelationalBone)
+BoneSelector.insert(1, RelationalBone.checkFor, RelationalBone)
 
 
 # --- hierarchyBone ---
@@ -306,7 +291,7 @@ class HierarchyBone(
         ]["type"].startswith("hierarchy.")
 
 
-boneSelector.insert(1, HierarchyBone.checkFor, HierarchyBone)
+BoneSelector.insert(1, HierarchyBone.checkFor, HierarchyBone)
 
 
 # --- treeItemBone ---
@@ -320,7 +305,7 @@ class TreeItemBone(RelationalBone):
         return skelStructure[boneName]["type"] == "relational.tree.leaf"
 
 
-boneSelector.insert(2, TreeItemBone.checkFor, TreeItemBone)
+BoneSelector.insert(2, TreeItemBone.checkFor, TreeItemBone)
 
 
 # --- treeDirBone ---
@@ -338,7 +323,7 @@ class TreeDirBone(RelationalBone):
         )
 
 
-boneSelector.insert(2, TreeDirBone.checkFor, TreeDirBone)
+BoneSelector.insert(2, TreeDirBone.checkFor, TreeDirBone)
 
 
 # --- fileBone direct upload without repo---
@@ -370,11 +355,11 @@ class FileEditDirectWidget(RelationalEditWidget):
         tpl.appendChild(
             self.fromHTML(
                 """
-                <div class="flr-bone-widgets">
+                <div class="flr-bone-file-widgets">
                     <div class="flr-widgets-item input-group" [name]='filerow'>
                         <flare-input [name]="destWidget" readonly>
-                        <flare-button [name]="selectBtn" class="btn--select input-group-item--last is-hidden" text="Select" icon="icon-select"></flare-button>
-                        <flare-button hidden [name]="deleteBtn" class="btn--delete" text="Delete" icon="icon-delete"></flare-button>
+                        <flare-button [name]="selectBtn" class="btn--select input-group-item--last is-hidden" text="Select" icon="icon-list"></flare-button>
+                        <flare-button hidden [name]="deleteBtn" class="btn--delete" text="Delete" icon="icon-cancel"></flare-button>
                     </div>
                     <div class="flr-widgets-item">
                         <div [name]="dropArea" class="supports-upload">
@@ -433,17 +418,14 @@ class FileEditDirectWidget(RelationalEditWidget):
         uploader.uploadFailed.register(self)
 
     def onDragEnter(self, event):
-        console.log("onDragEnter", event)
         event.stopPropagation()
         event.preventDefault()
 
     def onDragOver(self, event):
-        console.log("onDragEnter", event)
         event.stopPropagation()
         event.preventDefault()
 
     def onDragLeave(self, event):
-        console.log("onDragLeave", event)
         event.stopPropagation()
         event.preventDefault()
 
@@ -512,7 +494,7 @@ class FileMultiEditDirectWidget(html5.Div):
         super().__init__(
             """
 			<div [name]="actions" class="flr-bone-actions input-group" style="width:100%">
-			    <div class="flr-bone-widgets">
+			    <div class="flr-bone-file-widgets">
 				<div [name]="dropArea" class="supports-upload" style="position:relative; border:2px dashed #ccc; padding:10px 10px 25px; margin: 0 -2px;">
                     <flare-svg-icon value='icon-upload-file' title='Upload'> </flare-svg-icon>
                     <label for="inplace-upload" class="flr-inplace-upload-label"><strong>Datei auswählen</strong><span [name]="dropText"> oder hierhin ziehen</span>. </label>
@@ -560,17 +542,14 @@ class FileMultiEditDirectWidget(html5.Div):
         uploader.uploadFailed.register(self)
 
     def onDragEnter(self, event):
-        console.log("onDragEnter", event)
         event.stopPropagation()
         event.preventDefault()
 
     def onDragOver(self, event):
-        console.log("onDragEnter", event)
         event.stopPropagation()
         event.preventDefault()
 
     def onDragLeave(self, event):
-        console.log("onDragLeave", event)
         event.stopPropagation()
         event.preventDefault()
 
@@ -661,7 +640,7 @@ class FileDirectBone(TreeItemBone):
                skelStructure[boneName]["params"].get("widget")=="direct")
 
 
-boneSelector.insert(7, FileDirectBone.checkFor, FileDirectBone)
+BoneSelector.insert(7, FileDirectBone.checkFor, FileDirectBone)
 
 
 # --- fileBone ---
@@ -696,4 +675,4 @@ class FileBone(TreeItemBone):
         )
 
 
-boneSelector.insert(5, FileBone.checkFor, FileBone)
+BoneSelector.insert(5, FileBone.checkFor, FileBone)

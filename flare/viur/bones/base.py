@@ -2,13 +2,14 @@
 
 import json, time
 from enum import IntEnum
+from flare import html5
 from flare.button import Button
 from flare.ignite import *
-from flare.forms import boneSelector
+from flare.viur import BoneSelector
 from flare.config import conf
 from flare.i18n import translate
-from flare.forms.formtooltip import ToolTip
-from flare.forms.formerrors import collectBoneErrors, checkErrors, ToolTipError
+from flare.viur.formtooltip import ToolTip
+from flare.viur.formerrors import collectBoneErrors
 
 
 class ReadFromClientErrorSeverity(IntEnum):
@@ -106,9 +107,15 @@ class BaseMultiEditWidgetEntry(html5.Div):
 
         # language=HTML
         self.appendChild(
-            """<div [name]="dragArea" class="flr-bone-dragger"><flare-svg-icon value="icon-drag-handle" ></flare-svg-icon></div>""",
+            """
+                <div [name]="dragArea" class="flr-bone-dragger label">
+                    <flare-svg-icon value="icon-draggable" ></flare-svg-icon>
+                </div>
+            """,
             self.widget,
-            """<flare-button [name]="removeBtn" class="btn--delete" text="Delete" icon="icon-cross" />""",
+            """
+                <flare-button [name]="removeBtn" class="btn--delete" text="Delete" icon="icon-cancel" />
+            """,
         )
 
         if widget.bone.boneStructure["readonly"]:
@@ -208,12 +215,12 @@ class BaseMultiEditWidget(html5.Div):
         # language=HTML
         super().__init__(
             """
-			<div [name]="actions" class="flr-bone-actions input-group">
-				<flare-button [name]="addBtn" class="btn--add" text="Add" icon="icon-add"></flare-button>
-			</div>
-			<div [name]="widgets" class="flr-bone-multiple-wrapper"></div>
-
-		"""
+            <div [name]="actions" class="flr-bone-actions input-group">
+                <flare-button [name]="addBtn" class="btn--add" text="Add" icon="icon-add"></flare-button>
+                <flare-button [name]="removeBtn" class="btn--delete" text="Clear" icon="icon-cancel"></flare-button>
+            </div>
+            <div [name]="widgets" class="flr-bone-multiple-wrapper"></div>
+            """
         )
 
         self.bone = bone
@@ -228,10 +235,15 @@ class BaseMultiEditWidget(html5.Div):
 
         if self.bone.boneStructure["readonly"]:
             self.addBtn.hide()
+            self.removeBtn.hide()
 
     def onAddBtnClick(self):
         entry = self.addEntry()
         entry.focus()
+
+    def onRemoveBtnClick(self):
+        self.widgets.removeAllChildren()
+        self.widgets.hide()
 
     def addEntry(self, value=None):
         entry = self.widgetFactory(self.bone, **self.kwargs)
@@ -277,10 +289,17 @@ class BaseMultiViewWidget(html5.Ul):
         if not isinstance(value, list):
             return
 
-        for entry in value:
+        long = False
+        for idx,entry in enumerate(value):
             widget = self.widgetFactory(self.bone, **self.kwargs)
             widget.unserialize(entry)
+            if idx >=10:
+                widget.hide()
+                long = True
             self.appendChild(widget)
+
+        if long:
+            self.appendChild("...")
 
     def serialize(self):
         ret = []
@@ -466,25 +485,21 @@ class BaseBone(object):
         return descrLbl
 
     def tooltipWidget(self):
-        if (
-            "params" in self.boneStructure.keys()
-            and isinstance(self.boneStructure["params"], dict)
-            and "tooltip" in self.boneStructure["params"].keys()
-        ):
+        if tooltip := self.boneStructure["params"].get("tooltip"):
             return ToolTip(
                 shortText=self.boneName
-                if conf["showBoneNames"]
-                else self.boneStructure.get("descr", self.boneName),
-                longText=self.boneStructure["params"]["tooltip"],
+                if conf["showBoneNames"] else self.boneStructure.get("descr", self.boneName),
+                longText=tooltip,
             )
-        return ""
+
+        return None
 
     def errorWidget(self):
-        if not self.boneErrors:
-            return False
-        return ToolTipError(longText=", ".join(self.boneErrors))
+        tooltip = ToolTip(shortText=translate("flare.forms.error"), longText=", ".join(self.boneErrors))
+        tooltip.addClass("msg--error", "is-open")
+        return tooltip
 
-    def boneWidget(self, label=True, tooltip=True,*args,**kwargs):
+    def boneWidget(self, *args, **kwargs):
         boneId = "%s___%s" % (self.boneName, str(time.time()).replace(".", "_"))
 
         widget = self.editWidget(errorInformation=self.errors)
@@ -493,17 +508,13 @@ class BaseBone(object):
         label = self.labelWidget()
         label["for"] = boneId
 
-        tooltip = self.tooltipWidget()
-
-        error = self.errorWidget()
-
         containerDiv = html5.Div()
-
         containerDiv.addClass(
             "flr-bone",
             "flr-bone--%s " % self.boneStructure["type"].replace(".", "-"),
             "flr-bone--%s" % self.boneName,
         )
+
         if self.multiple:
             containerDiv.addClass("flr-bone-multiple")
         if self.languages:
@@ -515,10 +526,14 @@ class BaseBone(object):
         valueDiv = html5.Div()
         valueDiv.addClass("flr-value-wrapper")
         valueDiv.appendChild(widget)
-        if tooltip:
+
+        if tooltip := self.tooltipWidget():
             valueDiv.appendChild(tooltip)
 
-        if error:
+        if error := self.errorWidget():
+            if not self.boneErrors:
+                error.hide()
+
             valueDiv.appendChild(error)
 
         containerDiv.appendChild(valueDiv)
@@ -539,4 +554,4 @@ class BaseBone(object):
     """
 
 
-boneSelector.insert(0, lambda *args, **kwargs: True, BaseBone)
+BoneSelector.insert(0, lambda *args, **kwargs: True, BaseBone)

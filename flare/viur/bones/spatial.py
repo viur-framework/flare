@@ -1,4 +1,4 @@
-from flare.forms import boneSelector
+from flare.viur import BoneSelector
 from .base import BaseBone, BaseEditWidget
 from flare import html5
 
@@ -11,7 +11,7 @@ class SpatialEditWidget(BaseEditWidget):
             self.fromHTML(
                 """
             <flare-input [name]="latitude" type="number" placeholder="latitude" step="any">
-            <flare-input [name]="longitude" type="number" placeholer="longitute" step="any">
+            <flare-input [name]="longitude" type="number" placeholder="longitute" step="any">
             """
             )
         )
@@ -42,4 +42,4 @@ class SpatialBone(BaseBone):
         ].startswith("spatial.")
 
 
-boneSelector.insert(1, SpatialBone.checkFor, SpatialBone)
+BoneSelector.insert(1, SpatialBone.checkFor, SpatialBone)

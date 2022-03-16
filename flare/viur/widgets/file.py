@@ -1,13 +1,13 @@
-import json, pyodide
+from flare import network
 from flare.ignite import *
 from flare.icons import Icon
 from flare.i18n import translate
 from flare.popup import Popup
 from flare.event import EventDispatcher
-from flare.forms import moduleWidgetSelector, displayDelegateSelector
+from flare.viur import ModuleWidgetSelector, DisplayDelegateSelector
 from flare.network import NetworkService, DeferredCall
 from flare.button import Button
-from flare.forms.widgets.tree import TreeNodeWidget, TreeLeafWidget, TreeBrowserWidget
+from flare.viur.widgets.tree import TreeNodeWidget, TreeLeafWidget, TreeBrowserWidget
 
 
 def getImagePreview(data, cropped=False, size=150):
@@ -241,18 +241,14 @@ class Uploader(Progress):
         r.node = node
         self.node = node
 
-    # self.parent().addClass("is-uploading")
-
     def onUploadUrlAvailable(self, req):
         """Internal callback - the actual upload url (retrieved by calling /file/getUploadURL) is known."""
         params = NetworkService.decode(req)["values"]
 
-        self.proxy_callback = pyodide.create_proxy(self.onLoad)
-
         if "uploadKey" in params:  # New Resumeable upload format
             self.targetKey = params["uploadKey"]
-            html5.window.fetch(params["uploadUrl"], **{"method": "POST", "body": req.file, "mode": "no-cors"}).then(
-                self.proxy_callback)
+            url = params["uploadUrl"]
+            body = req.file
         else:
             formData = html5.jseval("new FormData();")
 
@@ -265,30 +261,10 @@ class Uploader(Progress):
                 formData.append(key, value)
             formData.append("file", req.file)
 
-            html5.window.fetch(params["url"], **{"method": "POST", "body": formData, "mode": "no-cors"}).then(
-                self.proxy_callback)
+            url = params["url"]
+            body = formData
 
-    def onSkeyAvailable(self, req):
-        """Internal callback - the Security-Key is known.
-
-        # Only for core 2.x needed
-        """
-        formData = html5.jseval("new FormData();")
-        formData.append("file", req.file)
-
-        if self.context:
-            for k, v in self.context.items():
-                formData.append(k, v)
-
-        if req.node and str(req.node) != "null":
-            formData.append("node", req.node)
-
-        formData.append("skey", NetworkService.decode(req))
-        self.xhr = html5.jseval("new XMLHttpRequest()")
-        self.xhr.open("POST", req.destUrl)
-        self.xhr.onload = self.onLoad
-        self.xhr.upload.onprogress = self.onProgress
-        self.xhr.send(formData)
+        network.fetch_json(url, self.onLoad, method="POST", body=body, mode="no-cors")
 
     def onLoad(self, *args, **kwargs):
         """Internal callback - The state of our upload changed."""
@@ -429,5 +405,5 @@ class FileWidget(TreeBrowserWidget):
         ].startswith("tree.simple.file")
 
 
-moduleWidgetSelector.insert(0, FileWidget.canHandle, FileWidget)
-displayDelegateSelector.insert(0, FileWidget.canHandle, FileWidget)
+ModuleWidgetSelector.insert(0, FileWidget.canHandle, FileWidget)
+DisplayDelegateSelector.insert(0, FileWidget.canHandle, FileWidget)

@@ -119,7 +119,8 @@ class SafeEval:
         self.allowedCallables = {
             "str": str,
             "float": float,
-            "int": int
+            "int": int,
+            "bool": bool
         }
 
         if allowedCallables:
@@ -128,6 +129,7 @@ class SafeEval:
         self.nodes: Dict[ast.AST, Callable[[ast.AST, Dict[str, Any]], Any]] = {
             ast.Call: self.callNode,
             ast.Compare: self.compareNode,
+            ast.List: self.listNode,
             ast.Name: lambda node, names: names.get(node.id),
             ast.Constant: lambda node, _: node.n,
             ast.NameConstant: lambda node, _: node.value,
@@ -170,6 +172,8 @@ class SafeEval:
 
     def _BoolOp(self, node, names):
         """Handling ast.BoolOp in a Pythonic style."""
+        ret = None
+
         for child in node.values:
             ret = self.execute(child, names)
             if isinstance(node.op, ast.Or) and ret:
@@ -177,7 +181,7 @@ class SafeEval:
             elif isinstance(node.op, ast.And) and not ret:
                 return ret
 
-        return None
+        return ret
 
     def callNode(self, node: ast.Call, names: Dict[str, Any]) -> Any:
         """Evaluates the call if present in allowed callables.
@@ -207,6 +211,9 @@ class SafeEval:
                 return False
             left = right
         return True
+
+    def listNode(self, node, names):
+        return [self.execute(node, names) for node in node.elts]
 
     def execute(self, node: [str, ast.AST], names: Dict[str, Any]) -> Any:
         """Evaluates the current node with optional data.

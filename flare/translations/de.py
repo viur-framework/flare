@@ -12,4 +12,5 @@ lngDe = {
     "flare.network.error.500": "Interner Server Fehler",
     "flare.network.hint.401": "\n\nBitte überprüfen Sie, ob Sie angemeldet sind,\nund starten Sie das Programm danach erneut!",
     "flare.forms.tooltip": "Hinweis",
+    "flare.forms.error": "Fehler"
 }
