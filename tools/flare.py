@@ -66,8 +66,19 @@ def zipPy(target, packagename):
     """Zips all files in target folder."""
     tmp = tempfile.mkdtemp()
 
+    to_drop = [packagename]
+
     for entry in os.scandir(target):
-        if entry.name in ["flare", "packages"]:
+        if entry.name == "flare":
+            # special case... move flare/flare to just flare
+            flare_tmp = tempfile.mkdtemp()
+            shutil.move(os.path.join(target, "flare", "flare"), flare_tmp)
+            shutil.rmtree(os.path.join(target, "flare"))
+            shutil.move(os.path.join(flare_tmp, "flare"), target)
+            to_drop.append("flare")
+            continue
+        elif entry.name == "packages":
+            to_drop.append(entry.name)
             continue
 
         srcname = os.path.join(target, entry.name)
@@ -76,7 +87,9 @@ def zipPy(target, packagename):
 
     shutil.move(tmp, os.path.join(target, packagename))
     shutil.make_archive(os.path.join(target, "files"), "zip", target, verbose=True)
-    shutil.rmtree(os.path.join(target, packagename))
+
+    for drop in to_drop:
+        shutil.rmtree(os.path.join(target, drop))
 
 
 def copyAssets(source, target):
