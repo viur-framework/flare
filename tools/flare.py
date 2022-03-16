@@ -3,7 +3,7 @@
 flare application packager and build tool
 """
 
-import os, shutil, json, argparse, pathlib, fnmatch, watchgod, python_minifier, compileall
+import os, shutil, json, argparse, pathlib, fnmatch, watchgod, python_minifier, compileall, tempfile
 
 ignore_patterns = [
     "flare/assets/*",
@@ -17,13 +17,7 @@ ignore_patterns = [
 
 def copySourcePy(source, target):
     """Copy python source files to destination respecting the folder structure."""
-    cwd = os.getcwd()
-    os.chdir(os.path.join(cwd, source))
-    absTarget = os.path.join(cwd, target)
-
-    os.system(f'find "." -name "*.py" -exec rsync -Rq \\{{\\}} "{absTarget}" \;')  # fixme: WTF! Why not use Python for this??
-    os.chdir(cwd)
-
+    shutil.copytree(source, target, dirs_exist_ok=True)
     cleanSources(target)
     copyflareAssets(source, target)
     copypackageAssets(source, target)
@@ -35,7 +29,8 @@ def cleanSources(target):
 
     for folder in ["bin", "docs", "examples", "scripts", "test"]:
         target = os.path.join(absTarget, "flare", folder)
-        os.system(f"rm -rf {target}")  # fixme: Make this more Pythonic?
+        if os.path.exists(target):
+            shutil.rmtree(target)
 
 
 def minifyPy(target):
@@ -67,55 +62,21 @@ def compilePy(target):
     generateFilesJson(target, ".pyc")
 
 
-def movingFlareBeforeZip(target, packagename):
-    """If we deliver this app as zip and a flare submodule exists move it to the root directory."""
-    cwd = os.getcwd()
-    flareFolder = os.path.join(cwd, packagename, "flare")
-    if os.path.exists(flareFolder):
-        os.rename(flareFolder, flareFolder + "_")
-        shutil.copytree(
-            os.path.join(flareFolder + "_", "flare"), os.path.join(cwd, "flare")
-        )
-        shutil.rmtree(flareFolder + "_")
-
-
-def movingPackagesBeforeZip(target, packagename):
-    """If we deliver this app as zip and all files of the packages foldermusst be moved to the root directory."""
-    cwd = os.getcwd()
-    packagesFolder = os.path.join(cwd, packagename, "packages")
-    if os.path.exists(packagesFolder):
-        shutil.copytree(packagesFolder, cwd, dirs_exist_ok=True)
-        shutil.rmtree(packagesFolder)
-
-
 def zipPy(target, packagename):
     """Zips all files in target folder."""
-    cwd = os.getcwd()
-    targetpath = os.path.join(cwd, target)
-    packagepath = os.path.join(targetpath, packagename)
+    tmp = tempfile.mkdtemp()
 
-    if not os.path.exists(packagepath):
-        os.makedirs(packagepath)
+    for entry in os.scandir(target):
+        if entry.name in ["flare", "packages"]:
+            continue
 
-    os.system(
-        f'find {targetpath} -maxdepth 1 -not -name {packagename} -exec mv \\{{\\}} "{packagepath}" \;'
-    )  # fixme: WTF....
+        srcname = os.path.join(target, entry.name)
+        dstname = os.path.join(tmp, entry.name)
+        shutil.move(srcname, dstname)
 
-    os.chdir(targetpath)  # switch to root folder
-
-    movingFlareBeforeZip(target, packagename)
-    movingPackagesBeforeZip(target, packagename)
-    os.system("rm -f files.zip")  # fixme... ey... what should that?
-    os.system(f"zip files.zip -r ./*")  # fixme: Use Python's zip for this...
-
-    # remove everything thats not files.zip
-    _ = [
-        os.system(f"rm -rf {i}")  # fixme: Eyyy... this is not a shell scripting language............ man ey.....
-        for i in os.listdir(os.path.join(cwd, target))
-        if i != "files.zip"
-    ]
-
-    os.chdir(cwd)  # switch back
+    shutil.move(tmp, os.path.join(target, packagename))
+    shutil.make_archive(os.path.join(target, "files"), "zip", target, verbose=True)
+    shutil.rmtree(os.path.join(target, packagename))
 
 
 def copyAssets(source, target):
@@ -174,7 +135,7 @@ def clearTarget(target):
     if not os.path.exists(target):
         os.makedirs(target)
     else:
-        os.system(f"rm -rf {target}/*")  # fixme: Make this more Pythonic?
+        shutil.rmtree(target)
 
 
 def generateFilesJson(source, ext=".py"):
