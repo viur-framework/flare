@@ -44,7 +44,7 @@ class TreeItemWidget(html5.Li):
 
         self.sortindex = data["sortindex"] if "sortindex" in data else 0
 
-        # fixme: HTML below contains inline styling...
+        #language=HTML
         self.fromHTML(
             """
 			<div style="flex-direction:column;width:100%" [name]="nodeWrapper">
@@ -343,9 +343,12 @@ class TreeItemWidget(html5.Li):
 
     def onDblClick(self, event):
         self.widget.activateSelection(self)
-        try:
-            self.widget.parent().parent().parent().close()
-        except:pass
+        if self.skelType == "node":
+            self.toggleExpand()
+        else:
+            try:
+                self.widget.parent().parent().parent().close()
+            except:pass
 
         event.preventDefault()
         event.stopPropagation()
