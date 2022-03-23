@@ -3,28 +3,21 @@
 flare application packager and build tool
 """
 
-import os, shutil, json, argparse, pathlib
+import os, shutil, json, argparse, pathlib, fnmatch, watchgod, python_minifier, compileall, tempfile
 
-PATHBLACKLIST = ["assets", "docs", "examples", "test", "tools"]
-
-
-def cleanString(str):
-    """Replace characters from string which could brake the commands.
-
-    actual used to clean the environment workspace variable
-    """
-    return str.replace('"', "").replace("'", "")
+ignore_patterns = [
+    "flare/assets/*",
+    "flare/docs/*",
+    "flare/examples/*",
+    "flare/test/*",
+    "flare/tools/*",
+    "gen-*"
+]
 
 
 def copySourcePy(source, target):
     """Copy python source files to destination respecting the folder structure."""
-    cwd = os.getcwd()
-    os.chdir(os.path.join(cwd, source))
-    absTarget = os.path.join(cwd, target)
-
-    os.system(f'find "." -name "*.py" -exec rsync -Rq \\{{\\}} "{absTarget}" \;')
-    os.chdir(cwd)
-
+    shutil.copytree(source, target, dirs_exist_ok=True)
     cleanSources(target)
     copyflareAssets(source, target)
     copypackageAssets(source, target)
@@ -36,73 +29,67 @@ def cleanSources(target):
 
     for folder in ["bin", "docs", "examples", "scripts", "test"]:
         target = os.path.join(absTarget, "flare", folder)
-        os.system(f"rm -rf {target}")
+        if os.path.exists(target):
+            shutil.rmtree(target)
 
 
 def minifyPy(target):
-    """Minifies oll py files and strips comments and documentation."""
-    os.system(
-        f'for py in `find {target} -name "*.py"`; do echo "Minifying ${{py}}..."; pyminify --remove-literal-statements ${{py}} > ${{py}}.min; mv ${{py}}.min ${{py}}; done'
-    )
+    """Minifies all .py-files and strips comments and documentation."""
+    for root, _, filenames in os.walk(target):
+        for filename in filenames:
+            filename = os.path.join(root, filename)
 
+            if filename.endswith(".py"):
+                with open(filename, "r+") as f:
+                    code = f.read()
+                    f.seek(0)
+                    f.truncate()
+                    f.write(python_minifier.minify(code, remove_literal_statements=True))
 
 def compilePy(target):
     """Compiles py files to pyc and removes all py files at the end."""
-    import compileall
+    compileall.compile_dir(target, force=True, legacy=True, quiet=1)  # fixme: This does not work when local Python is 3.9.7 but Pyodide is 3.9.5...
 
-    compileall.compile_dir(target, force=True, legacy=True)
-    os.system(f'find "{target}" -name "*.py" -type f -delete')
+    # Remove all source files from target folder
+    for root, _, filenames in os.walk(target):
+        for filename in filenames:
+            filename = os.path.join(root, filename)
 
+            if filename.endswith(".py"):
+                os.remove(filename)
 
-def movingFlareBeforeZip(target, packagename):
-    """If we deliver this app as zip and a flare submodule exists move it to the root directory."""
-    cwd = os.getcwd()
-    flareFolder = os.path.join(cwd, packagename, "flare")
-    if os.path.exists(flareFolder):
-        os.rename(flareFolder, flareFolder + "_")
-        shutil.copytree(
-            os.path.join(flareFolder + "_", "flare"), os.path.join(cwd, "flare")
-        )
-        shutil.rmtree(flareFolder + "_")
-
-
-def movingPackagesBeforeZip(target, packagename):
-    """If we deliver this app as zip and all files of the packages foldermusst be moved to the root directory."""
-    cwd = os.getcwd()
-    packagesFolder = os.path.join(cwd, packagename, "packages")
-    if os.path.exists(packagesFolder):
-        shutil.copytree(packagesFolder, cwd, dirs_exist_ok=True)
-        shutil.rmtree(packagesFolder)
+    # Update files.json
+    generateFilesJson(target, ".pyc")
 
 
 def zipPy(target, packagename):
     """Zips all files in target folder."""
-    cwd = os.getcwd()
-    targetpath = os.path.join(cwd, target)
-    packagepath = os.path.join(targetpath, packagename)
+    tmp = tempfile.mkdtemp()
 
-    if not os.path.exists(packagepath):
-        os.makedirs(packagepath)
+    to_drop = [packagename]
 
-    os.system(
-        f'find {targetpath} -maxdepth 1 -not -name {packagename} -exec mv \\{{\\}} "{packagepath}" \;'
-    )
+    for entry in os.scandir(target):
+        if entry.name == "flare":
+            # special case... move flare/flare to just flare
+            flare_tmp = tempfile.mkdtemp()
+            shutil.move(os.path.join(target, "flare", "flare"), flare_tmp)
+            shutil.rmtree(os.path.join(target, "flare"))
+            shutil.move(os.path.join(flare_tmp, "flare"), target)
+            to_drop.append("flare")
+            continue
+        elif entry.name == "packages":
+            to_drop.append(entry.name)
+            continue
 
-    os.chdir(targetpath)  # switch to root folder
+        srcname = os.path.join(target, entry.name)
+        dstname = os.path.join(tmp, entry.name)
+        shutil.move(srcname, dstname)
 
-    movingFlareBeforeZip(target, packagename)
-    movingPackagesBeforeZip(target, packagename)
-    os.system("rm -f files.zip")  # remove old zip if exists
-    os.system(f"zip files.zip -r ./*")  # zip this folder
+    shutil.move(tmp, os.path.join(target, packagename))
+    shutil.make_archive(os.path.join(target, "files"), "zip", target, verbose=True)
 
-    # remove everything thats not files.zip
-    _ = [
-        os.system(f"rm -rf {i}")
-        for i in os.listdir(os.path.join(cwd, target))
-        if i != "files.zip"
-    ]
-
-    os.chdir(cwd)  # switch back
+    for drop in to_drop:
+        shutil.rmtree(os.path.join(target, drop))
 
 
 def copyAssets(source, target):
@@ -120,13 +107,9 @@ def copyAssets(source, target):
     if os.path.exists(assetfolder):
         shutil.copytree(assetfolder, os.path.join(target, "public"), dirs_exist_ok=True)
 
-    toplevelFiles = (".html", ".js", ".webmanifest", ".json")
-
-    _ = [
-        shutil.copyfile(os.path.join(source, i), os.path.join(target, i))
-        for i in os.listdir(source)
-        if i.endswith(toplevelFiles)
-    ]
+    for i in os.listdir(source):
+        if i.endswith((".html", ".js", ".webmanifest")):
+            shutil.copyfile(os.path.join(source, i), os.path.join(target, i))
 
 
 def copyflareAssets(source, target):
@@ -139,17 +122,16 @@ def copyflareAssets(source, target):
 
 def copyWebworkerScripts(source, target):
     flarefolder = os.path.join( source, "flare", "flare", "webworker")
-    if os.path.exists( flarefolder ):
+    if os.path.exists(flarefolder):
         shutil.copytree(
-            flarefolder, os.path.join( target, "webworker" ), dirs_exist_ok = True
+            flarefolder, os.path.join(target, "webworker"), dirs_exist_ok=True
         )
 
     appfolder = os.path.join(source, "webworker")
-    if os.path.exists( appfolder ):
+    if os.path.exists(appfolder):
         shutil.copytree(
-            appfolder, os.path.join( target, "webworker" ), dirs_exist_ok = True
+            appfolder, os.path.join(target, "webworker"), dirs_exist_ok=True
         )
-
 
 
 def copypackageAssets(source, target):
@@ -165,31 +147,27 @@ def clearTarget(target):
     """Clear target folder."""
     if not os.path.exists(target):
         os.makedirs(target)
-    os.system(f"rm -rf {target}/*")
+    else:
+        shutil.rmtree(target)
 
 
-def generateFilesJson(source):
+def generateFilesJson(source, ext=".py"):
     """Walks over the source app directory hierarchy and collects all _wanted_ and _needed_ python files.
     This should work for all of Linux, MacOS and Windows and uses posix compliant path structure.
     """
     files = []
 
-    walkObj = os.walk(source)
-    for root, dirnames, filenames in walkObj:
-        for f in filenames:
-            pathObject = pathlib.Path(root).joinpath(f)
-            pathParts = pathObject.parts
-            if (
-                f.endswith(".py")
-                and "(" not in f
-                and not any([f.startswith(i) for i in ["get-", "gen-", "test-"]])  # this might be unnecessary...
-                and not any([p in PATHBLACKLIST for p in pathParts])  # ignore folders from blacklist
-            ):
-                f = pathObject.as_posix().rstrip("./")
-                #print(f)
-                files.append(f)
+    for root, _, filenames in os.walk(source):
+        root = os.path.relpath(root, source)
 
-    with open("files.json", "w") as outputFile:
+        for filename in filenames:
+            filename = str(os.path.join(root, filename)).removeprefix("./")
+
+            if filename.endswith(ext) and not any([fnmatch.fnmatch(filename, pat) for pat in ignore_patterns]):
+                files.append(filename)
+                #print(files[-1])
+
+    with open(os.path.join(source, "files.json"), "w") as outputFile:
         json.dump(sorted(files), outputFile, indent=2)
         print("", file=outputFile)  # append line break
 
@@ -221,60 +199,65 @@ def main():
     if args.watch:
         print("starting initial build")
 
-    os.chdir(cleanString(os.environ.get("PROJECT_WORKSPACE", ".")))
+    os.chdir(os.environ.get("PROJECT_WORKSPACE", "."))
 
+    # Clear target first
     clearTarget(args.target)
+
+    # Copy sources
     copySourcePy(args.source, args.target)
 
     if args.minify:
+        # Minify copied sources
         minifyPy(args.target)
 
     if args.compile:
+        # Turn PY into pre-compiled PYC files
         compilePy(args.target)
+    else:
+        # If this is not wanted, generate ordinary files.json
+        generateFilesJson(args.target)
 
     if args.zip:
+        # Compress target into zip archive
         zipPy(args.target, args.name)
 
+    # Copy and handle webworker scripts separately
     copyWebworkerScripts(args.source, args.target)
+
     if args.minify:
-        minifyPy(os.path.join(args.target,"webworker"))
+        minifyPy(os.path.join(args.target, "webworker"))
     #if args.compile:
     #    compilePy(os.path.join(args.target,"webworker"))
 
+    # Copy further assets
     copyAssets(args.source, args.target)
 
     if args.watch:
         print("watching for changes...")
 
-        from watchgod import watch, PythonWatcher
-        from watchgod.watcher import Change
-
-        for changes in watch(args.source, watcher_cls=PythonWatcher):
+        for changes in watchgod.watch(args.source, watcher_cls=watchgod.PythonWatcher):
             changes = list(changes)
+            filename = os.path.relpath(changes[0][1], args.source)
 
-            # dont copy py files from blacklisted folders
-            if any(map(changes[0][1].__contains__, [f"/{p}/" for p in PATHBLACKLIST])):
+            if any([fnmatch.fnmatch(filename, pat) for pat in ignore_patterns]):
                 continue
 
             recreateFilesJson = False
 
-            if changes[0][0] == Change.added:
-                print(f"{changes[0][1]} added")
+            if changes[0][0] == watchgod.watcher.Change.added:
+                print(f"{filename} added")
                 recreateFilesJson = True
-            elif changes[0][0] == Change.deleted:
-                print(f"{changes[0][1]} deleted")
+            elif changes[0][0] == watchgod.watcher.Change.deleted:
+                print(f"{filename} deleted")
                 recreateFilesJson = True
             else:
-                print(f"{changes[0][1]} modified")
-
-            if recreateFilesJson:
-                print("regenerating files.json")
-                generateFilesJson(args.source)
+                print(f"{filename} modified")
 
             filepath = changes[0][1].replace(str(args.source) + "/", "")
 
             if not args.zip:
-                if changes[0][0] == Change.deleted:
+                if changes[0][0] == watchgod.watcher.Change.deleted:
                     os.remove(os.path.join(args.target, filepath))
                 else:
                     # copy changed or added file
@@ -286,6 +269,10 @@ def main():
             else:
                 clearTarget(args.target)
                 copySourcePy(args.source, args.target)
+
+            if recreateFilesJson:
+                print("regenerating files.json")
+                generateFilesJson(args.target)
 
             if args.minify:
                 minifyPy(args.target)
