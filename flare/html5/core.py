@@ -1971,7 +1971,7 @@ class Input(
         return self.element.accept
 
     def _setAccept(self, val):
-        self.element.accept = val
+        self.element.setAttribute("accept", val)
 
     def _getList(self):
         return self.element.list
