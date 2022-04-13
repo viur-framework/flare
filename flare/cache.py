@@ -280,7 +280,7 @@ class Plan(object):
                 [
                     ("%s=%s" % (str(key), str(params[key])))
                     for key in sorted(params.keys())
-                    if key not in ["cursor", "amount"]
+                    if key not in ["cursor", "limit"]
                 ]
             )
             print("compound check", self.module, compoundKey)
@@ -307,8 +307,8 @@ class Plan(object):
                 compoundKey
             ] = None  # Mark for under construction!
 
-            if "amount" not in params:
-                params["amount"] = 99
+            if "limit" not in params:
+                params["limit"] = 99
 
         # New request required
 
@@ -396,7 +396,7 @@ class Plan(object):
                         "search" not in req.params
                         and answ["cursor"]
                         and len(answ["skellist"])
-                        == req.params.get("amount", len(answ["skellist"]))
+                        == req.params.get("limit", len(answ["skellist"]))
                     ):
                         req.params["cursor"] = answ["cursor"]
                         nreq = NetworkService.request(
@@ -420,7 +420,7 @@ class Plan(object):
                     [
                         ("%s=%s" % (str(key), str(req.params[key])))
                         for key in sorted(req.params.keys())
-                        if key not in ["cursor", "amount"]
+                        if key not in ["cursor", "limit"]
                     ]
                 )
 
