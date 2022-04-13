@@ -34,6 +34,7 @@ class TreeItemWidget(html5.Li):
         self.data = data
 
         self.currentStatus = None
+        self.leaveElement = False
 
         self.structure = structure
         self.widget = widget
@@ -192,6 +193,11 @@ class TreeItemWidget(html5.Li):
             w = html5.window
             w.setTimeout(pyodide.create_once_callable(self.disableDragMarkers), 5000)
 
+    def moveRequest(self, params):
+        """Performs the move operation with the provided params."""
+        NetworkService.request(self.module, "move", params, secure=True, modifies=True)
+        self.currentStatus = None
+
     def onDrop(self, event):
         """We received a drop.
 
@@ -208,64 +214,46 @@ class TreeItemWidget(html5.Li):
         srcKey, skelType = event.dataTransfer.getData("Text").split("/")
 
         if self.currentStatus == "inner":
-            NetworkService.request(
-                self.module,
-                "move",
-                {"skelType": skelType, "key": srcKey, "parentNode": self.data["key"]},
-                secure=True,
-                modifies=True,
-            )
+            self.moveRequest({
+                "skelType": skelType,
+                "key": srcKey,
+                "parentNode": self.data["key"]
+            })
 
         elif self.currentStatus == "top":
-            parentID = self.data["parententry"]
-            if parentID:
-                lastIdx = 0
-                for c in self.parent()._children:
-                    if "data" in dir(c) and "sortindex" in c.data.keys():
-                        if c == self:
-                            break
-                        lastIdx = float(c.data["sortindex"])
-                newIdx = str((lastIdx + float(self.data["sortindex"])) / 2.0)
-                req = NetworkService.request(
-                    self.module,
-                    "move",
-                    {
-                        "skelType": skelType,
-                        "key": srcKey,
-                        "parentNode": parentID,
-                        "sortindex": newIdx,
-                    },
-                    secure=True,
-                    modifies=True,
-                )
+            lastIdx = 0
+
+            for c in self.parent()._children:
+                if "data" in dir(c) and "sortindex" in c.data.keys():
+                    if c == self:
+                        break
+                    lastIdx = float(c.data["sortindex"])
+
+            self.moveRequest({
+                "skelType": skelType,
+                "key": srcKey,
+                "parentNode": self.data["parententry"],
+                "sortindex": str((lastIdx + float(self.data["sortindex"])) / 2.0),
+            })
 
         elif self.currentStatus == "bottom":
-            parentID = self.data["parententry"]
+            lastIdx = time()
+            doUseNextChild = False
 
-            if parentID:
-                lastIdx = time()
-                doUseNextChild = False
-                for c in self.parent()._children:
-                    if "data" in dir(c) and "sortindex" in c.data.keys():
-                        if doUseNextChild:
-                            lastIdx = float(c.data["sortindex"])
-                            break
-                        if c == self:
-                            doUseNextChild = True
+            for c in self.parent()._children:
+                if "data" in dir(c) and "sortindex" in c.data.keys():
+                    if doUseNextChild:
+                        lastIdx = float(c.data["sortindex"])
+                        break
+                    if c == self:
+                        doUseNextChild = True
 
-                newIdx = str((lastIdx + float(self.data["sortindex"])) / 2.0)
-                req = NetworkService.request(
-                    self.module,
-                    "move",
-                    {
-                        "skelType": skelType,
-                        "key": srcKey,
-                        "parentNode": parentID,
-                        "sortindex": newIdx,
-                    },
-                    secure=True,
-                    modifies=True,
-                )
+            self.moveRequest({
+                "skelType": skelType,
+                "key": srcKey,
+                "parentNode": self.data["parententry"],
+                "sortindex": str((lastIdx + float(self.data["sortindex"])) / 2.0),
+            })
 
     def EntryIcon(self):
         self.nodeImage.removeClass("is-hidden")
@@ -382,6 +370,7 @@ class TreeLeafWidget(TreeItemWidget):
         """Leaf have a different color."""
         super(TreeLeafWidget, self).setStyle()
         self["style"]["background-color"] = "#f7edd2"
+        self.additionalDropAreas()
 
     def toggleArrow(self):
         """Leafes cant be toggled."""
@@ -392,6 +381,32 @@ class TreeLeafWidget(TreeItemWidget):
         """Leafs have a different Icon."""
         self.nodeImage.removeClass("is-hidden")
         self.nodeImage.appendChild(Icon("icon-file"))
+
+    def moveRequest(self, params):
+        if self.currentStatus == "inner":
+            self.currentStatus = None
+            return  # do nothing, as this is a leaf.
+
+        super().moveRequest(params)
+
+    def onDragOver(self, event):
+        if self.isDragged:
+            return
+
+        if "afterDiv" in dir(self):
+            self.afterDiv.show()  # show dropzones
+        if "beforeDiv" in dir(self):
+            self.beforeDiv.show()
+
+        self.leaveElement = False  # reset leaveMarker
+
+        if "beforeDiv" in dir(self) and event.target == self.beforeDiv.element:
+            super().onDragOver(event)
+        elif "afterDiv" in dir(self) and event.target == self.afterDiv.element:
+            super().onDragOver(event)
+        else:
+            event.preventDefault()
+            event.stopPropagation()
 
 
 class TreeNodeWidget(TreeItemWidget):
