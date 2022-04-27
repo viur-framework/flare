@@ -64,15 +64,11 @@ class SvgIcon(html5.svg.Svg):
             )
 
     def replaceSVG(self, icondata):
+        classes = list(self["class"])  # We need to restore our classes later
         conf["flare.icon.cache"].update({self.url:icondata})
-        self.removeAllChildren()
-
-        for node in html5.fromHTML(icondata):
-            if isinstance(node, html5.svg.Svg):
-                self["viewbox"] = node["viewbox"]
-                self.addClass(node["class"])
-                self.appendChild(node._children)
-                break
+        self.element.outerHTML = icondata  # Replace our HTML-Code with the contents of the SVG
+        for className in classes:  # Restore our classes
+            self.element.classList.add(className)
 
     def requestFallBack(self, data, status):
         url = None
