@@ -55,7 +55,7 @@ class TextEditWidget(BaseEditWidget):
 class TextViewWidget(BaseViewWidget):
     def unserialize(self, value=None):
         self.value = value
-        self.replaceChild(value or conf["emptyValue"])
+        self.element.innerHTML = value or conf["emptyValue"]
 
 
 class TextBone(BaseBone):
