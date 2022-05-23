@@ -28,16 +28,20 @@ from .config import conf, updateConf
 
 
 def _html5WidgetSetHidden(widget, hidden):
-    html5.Widget._super_setHidden(widget, hidden)
-
     if hidden:
         widget.addClass("is-hidden")
     else:
         widget.removeClass("is-hidden")
 
 
-html5.Widget._super_setHidden = html5.Widget._setHidden
 html5.Widget._setHidden = _html5WidgetSetHidden
+
+
+def _html5WidgetGetHidden(widget):
+    return widget.hasClass("is-hidden")
+
+
+html5.Widget._getHidden = _html5WidgetGetHidden
 
 
 def _html5WidgetSetDisabled(widget, disabled):
