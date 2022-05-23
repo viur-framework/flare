@@ -59,7 +59,7 @@ class DeferredCall(object):
         self._tKwArgs = kwargs
 
         self.proxy_run = pyodide.create_once_callable(self.run)
-        html5.window.setTimeout(self.proxy_run, milliseconds=delay)
+        html5.window.setTimeout(self.proxy_run, delay)
 
     def run(self):
         """Internal callback that executes the callback function."""
