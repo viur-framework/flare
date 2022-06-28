@@ -64,15 +64,24 @@ class SvgIcon(html5.svg.Svg):
             )
 
     def replaceSVG(self, icondata):
-        conf["flare.icon.cache"].update({self.url:icondata})
-        self.removeAllChildren()
+        conf["flare.icon.cache"][self.url] = icondata
 
-        for node in html5.fromHTML(icondata):
-            if isinstance(node, html5.svg.Svg):
-                self["viewbox"] = node["viewbox"]
-                self.addClass(node["class"])
-                self.appendChild(node._children)
-                break
+        try:
+            document = html5.domParseString(icondata, "image/svg+xml")
+        except Exception as e:
+            logging.error(f"Invalid SVG document for {self.url}, cannot parse")
+            logging.exception(e)
+            return
+
+        if not (new_element := document.querySelector("svg")):
+            logging.error(f"Invalid SVG document parsed for {self.url}, cannot find root element")
+            return
+
+        old_element = self.element
+        new_element.id = old_element.id
+        new_element.classList = old_element.classList
+        self.element = new_element
+        old_element.replaceWith(self.element)
 
     def requestFallBack(self, data, status):
         url = None
