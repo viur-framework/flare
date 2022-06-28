@@ -97,6 +97,25 @@ def domGetElementsByTagName(tag):
 __domParser = None
 
 
+def domParseString(string, mimetype="text/html"):
+    """
+    Parses the given string with the optionally given mimetype using JavaScript's DOM parser.
+    :param string: Any XML/HTML string processable by DOMParser.
+    :param mimetype: The mimetype to use.
+
+    :return: Returns the parsed document DOM.
+    """
+    global __domParser
+
+    if jseval is None:
+        return string
+
+    if __domParser is None:
+        __domParser = jseval("new DOMParser")
+
+    return __domParser.parseFromString(string, mimetype)
+
+
 def domConvertEncodedText(txt):
     """Convert HTML-encoded text (containing HTML entities) into its decoded string representation.
 
@@ -108,16 +127,8 @@ def domConvertEncodedText(txt):
     :param txt: The encoded text.
     :return: The decoded text.
     """
-    global __domParser
-
-    if jseval is None:
-        return txt
-
-    if __domParser is None:
-        __domParser = jseval("new DOMParser")
-
-    dom = __domParser.parseFromString("<!doctype html><body>" + str(txt), "text/html")
-    return dom.body.textContent
+    doc = domParseString("<!doctype html><body>" + str(txt))
+    return doc.body.textContent
 
 
 ########################################################################################################################
