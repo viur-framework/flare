@@ -20,7 +20,7 @@ class Popup(html5.Div):
         # language=HTML
         super().__init__(
             """
-            <div class="box" [name]="popupBox" style="height: 100%">
+            <div class="box" [name]="popupBox" style="height: 100%; overflow: auto"> <!-- fixme: Remove inline style here! -->
                 <div class="box-head" [name]="popupHead">
                     <div class="item" [name]="popupHeadItem">
                         <div class="item-image">
