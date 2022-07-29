@@ -1410,10 +1410,10 @@ class _attrFor(object):
 
 class _attrInputs(_attrRequired):
     def _getMaxlength(self):
-        return self.element.maxlength
+        return self.element.maxLength
 
     def _setMaxlength(self, val):
-        self.element.maxlength = val
+        self.element.maxLength = val
 
     def _getPlaceholder(self):
         return self.element.placeholder
