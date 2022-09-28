@@ -1,6 +1,6 @@
-import logging, pyodide
+import logging, pyodide, random, string
 
-from js import Event as JSevent, encodeURI as JSencodeURI
+from js import Event as JSevent
 
 try:
     from js import summernoteEditor
@@ -17,17 +17,15 @@ from .file import FileWidget
 
 
 class TextInsertImageAction(Button):
-    def __init__(self, summernote=None, boneName="", *args, **kwargs):
-        if summernote is None:
-            summernote = self
-
+    def __init__(self, summernote, id, *args, **kwargs):
         super(TextInsertImageAction, self).__init__(
             translate("Insert Image"), *args, **kwargs
         )
+
         self["class"] = "icon text image viur-insert-image-btn"
         self["title"] = translate("Insert Image")
         self["style"]["display"] = "none"
-        self.element.setAttribute("data-bonename", boneName)
+        self.element.setAttribute("data-bonename", id)
         self.summernote = summernote
 
     def onClick(self, sender=None):
@@ -36,14 +34,11 @@ class TextInsertImageAction(Button):
         conf["mainWindow"].stackWidget(currentSelector)
 
     def onSelectionActivated(self, selectWdg, selection):
-        print("onSelectionActivated")
-
         if not selection:
             return
+
         for item in selection:
-            if "mimetype" in item.data.keys() and item.data["mimetype"].startswith(
-                "image/"
-            ):
+            if "mimetype" in item.data.keys() and item.data["mimetype"].startswith("image/"):
                 self.summernote.summernote(
                     "editor.insertImage", item.data["downloadUrl"], item.data["name"].replace('"', "")
                 )
@@ -72,11 +67,13 @@ class HtmlEditor(html5.Textarea):
     def __init__(self, *args, **kwargs):
         super(HtmlEditor, self).__init__(*args, **kwargs)
 
+        self.id = "".join(random.choice(
+            string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(16)
+        )
         self.value = ""
         self.summernote = None
         self.enabled = True
         self.summernoteContainer = self
-        self.boneName = ""
 
     def _attachSummernote(self, retry=0):
         elem = self.summernoteContainer.element
@@ -95,10 +92,11 @@ class HtmlEditor(html5.Textarea):
             DeferredCall(self._attachSummernote, retry=retry + 1, _delay=1000)
             return
 
-        #imagebtn = TextInsertImageAction(
-        #    summernote=self.summernote, boneName=self.boneName
-        #)
-        #self.parent().appendChild(imagebtn)
+        imagebtn = TextInsertImageAction(
+            summernote=self.summernote,
+            id=self.id
+        )
+        self.parent().appendChild(imagebtn)
 
         if not self.enabled:
             self.summernote.summernote("disable")
@@ -113,8 +111,7 @@ class HtmlEditor(html5.Textarea):
             return
 
         self._attachSummernote()
-
-        self.element.setAttribute("data-bonename", self.boneName)
+        self.element.setAttribute("data-bonename", self.id)
 
     def onDetach(self):
         super(HtmlEditor, self).onDetach()

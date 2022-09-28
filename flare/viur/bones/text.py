@@ -2,6 +2,7 @@ from flare.ignite import *
 from flare.viur import BoneSelector
 from flare.config import conf
 from flare.viur.widgets.htmleditor import HtmlEditor
+from flare.html5 import Textarea
 from .base import BaseBone, BaseEditWidget, BaseViewWidget
 
 
@@ -11,7 +12,6 @@ class TextEditWidget(BaseEditWidget):
     def createWidget(self):
         if self.bone.boneStructure["validHtml"]:
             widget = HtmlEditor()
-            widget.boneName = self.bone.boneName  # fixme WTF?
             widget.addClass("textarea")
 
             if bool(self.bone.boneStructure.get("readonly")):
