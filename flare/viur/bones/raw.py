@@ -21,12 +21,17 @@ class RawEditWidget(BaseEditWidget):
 class RawViewWidget(BaseViewWidget):
     def unserialize(self, value=None):
         self.value = value
-        self.replaceChild(html5.Code(value or conf["emptyValue"]))
+        display_value = value or conf["emptyValue"]
+
+        if len(display_value) > 200:
+            display_value = display_value[:200] + "..."
+
+        self.replaceChild(html5.Code(display_value))
 
 
 class RawBone(BaseBone):
     editWidgetFactory = RawEditWidget
-    viewWidgetFactory = RawEditWidget
+    viewWidgetFactory = RawViewWidget
 
     @staticmethod
     def checkFor(moduleName, boneName, skelStructure, *args, **kwargs):
