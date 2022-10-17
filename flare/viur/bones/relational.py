@@ -135,6 +135,9 @@ class RelationalEditWidget(BaseEditWidget):
         return self.destKey or None
 
     def onSelectBtnClick(self):
+        # Set a context if configured so
+        context = self.bone.boneStructure["params"].get("context")
+
         selector = conf["selectors"].get(self.bone.destModule)
         if selector is None:
             selector = ModuleWidgetSelector.select(
@@ -142,13 +145,17 @@ class RelationalEditWidget(BaseEditWidget):
             )
             assert selector, "No selector can be found for %r" % self.destModule
 
-            selector = selector(self.bone.destModule, **self.bone.destInfo)
+            if context:
+                dest_info = self.bone.destInfo.copy()
+                dest_info["context"] = context
+            else:
+                dest_info = self.bone.destInfo
+
+            selector = selector(self.bone.destModule, **dest_info)
 
             #conf["selectors"][self.bone.destModule] = selector
 
-        # Set a context if configured so
-        context = self.bone.boneStructure["params"].get("context")
-        if context:
+        elif context:
             selector.setContext(context)
 
         # Start widget with selector callback
@@ -209,21 +216,26 @@ class RelationalMultiEditWidget(BaseMultiEditWidget):
         super().__init__(*args, **kwargs)
 
     def onAddBtnClick(self):
-        selector = conf["selectors"].get(self.bone.destModule)
+        # Set a context if configured so
+        context = self.bone.boneStructure["params"].get("context")
 
+        selector = conf["selectors"].get(self.bone.destModule)
         if selector is None:
             selector = ModuleWidgetSelector.select(
                 self.bone.destModule, self.bone.destInfo
             )
             assert selector, "No selector can be found for %r" % self.destModule
 
-            selector = selector(self.bone.destModule, **self.bone.destInfo)
+            if context:
+                dest_info = self.bone.destInfo.copy()
+                dest_info["context"] = context
+            else:
+                dest_info = self.bone.destInfo
+
+            selector = selector(self.bone.destModule, **dest_info)
 
             conf["selectors"][self.bone.destModule] = selector
-
-        # Set a context if configured so
-        context = self.bone.boneStructure["params"].get("context")
-        if context:
+        elif context:
             selector.setContext(context)
 
         # Start widget with selector callback
