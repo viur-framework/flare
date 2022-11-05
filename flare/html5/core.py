@@ -281,16 +281,8 @@ class _WidgetStyleWrapper(dict):
         self.targetWidget = targetWidget
         style = targetWidget.element.style
 
-        for key in dir(style):
-            # Convert JS-Style-Syntax to CSS Syntax (ie borderTop -> border-top)
-            realKey = ""
-            for currChar in key:
-                if currChar.isupper():
-                    realKey += "-"
-                realKey += currChar.lower()
-            val = style.getPropertyValue(realKey)
-            if val:
-                dict.__setitem__(self, realKey, val)
+        for key in style.object_values():
+            self[key] = style.getPropertyValue(key)
 
     def __setitem__(self, key, value):
         dict.__setitem__(self, key, value)
@@ -463,16 +455,16 @@ class Widget(object):
     def __getitem__(self, key):
         funcName = self._getTargetfuncName(key, "get")
 
-        if funcName in dir(self):
-            return getattr(self, funcName)()
+        if func := getattr(self, funcName, None):
+            return func()
 
         return None
 
     def __setitem__(self, key, value):
         funcName = self._getTargetfuncName(key, "set")
 
-        if funcName in dir(self):
-            return getattr(self, funcName)(value)
+        if func := getattr(self, funcName, None):
+            return func(value)
 
         raise ValueError(
             "{} is no valid attribute for {}".format(key, (self._tagName or str(self)))
