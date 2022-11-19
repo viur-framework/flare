@@ -150,7 +150,7 @@ class Cache(object):
 
 class Plan(object):
     def __init__(
-        self, module, action, params=None, follow=None, alias="current", local=True
+        self, module, action, params=None, follow=None, alias="current", local=True, force=False
     ):
         super(Plan, self).__init__()
 
@@ -166,6 +166,7 @@ class Plan(object):
         assert action in ["view", "list"]
         self.action = action
         self.alias = alias
+        self.force = force
 
         self.result = None
 
@@ -223,7 +224,7 @@ class Plan(object):
                     return True
 
         # Try to fetch from cache with original params
-        if fetchFromCache(cparams):
+        if not self.force and fetchFromCache(cparams):
             return True
 
         # Involve parameters from parent results
@@ -271,7 +272,7 @@ class Plan(object):
                 params[key] = val
 
         # Try to fetch from cache
-        if fetchFromCache(params):
+        if not self.force and fetchFromCache(params):
             return True
 
         # Check for cached compound list results
