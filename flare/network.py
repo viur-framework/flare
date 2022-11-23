@@ -441,9 +441,7 @@ class NetworkService(object):
         :type secure: bool
 
         """
-        logging.debug(
-            "NetworkService.request module=%r, url=%r, params=%r", module, url, params
-        )
+        logging.debug(f"NetworkService.request {module=} {url=} {params=}")
 
         if group:
             # grouped requests will always be handled later
@@ -550,26 +548,12 @@ class NetworkService(object):
         self.status = "failed"
         self.result = text
 
-        logging.debug(
-            "NetworkService.onError kickoffs=%r, retryMax=%r, code=%r, retryCodes=%r",
-            self.kickoffs,
-            self.retryMax,
-            code,
-            self.retryCodes,
-        )
-
         if self.kickoffs < self.retryMax and int(code) in self.retryCodes:
-            # The following can be used to pass errors to a bugtracker service like Stackdriver or Bugsnag
-            logError = None  # html5.window.top.logError
-            if logError and self.kickoffs == self.retryMax - 1:
-                logError(
-                    "NetworkService.onError code:%s module:%s url:%s params:%s"
-                    % (code, self.module, self.url, self.params)
-                )
-
-            logging.error("error %d, kickoff %d, will retry now", code, self.kickoffs)
+            logging.debug(f"NetworkService.error {self.kickoffs=} {self.retryMax=} {code=} {self.kickoffs=} retrying")
             DeferredCall(self.kickoff, _delay=self.retryDelay)
             return
+
+        logging.error(f"NetworkService.error {self.kickoffs=} {self.retryMax=} {code=} {text=}")
 
         for s in self.failureHandler:
             s(self, code)
