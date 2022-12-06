@@ -26,7 +26,7 @@ class RawViewWidget(BaseViewWidget):
         if len(display_value) > 200:
             display_value = display_value[:200] + "..."
 
-        self.replaceChild(html5.Code(display_value))
+        self.replaceChild(html5.Code(html5.TextNode(display_value)))
 
 
 class RawBone(BaseBone):
