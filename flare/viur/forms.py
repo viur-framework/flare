@@ -91,7 +91,7 @@ class ViurForm(html5.Form):
             if key in self.ignore or (self.visible and key not in self.visible):
                 continue
 
-            bone_field = ViurFormBone(key, self)
+            bone_field = ViurFormBone(key, self, defaultvalue=bone.get("defaultvalue"))
             bone_field.onAttach()  # needed for value loading!  # fixme should be solved differently.
 
             # Hide invisible fields or fields with conditional flagging
