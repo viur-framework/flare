@@ -411,12 +411,7 @@ class ViurFormBone(html5.Div):
             self.form.registerField(self.boneName, self)
 
             self.sinkEvent("onChange")
-
-            if self.defaultValue:
-                # warning overrides server default
-                self.skel[self.boneName] = self.defaultValue
-
-            self.unserialize(self.skel.get(self.boneName))
+            self.unserialize(self.skel.get(self.boneName) or self.defaultValue)
             self.formloaded = True
 
     def onChange(self, event, *args, **kwargs):
