@@ -367,7 +367,7 @@ class ViurFormBone(html5.Div):
                 logging.error("Missing moduleName attribute on referenced form %r", self.form)
 
             # self.form existiert und form hat skel und structure
-            if isinstance(self.form.structure, list):  # fixme: Muss das sein???
+            if isinstance(self.form.structure, list):
                 self.structure = {k: v for k, v in self.form.structure}
             else:
                 self.structure = self.form.structure

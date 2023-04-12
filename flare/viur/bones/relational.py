@@ -10,13 +10,13 @@ from .base import BaseBone, BaseEditWidget, BaseMultiEditWidget, BaseMultiEditWi
 def _getDefaultValues(structure):
     """Gets defaultValues from a structure."""
     defaultValues = {}
-    for k, v in {k: v for k, v in structure}.items():
-        if (
-            "params" in v.keys()
-            and v["params"]
-            and "defaultValue" in v["params"].keys()
-        ):
-            defaultValues[k] = v["params"]["defaultValue"]
+
+    if isinstance(structure, list):
+        for k, v in structure:
+            defaultValues[k] = v["defaultvalue"]
+    else:
+        for k, v in structure.items():
+            defaultValues[k] = v["defaultvalue"]
 
     return defaultValues
 

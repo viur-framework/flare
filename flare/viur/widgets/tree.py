@@ -11,7 +11,6 @@ from flare.viur.formatString import formatString
 from flare.icons import SvgIcon, Icon
 from flare.event import EventDispatcher
 import pyodide
-from collections import OrderedDict
 
 # fixme embedsvg
 
@@ -279,12 +278,11 @@ class TreeItemWidget(html5.Li):
                     "frontend_default_visible" in params
                     and params["frontend_default_visible"]
                 ):
-                    structure = {k: v for k, v in self.structure.items()}
-                    wdg = BoneSelector.select(self.module, boneName, structure)
+                    wdg = BoneSelector.select(self.module, boneName, self.structure)
 
                     if wdg is not None:
                         self.nodeHeadline.appendChild(
-                            wdg(self.module, boneName, structure).viewWidget(
+                            wdg(self.module, boneName, self.structure).viewWidget(
                                 self.data[boneName]
                             )
                         )
@@ -509,9 +507,14 @@ class TreeWidget(html5.Div):
     def receivedStructure(self, resp):
         data = NetworkService.decode(resp)
         for stype, structlist in data.items():
-            structure = OrderedDict()
-            for k, v in structlist:
-                structure[k] = v
+            structure = {}
+
+            if isinstance(structlist, list):
+                for k, v in structlist:
+                    structure[k] = v
+            else:
+                structure = structlist
+
             if stype == "viewNodeSkel":
                 self.viewNodeStructure = structure
             elif stype == "viewLeafSkel":
