@@ -13,10 +13,12 @@ def _getDefaultValues(structure):
 
     if isinstance(structure, list):
         for k, v in structure:
-            defaultValues[k] = v["defaultvalue"]
+            if "defaultvalue" in v:
+                defaultValues[k] = v["defaultvalue"]
     else:
         for k, v in structure.items():
-            defaultValues[k] = v["defaultvalue"]
+            if "defaultvalue" in v:
+                defaultValues[k] = v["defaultvalue"]
 
     return defaultValues
 

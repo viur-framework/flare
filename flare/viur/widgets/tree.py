@@ -507,11 +507,8 @@ class TreeWidget(html5.Div):
     def receivedStructure(self, resp):
         data = NetworkService.decode(resp)
         for stype, structlist in data.items():
-            structure = {}
-
             if isinstance(structlist, list):
-                for k, v in structlist:
-                    structure[k] = v
+                structure = {k: v for k, v in structlist}
             else:
                 structure = structlist
 
