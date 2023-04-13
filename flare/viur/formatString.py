@@ -59,6 +59,11 @@ def formatStringHandler(
         partValue = value
 
         for bone in parts:
+            # Handle empty part value and break
+            if not partValue:
+                ret += str(partValue)
+                break
+
             partValue = partValue.get(bone)
 
             # Only for relationalbones...
