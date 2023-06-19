@@ -17,13 +17,16 @@ def unescape(val, maxLength=0):
     :returns: The unquoted string.
     :rtype: str
     """
-    val = (
-        str(val)
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&quot;", '"')
-        .replace("&#39;", "'")
-    )
+
+    val = str(val)\
+        .replace("&lt;", "<")\
+        .replace("&gt;", ">")\
+        .replace("&quot;", '"')\
+        .replace("&#39;", "'")\
+        .replace("&#040;", "(")\
+        .replace("&#041;", ")")\
+        .replace("&#061;", "=")
+
 
     if maxLength > 0:
         return val[0:maxLength]
