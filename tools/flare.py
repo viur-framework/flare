@@ -3,7 +3,7 @@
 flare application packager and build tool
 """
 
-import os, shutil, json, argparse, pathlib, fnmatch, watchgod, python_minifier, compileall, tempfile
+import os, shutil, json, argparse, pathlib, fnmatch, compileall, tempfile
 
 ignore_patterns = [
     "flare/assets/*",
@@ -35,6 +35,8 @@ def cleanSources(target):
 
 def minifyPy(target):
     """Minifies all .py-files and strips comments and documentation."""
+    import python_minifier
+
     for root, _, filenames in os.walk(target):
         for filename in filenames:
             filename = os.path.join(root, filename)
@@ -235,6 +237,7 @@ def main():
 
     if args.watch:
         print("watching for changes...")
+        import watchgod
 
         for changes in watchgod.watch(args.source, watcher_cls=watchgod.PythonWatcher):
             changes = list(changes)
