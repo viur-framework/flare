@@ -30,6 +30,7 @@ class ViurForm(html5.Form):
         logging.debug("ViurForm: %r, %r, %r, %r, %r, %r, %r, %r, %r, %r", formName, moduleName, actionName, skel,
                       structure, visible, ignore, hide, args, kwargs)
         super().__init__()
+
         self.formName = formName
         self.moduleName = moduleName
         self.actionName = actionName
@@ -73,6 +74,12 @@ class ViurForm(html5.Form):
 
     def _setFormname(self, val):
         self.formName = val
+
+    def onAttach(self):
+        if not self.children():
+            self.submitForm()
+
+        super().onAttach()
 
     def buildForm(self):
         """
@@ -248,6 +255,16 @@ class ViurForm(html5.Form):
 
         else:
             # form rejected
+            if not self.structure:
+                if isinstance(resp["structure"], list):
+                    self.structure = {k: v for k, v in resp["structure"]}
+                else:
+                    self.structure = resp["structure"]
+
+                if not self.children():
+                    self.buildForm()
+                    self.unserialize(resp["values"])
+
             self.errors = resp["errors"]
             self.handleErrors()
 
@@ -397,7 +414,7 @@ class ViurFormBone(html5.Div):
 
             except Exception as e:
                 logging.exception(e)
-                self.appendChild(f"""<div>Bone not found our invalid: {self.boneName}</div>""")
+                self.appendChild(f"""<div>Bone not found or invalid: {self.boneName}</div>""")
                 return 0
 
             self.appendChild(self.containerWidget)
