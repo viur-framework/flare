@@ -57,7 +57,7 @@ class ButtonBarSearch(html5.Div):
         self.state = StateHandler((), self)
         self.state.updateState("applyfilter", None)
 
-    def applyFilter(self, widget):
+    def applyFilter(self, widget=None):
         currentValue = self.widget["value"]
         self.state.updateState("applyfilter", currentValue)
 

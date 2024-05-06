@@ -34,13 +34,13 @@ class ListWidget(html5.Div):
         self.module = module
         self.filter = filter
 
-    def setSelector(self, callback, multi=True, allow=None):
+    def setSelector(self, callback, multi=True, allow=None, search=None):
         """Configures the widget as selector for a relationalBone and shows it."""
         self.selectionCallback = callback
         self.selectionMulti = multi
         self.callback = callback
 
-        listselectionPopup = ListSelection(self.module, self.filter)
+        listselectionPopup = ListSelection(self.module, self.filter, search=search)
         listselectionPopup.state.register("acceptSelection", self)
 
     def onAcceptSelectionChanged(self, event, *args, **kwargs):
@@ -87,6 +87,7 @@ class ListSelection(Popup):
         self,
         modulname,
         filter=None,
+        search=None,
         title=None,
         id=None,
         className=None,
@@ -113,18 +114,23 @@ class ListSelection(Popup):
             **kwargs
         )
         self.addClass("popup--wide")
-        self.buildListSelection()
+        self.buildListSelection(search=search)
 
-    def requestClients(self):
+    def requestClients(self, search=None):
         self.currentlistHandler = ListHandler(
             self.modulname, "list", params=self.filter, eventName="requestList"
         )
         self.currentlistHandler.requestList.register(self)
-        self.currentlistHandler.requestData()
 
         self.state = StateHandler((), self)
         self.state.updateState("activeSelection", None)
         self.state.updateState("acceptSelection", None)
+
+        if search:
+            self.filterbtn.widget["value"] = search
+            self.filterbtn.applyFilter()
+        else:
+            self.currentlistHandler.requestData()
 
     def onRequestList(self, skellist):
         self.listelements.removeAllChildren()
@@ -149,7 +155,7 @@ class ListSelection(Popup):
         self.state.updateState("activeSelection", None)
         self.currentlistHandler.reload()
 
-    def buildListSelection(self):
+    def buildListSelection(self, search=None):
         popupwrap = html5.Div()
         popupwrap.addClass(["box", "main-box"])
 
@@ -181,7 +187,7 @@ class ListSelection(Popup):
         self.listelements = html5.Div()
         popupwrap.appendChild(self.listelements)
 
-        self.requestClients()
+        self.requestClients(search)
         self.setContent(popupwrap)
 
     def onApplyfilterChanged(self, value, *args, **kwargs):

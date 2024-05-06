@@ -32,7 +32,7 @@ class RelationalEditWidget(BaseEditWidget):
         widgetList = self.fromHTML(
             """
             <div class='flr-value--relational-wrapper'>
-                <div [name]="destWidget" class="input input-group-item" readonly></div>
+                <input [name]="destWidget" class="input input-group-item"></div>
                 <flare-button [name]="selectBtn" class="btn--select input-group-item input-group-item--last" text="Select" icon="icon-save"></flare-button>
                 <flare-button hidden [name]="deleteBtn" class="btn--delete input-group-item" text="Delete" icon="icon-cancel"></flare-button>
             </div>
@@ -80,6 +80,11 @@ class RelationalEditWidget(BaseEditWidget):
             if self.editWidget:
                 self.editWidget.disable()
 
+            if isinstance(self.destWidget, html5.Input):
+                self.destWidget["value"] = ""
+            else:
+                self.destWidget.removeAllChildren()
+
             return
 
         if display := self.bone.boneStructure["params"].get("display"):
@@ -108,9 +113,12 @@ class RelationalEditWidget(BaseEditWidget):
                     fmtstr or conf["emptyValue"]
                 )
 
-
     def onChange(self, event):
-        if self.editWidget:
+        # when the dest input feld was edited, search for this value
+        if html5.doesEventHitWidgetOrChildren(event, self.destWidget):
+            self.onSelectBtnClick(search=self.destWidget["value"])
+
+        elif self.editWidget:
             self.value["rel"] = self.editWidget.serialize()
             self.updateString()
 
@@ -136,7 +144,7 @@ class RelationalEditWidget(BaseEditWidget):
 
         return self.destKey or None
 
-    def onSelectBtnClick(self):
+    def onSelectBtnClick(self, *args, search=None):
         # Set a context if configured so
         context = self.bone.boneStructure["params"].get("context")
 
@@ -171,6 +179,7 @@ class RelationalEditWidget(BaseEditWidget):
             ),
             multi=self.bone.multiple,
             allow=self.bone.selectorAllow,
+            search=search,
         )
 
     def onDeleteBtnClick(self):
