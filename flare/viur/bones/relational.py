@@ -145,7 +145,7 @@ class RelationalEditWidget(BaseEditWidget):
             selector = ModuleWidgetSelector.select(
                 self.bone.destModule, self.bone.destInfo
             )
-            assert selector, "No selector can be found for %r" % self.destModule
+            assert selector, "No selector can be found for %r" % self.bone.destModule
 
             if context:
                 dest_info = self.bone.destInfo.copy()

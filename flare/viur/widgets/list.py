@@ -68,7 +68,7 @@ class SkellistItem(Button):
 
     def buildWidget(self):
         if "firstname" in self.skel and "lastname" in self.skel:
-            self.appendChild(self.skel["firstname"] + " " + self.skel["lastname"])
+            self.appendChild((self.skel["firstname"] or "") + " " + (self.skel["lastname"] or ""))
         else:
             self.appendChild(self.skel["name"])
 
