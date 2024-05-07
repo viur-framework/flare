@@ -1,5 +1,5 @@
 from flare import html5
-from flare.viur import ModuleWidgetSelector
+from flare.viur import ModuleWidgetSelector, formatString
 from flare.i18n import translate
 from flare.popup import Popup
 from flare.handler import ListHandler
@@ -34,13 +34,13 @@ class ListWidget(html5.Div):
         self.module = module
         self.filter = filter
 
-    def setSelector(self, callback, multi=True, allow=None, search=None):
+    def setSelector(self, callback, multi=True, allow=None, search=None, format=None):
         """Configures the widget as selector for a relationalBone and shows it."""
         self.selectionCallback = callback
         self.selectionMulti = multi
         self.callback = callback
 
-        listselectionPopup = ListSelection(self.module, self.filter, search=search)
+        listselectionPopup = ListSelection(self.module, self.filter, search=search, format=format)
         listselectionPopup.state.register("acceptSelection", self)
 
     def onAcceptSelectionChanged(self, event, *args, **kwargs):
@@ -59,18 +59,22 @@ ModuleWidgetSelector.insert(0, ListWidget.canHandle, ListWidget)
 
 # @html5.tag  # fixme: What should be the tag-name for this?
 class SkellistItem(Button):
-    def __init__(self, skel):
+    def __init__(self, skel, selector):
         super().__init__()
         self.skel = skel
+        self.selector = selector
         self.addClass("skellist-element")
         self["style"]["width"] = "100%"
         self.buildWidget()
 
     def buildWidget(self):
-        if "firstname" in self.skel and "lastname" in self.skel:
-            self.appendChild((self.skel["firstname"] or "") + " " + (self.skel["lastname"] or ""))
-        else:
-            self.appendChild(self.skel["name"])
+        self.appendChild(
+            formatString(
+                self.selector.format or "$(name)",
+                self.skel,
+                self.selector.currentlistHandler.structure,
+            )
+        )
 
     def onActiveSelectionChanged(self, event, *args, **kwargs):
         if not event:
@@ -95,6 +99,7 @@ class ListSelection(Popup):
         enableShortcuts=True,
         closeable=True,
         footer=True,
+        format="$(name)",
         *args,
         **kwargs
     ):
@@ -102,6 +107,8 @@ class ListSelection(Popup):
         footer = False
         self.modulname = modulname
         self.filter = filter or {}
+        self.format = format
+
         super().__init__(
             title,
             id,
@@ -135,7 +142,7 @@ class ListSelection(Popup):
     def onRequestList(self, skellist):
         self.listelements.removeAllChildren()
         for skel in skellist:
-            skelwidget = SkellistItem(skel)
+            skelwidget = SkellistItem(skel, self)
             skelwidget.callback = self.activateSelection  # real button action
             self.state.register(
                 "activeSelection", skelwidget
@@ -207,7 +214,6 @@ class ListSelection(Popup):
 
         if selection:
             self.state.updateState("acceptSelection", selection)
-
             self.close()
 
     def setContent(self, widget):

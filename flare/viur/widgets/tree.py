@@ -527,7 +527,7 @@ class TreeWidget(html5.Div):
 
         self.reloadData()
 
-    def setSelector(self, callback, multi=True, allow=None):
+    def setSelector(self, callback, multi=True, allow=None, search=None, format=None):
         """
         Configures the widget as selector for a relationalBone and shows it.
         """

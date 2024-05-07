@@ -180,6 +180,7 @@ class RelationalEditWidget(BaseEditWidget):
             multi=self.bone.multiple,
             allow=self.bone.selectorAllow,
             search=search,
+            format=self.bone.formatString.replace("dest.", ""),
         )
 
     def onDeleteBtnClick(self):
@@ -254,6 +255,7 @@ class RelationalMultiEditWidget(BaseMultiEditWidget):
             self._addEntriesFromSelection,
             multi=self.bone.multiple,
             allow=self.bone.selectorAllow,
+            format=self.bone.formatString.replace("dest.", ""),
         )
 
     def _addEntriesFromSelection(self, selector, selection):
