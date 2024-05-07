@@ -106,7 +106,7 @@ class ViurForm(html5.Form):
                 bone_field.hide()
 
             # Disable fields with conditional flagging
-            if bone["params"].get("readonlyIf"):
+            if bone["readonly"] or bone["params"].get("readonlyIf"):
                 bone_field.disable()
 
             self.appendChild(bone_field)
