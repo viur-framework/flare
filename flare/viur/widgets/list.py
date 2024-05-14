@@ -149,6 +149,10 @@ class ListSelection(Popup):
             )  # register to change State for active State handling
             self.listelements.appendChild(skelwidget)
 
+        if len(self.listelements.children()) == 1:
+            self.activateSelection(skelwidget)
+            self.acceptSelection()
+
     def onActiveSelectionChanged(self, event, *args, **kwargs):
         if event:
             self.selectbtn["disabled"] = False
